@@ -1,0 +1,24 @@
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+BraceWrapping:
+    AfterControlStatement: MultiLine
+BreakBeforeBraces: Custom
+ColumnLimit: 79
+IndentCaseLabels: false
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+PenaltyReturnTypeOnItsOwnLine: 256
+PointerAlignment: Left
+ReflowComments: false
+SpacesInContainerLiterals: false

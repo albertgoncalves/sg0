@@ -1,0 +1,15 @@
+*
+!.gitignore
+!*.nix
+!.shellhook
+!README.md
+!cover.gif
+!.clang-format
+
+!scripts/
+!*.sh
+
+!src/
+!*.h
+!*.c
+!*.glsl

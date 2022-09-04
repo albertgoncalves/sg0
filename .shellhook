@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+export WD=$PWD
+
+set -euo pipefail
+
+if [ ! -d "$WD/bin" ]; then
+    mkdir "$WD/bin"
+fi
+
+if [ ! -d "$WD/nixGL" ]; then
+    git clone https://github.com/albertgoncalves/nixGL.git
+    (
+        cd "$WD/nixGL"
+        if grep -iq "mesa" "/var/log/Xorg.0.log"; then
+            nix-build -A nixGLIntel
+        elif grep -iq "nvidia" "/var/log/Xorg.0.log"; then
+            driver_version=$(
+                grep "X Driver" /var/log/Xorg.0.log \
+                    | sed 's/^.*X Driver  \(\S*\)\s*.*/\1/'
+            )
+            ./nvidiaInstall.py "$driver_version" nixGLNvidia
+        else
+            nix-build -A nixGLIntel
+        fi
+    )
+fi
+
+exports=$(grep "export" < "$WD/nixGL/result/bin/"nixGL*)
+if [ -n "$exports" ]; then
+    eval "$exports"
+fi
+
+set +euo pipefail
+
+export ASAN_OPTIONS="detect_leaks=0"
