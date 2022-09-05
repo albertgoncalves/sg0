@@ -18,7 +18,7 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 25.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
@@ -37,19 +37,31 @@ typedef struct {
 } Rect;
 
 static Rect RECTS[] = {
-    {{0}, {1.0f, 1.0f, 1.0f}, {0.8f, 0.85f, 0.95f, 0.9f}},
-    {{0.0f, -1.0f, 0.0f},
-     {20.f, 1.0f, 20.f},
-     {0.2125f, 0.2125f, 0.2125f, 1.0f}},
-    {{-5.0f, 0.5f, 0.0f},
-     {0.5f, 3.5f, 15.0f},
-     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
-    {{5.5f, 0.5f, -5.0f},
-     {10.0f, 3.5f, 0.5f},
-     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
-    {{2.5f, 0.5f, 5.0f},
-     {7.5f, 3.5f, 0.5f},
-     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
+    {
+        {0},
+        {1.0f, 1.0f, 1.0f},
+        {0.8f, 0.85f, 0.95f, 0.9f},
+    },
+    {
+        {0.0f, -1.0f, 0.0f},
+        {20.f, 1.0f, 20.f},
+        {0.2125f, 0.2125f, 0.2125f, 1.0f},
+    },
+    {
+        {-5.0f, 0.5f, 0.0f},
+        {0.5f, 3.5f, 15.0f},
+        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+    },
+    {
+        {5.5f, 0.5f, -5.0f},
+        {10.0f, 3.5f, 0.5f},
+        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+    },
+    {
+        {2.5f, 0.5f, 5.0f},
+        {7.5f, 3.5f, 0.5f},
+        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+    },
 };
 
 #define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
@@ -231,7 +243,7 @@ static u32 get_vbo(u32 program) {
         EXIT_IF_GL_ERROR();
     }
     {
-        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_NORMAL");
+        const u32 index = (u32)glGetAttribLocation(program, "VERT_IN_NORMAL");
         glEnableVertexAttribArray(index);
         glVertexAttribPointer(index,
                               SIZE,
@@ -252,7 +264,8 @@ static u32 get_instance_vbo(u32 program) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(RECTS[0])
     {
-        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_TRANSLATE");
+        const u32 index =
+            (u32)glGetAttribLocation(program, "VERT_IN_TRANSLATE");
         glEnableVertexAttribArray(index);
         glVertexAttribPointer(index,
                               SIZE,
@@ -264,7 +277,7 @@ static u32 get_instance_vbo(u32 program) {
         EXIT_IF_GL_ERROR();
     }
     {
-        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_SCALE");
+        const u32 index = (u32)glGetAttribLocation(program, "VERT_IN_SCALE");
         glEnableVertexAttribArray(index);
         glVertexAttribPointer(index,
                               SIZE,
@@ -276,12 +289,11 @@ static u32 get_instance_vbo(u32 program) {
         EXIT_IF_GL_ERROR();
     }
 #undef SIZE
-#define SIZE (sizeof(Vec4f) / sizeof(f32))
     {
-        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_COLOR");
+        const u32 index = (u32)glGetAttribLocation(program, "VERT_IN_COLOR");
         glEnableVertexAttribArray(index);
         glVertexAttribPointer(index,
-                              SIZE,
+                              sizeof(Vec4f) / sizeof(f32),
                               GL_FLOAT,
                               FALSE,
                               STRIDE,
@@ -315,11 +327,9 @@ static void update(GLFWwindow* window) {
         move.x -= 1.0f;
     }
     if ((move.x != 0.0f) || (move.z != 0.0f)) {
-        f32 x = move.x * move.x;
-        f32 z = move.z * move.z;
-        f32 l = sqrtf(x + z);
-        PLAYER_SPEED.x += (move.x / l) * RUN;
-        PLAYER_SPEED.z += (move.z / l) * RUN;
+        f32 len = sqrtf((move.x * move.x) + (move.z * move.z));
+        PLAYER_SPEED.x += (move.x / len) * RUN;
+        PLAYER_SPEED.z += (move.z / len) * RUN;
     }
     PLAYER_SPEED.x *= FRICTION;
     PLAYER_SPEED.z *= FRICTION;
