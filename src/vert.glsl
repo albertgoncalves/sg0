@@ -16,6 +16,7 @@ uniform vec3 VIEW_TO;
 uniform vec3 VIEW_UP;
 uniform vec3 VIEW_OFFSET;
 
+out vec3 VERT_OUT_POSITION;
 out vec3 VERT_OUT_NORMAL;
 out vec3 VERT_OUT_COLOR;
 
@@ -67,6 +68,7 @@ void main() {
     gl_Position =
         projection * view *
         vec4(VERT_IN_SCALE * (VERT_IN_POSITION + VERT_IN_TRANSLATE), 1.0f);
+    VERT_OUT_POSITION = VERT_IN_POSITION;
     VERT_OUT_NORMAL = VERT_IN_NORMAL;
     VERT_OUT_COLOR = VERT_IN_COLOR;
 }
