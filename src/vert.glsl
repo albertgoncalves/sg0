@@ -67,7 +67,7 @@ void main() {
         perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
     gl_Position =
         projection * view *
-        vec4(VERT_IN_SCALE * (VERT_IN_POSITION + VERT_IN_TRANSLATE), 1.0f);
+        vec4((VERT_IN_SCALE * VERT_IN_POSITION) + VERT_IN_TRANSLATE, 1.0f);
     VERT_OUT_POSITION = VERT_IN_POSITION;
     VERT_OUT_NORMAL = VERT_IN_NORMAL;
     VERT_OUT_COLOR = VERT_IN_COLOR;
