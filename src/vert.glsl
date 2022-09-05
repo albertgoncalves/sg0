@@ -19,8 +19,6 @@ uniform vec3 VIEW_OFFSET;
 out vec3 VERT_OUT_NORMAL;
 out vec3 VERT_OUT_COLOR;
 
-#define PI 3.1415926535897932385f
-
 mat4 perspective(float fov_degrees,
                  float aspect_ratio,
                  float view_near,
