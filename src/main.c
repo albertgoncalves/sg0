@@ -1,5 +1,7 @@
 #include "prelude.h"
 
+#include <math.h>
+
 #define GL_GLEXT_PROTOTYPES
 
 #include <GLFW/glfw3.h>
@@ -365,17 +367,25 @@ i32 main(i32 n, const char** args) {
              delta -= FRAME_UPDATE_STEP)
         {
             glfwPollEvents();
+            Vec3f move = {0};
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-                PLAYER_SPEED.z -= RUN;
+                move.z -= 1.0f;
             }
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-                PLAYER_SPEED.z += RUN;
+                move.z += 1.0f;
             }
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-                PLAYER_SPEED.x += RUN;
+                move.x += 1.0f;
             }
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-                PLAYER_SPEED.x -= RUN;
+                move.x -= 1.0f;
+            }
+            if ((move.x != 0.0f) || (move.z != 0.0f)) {
+                f32 x = move.x * move.x;
+                f32 z = move.z * move.z;
+                f32 l = sqrtf(x + z);
+                PLAYER_SPEED.x += (move.x / l) * RUN;
+                PLAYER_SPEED.z += (move.z / l) * RUN;
             }
             PLAYER_SPEED.x *= FRICTION;
             PLAYER_SPEED.z *= FRICTION;

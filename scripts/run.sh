@@ -16,6 +16,7 @@ flags=(
     -fshort-enums
     -lGL
     -lglfw
+    -lm
     "-march=native"
     -O3
     "-std=c99"
