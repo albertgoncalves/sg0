@@ -2,6 +2,9 @@
 
 layout(location = 0) in vec3 VERT_IN_POSITION;
 layout(location = 1) in vec3 VERT_IN_NORMAL;
+layout(location = 2) in vec3 VERT_IN_TRANSLATE;
+layout(location = 3) in vec3 VERT_IN_SCALE;
+layout(location = 4) in vec3 VERT_IN_COLOR;
 
 uniform float FOV_DEGREES;
 uniform float ASPECT_RATIO;
@@ -13,23 +16,10 @@ uniform vec3 VIEW_TO;
 uniform vec3 VIEW_UP;
 uniform vec3 VIEW_OFFSET;
 
-uniform vec3 POSITION;
-
+out vec3 VERT_OUT_NORMAL;
 out vec3 VERT_OUT_COLOR;
 
 #define PI 3.1415926535897932385f
-
-mat4 translate(vec3 v) {
-    mat4 m = mat4(0.0f);
-    m[0][0] = 1.0f;
-    m[1][1] = 1.0f;
-    m[2][2] = 1.0f;
-    m[3][3] = 1.0f;
-    m[3][0] = v.x;
-    m[3][1] = v.y;
-    m[3][2] = v.z;
-    return m;
-}
 
 mat4 perspective(float fov_degrees,
                  float aspect_ratio,
@@ -77,6 +67,8 @@ void main() {
     mat4 projection =
         perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
     gl_Position =
-        projection * view * translate(POSITION) * vec4(VERT_IN_POSITION, 1.0f);
-    VERT_OUT_COLOR = (VERT_IN_NORMAL + 1.0f) / 2.0f;
+        projection * view *
+        vec4(VERT_IN_SCALE * (VERT_IN_POSITION + VERT_IN_TRANSLATE), 1.0f);
+    VERT_OUT_NORMAL = VERT_IN_NORMAL;
+    VERT_OUT_COLOR = VERT_IN_COLOR;
 }

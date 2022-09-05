@@ -16,20 +16,24 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 25.0f, 8.0f})
-#define VIEW_TO   ((Vec3f){0.0f, 0.0f, -3.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 15.0f, 10.0f})
+#define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
 
-static Vec3f PLAYER_POSITION = {0};
-static Vec3f PLAYER_SPEED = {0};
+static u32 INDEX_VERTEX;
 
 #define RUN      0.005f
 #define FRICTION 0.95f
 
 #define CAMERA_LATENCY (1.0f / 200.0f)
 
-static const Vec3f VERTICES[][2] = {
+typedef struct {
+    Vec3f position;
+    Vec3f normal;
+} Vertex;
+
+static const Vertex VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -70,6 +74,24 @@ static const Vec3u INDICES[] = {
     {20, 21, 22},
     {22, 23, 20},
 };
+
+typedef struct {
+    Vec3f translate;
+    Vec3f scale;
+    Vec3f color;
+} Rect;
+
+static Rect RECTS[] = {
+    {{0}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.0f, 0.25f, 0.25f}},
+    {{-2.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.25f, 0.0f, 0.25f}},
+};
+
+#define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
+
+#define PLAYER_POSITION (RECTS[0].translate)
+
+static Vec3f PLAYER_SPEED = {0};
 
 #define FRAME_UPDATE_COUNT 8
 #define FRAME_DURATION     ((u64)((1.0 / (60.0 + 1.0)) * NANO_PER_SECOND))
@@ -184,9 +206,14 @@ static u32 get_vbo(u32 program) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(Vec3f[2])
     {
-        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
-        glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, SIZE, GL_FLOAT, FALSE, STRIDE, NULL);
+        INDEX_VERTEX = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
+        glEnableVertexAttribArray(INDEX_VERTEX);
+        glVertexAttribPointer(INDEX_VERTEX,
+                              SIZE,
+                              GL_FLOAT,
+                              FALSE,
+                              STRIDE,
+                              (void*)offsetof(Vertex, position));
         EXIT_IF_GL_ERROR();
     }
     {
@@ -197,12 +224,58 @@ static u32 get_vbo(u32 program) {
                               GL_FLOAT,
                               FALSE,
                               STRIDE,
-                              (void*)(sizeof(Vec3f) * 1));
+                              (void*)offsetof(Vertex, normal));
         EXIT_IF_GL_ERROR();
     }
 #undef SIZE
 #undef STRIDE
     return vbo;
+}
+
+static u32 get_instance_vbo(u32 program) {
+    u32 instance_vbo;
+    BIND_BUFFER(instance_vbo, RECTS, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+#define SIZE   (sizeof(Vec3f) / sizeof(f32))
+#define STRIDE sizeof(RECTS[0])
+    {
+        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_TRANSLATE");
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index,
+                              SIZE,
+                              GL_FLOAT,
+                              FALSE,
+                              STRIDE,
+                              (void*)offsetof(Rect, translate));
+        glVertexAttribDivisor(index, 1);
+        EXIT_IF_GL_ERROR();
+    }
+    {
+        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_SCALE");
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index,
+                              SIZE,
+                              GL_FLOAT,
+                              FALSE,
+                              STRIDE,
+                              (void*)offsetof(Rect, scale));
+        glVertexAttribDivisor(index, 1);
+        EXIT_IF_GL_ERROR();
+    }
+    {
+        u32 index = (u32)glGetAttribLocation(program, "VERT_IN_COLOR");
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index,
+                              SIZE,
+                              GL_FLOAT,
+                              FALSE,
+                              STRIDE,
+                              (void*)offsetof(Rect, color));
+        glVertexAttribDivisor(index, 1);
+        EXIT_IF_GL_ERROR();
+    }
+#undef SIZE
+#undef STRIDE
+    return instance_vbo;
 }
 
 static u32 get_ebo(void) {
@@ -248,6 +321,7 @@ i32 main(i32 n, const char** args) {
     const u32 program = get_program(args[1], args[2]);
     const u32 vao = get_vao();
     const u32 vbo = get_vbo(program);
+    const u32 instance_vbo = get_instance_vbo(program);
     const u32 ebo = get_ebo();
 
     glUniform1f(glGetUniformLocation(program, "FOV_DEGREES"), FOV_DEGREES);
@@ -323,11 +397,12 @@ i32 main(i32 n, const char** args) {
                     VIEW_OFFSET.y,
                     VIEW_OFFSET.z);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawElements(GL_TRIANGLES,
-                       sizeof(INDICES) / (sizeof(u8)),
-                       GL_UNSIGNED_BYTE,
-                       0);
-
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(RECTS[0]), RECTS);
+        glDrawElementsInstanced(GL_TRIANGLES,
+                                sizeof(INDICES) / (sizeof(u8)),
+                                GL_UNSIGNED_BYTE,
+                                (void*)((u64)INDEX_VERTEX),
+                                (i32)LEN_RECTS);
         EXIT_IF_GL_ERROR();
         glfwSwapBuffers(window);
 
@@ -340,6 +415,7 @@ i32 main(i32 n, const char** args) {
 
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &instance_vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteProgram(program);
     glfwTerminate();
