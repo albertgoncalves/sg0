@@ -10,6 +10,6 @@ uniform vec3 VIEW_FROM;
 
 void main() {
     vec3  direction = normalize(VERT_OUT_POSITION + VIEW_FROM);
-    float brightness = dot(VERT_OUT_NORMAL, direction);
-    FRAG_OUT_COLOR = vec4(brightness * VERT_OUT_COLOR, 1.0);
+    float brightness = mix(dot(VERT_OUT_NORMAL, direction), 1.0f, 0.75f);
+    FRAG_OUT_COLOR = vec4(VERT_OUT_COLOR * brightness, 1.0);
 }
