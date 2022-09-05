@@ -10,7 +10,7 @@
 #define WINDOW_HEIGHT 768
 #define WINDOW_NAME   __FILE__
 
-#define BACKGROUND_COLOR 0.15f, 0.15f, 0.15f, 1.0f
+#define BACKGROUND_COLOR 0.20f, 0.20f, 0.20f, 1.0f
 
 #define FOV_DEGREES 45.0f
 
@@ -18,14 +18,14 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 15.0f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 17.5f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
 
 static u32 INDEX_VERTEX;
 
-#define RUN      0.002f
+#define RUN      0.001875f
 #define FRICTION 0.9675f
 
 #define CAMERA_LATENCY (1.0f / 200.0f)
