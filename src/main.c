@@ -31,6 +31,28 @@ static u32 INDEX_VERTEX;
 #define CAMERA_LATENCY (1.0f / 200.0f)
 
 typedef struct {
+    Vec3f translate;
+    Vec3f scale;
+    Vec3f color;
+} Rect;
+
+static Rect RECTS[] = {
+    {{0}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.0f, 0.25f, 0.25f}},
+    {{-2.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.25f, 0.0f, 0.25f}},
+};
+
+#define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
+
+#define PLAYER_POSITION (RECTS[0].translate)
+
+static Vec3f PLAYER_SPEED = {0};
+
+#define FRAME_UPDATE_COUNT 8
+#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
+#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
+
+typedef struct {
     Vec3f position;
     Vec3f normal;
 } Vertex;
@@ -76,28 +98,6 @@ static const Vec3u INDICES[] = {
     {20, 21, 22},
     {22, 23, 20},
 };
-
-typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec3f color;
-} Rect;
-
-static Rect RECTS[] = {
-    {{0}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.0f, 0.25f, 0.25f}},
-    {{-2.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.25f, 0.0f, 0.25f}},
-};
-
-#define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
-
-#define PLAYER_POSITION (RECTS[0].translate)
-
-static Vec3f PLAYER_SPEED = {0};
-
-#define FRAME_UPDATE_COUNT 8
-#define FRAME_DURATION     ((u64)((1.0 / (60.0 + 1.0)) * NANO_PER_SECOND))
-#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
 
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
@@ -145,15 +145,17 @@ static void compile_shader(const char* path, u32 shader) {
     const char*  source = map_to_buffer(map);
     glShaderSource(shader, 1, &source, NULL);
     glCompileShader(shader);
-    i32 status = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (!status) {
-        glGetShaderInfoLog(shader,
-                           (i32)(CAP_BUFFER - LEN_BUFFER),
-                           NULL,
-                           &BUFFER[LEN_BUFFER]);
-        printf("%s", &BUFFER[LEN_BUFFER]);
-        EXIT();
+    {
+        i32 status = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        if (!status) {
+            glGetShaderInfoLog(shader,
+                               (i32)(CAP_BUFFER - LEN_BUFFER),
+                               NULL,
+                               &BUFFER[LEN_BUFFER]);
+            printf("%s", &BUFFER[LEN_BUFFER]);
+            EXIT();
+        }
     }
     EXIT_IF(munmap(map.address, map.len));
 }
@@ -176,7 +178,7 @@ static u32 get_program(const char* source_vert, const char* source_frag) {
                                 NULL,
                                 &BUFFER[LEN_BUFFER]);
             printf("%s", &BUFFER[LEN_BUFFER]);
-            EXIT_IF(!status);
+            EXIT();
         }
     }
     glDeleteShader(shader_vert);
@@ -206,7 +208,7 @@ static u32 get_vbo(u32 program) {
     u32 vbo;
     BIND_BUFFER(vbo, VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(Vec3f[2])
+#define STRIDE sizeof(VERTICES[0])
     {
         INDEX_VERTEX = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
         glEnableVertexAttribArray(INDEX_VERTEX);
@@ -282,14 +284,57 @@ static u32 get_instance_vbo(u32 program) {
 
 static u32 get_ebo(void) {
     u32 ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(INDICES),
-                 INDICES,
-                 GL_STATIC_DRAW);
-    EXIT_IF_GL_ERROR();
+    BIND_BUFFER(ebo, INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
     return ebo;
+}
+
+static void update(GLFWwindow* window) {
+    glfwPollEvents();
+    Vec3f move = {0};
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        move.z -= 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        move.z += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        move.x += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        move.x -= 1.0f;
+    }
+    if ((move.x != 0.0f) || (move.z != 0.0f)) {
+        f32 x = move.x * move.x;
+        f32 z = move.z * move.z;
+        f32 l = sqrtf(x + z);
+        PLAYER_SPEED.x += (move.x / l) * RUN;
+        PLAYER_SPEED.z += (move.z / l) * RUN;
+    }
+    PLAYER_SPEED.x *= FRICTION;
+    PLAYER_SPEED.z *= FRICTION;
+    PLAYER_POSITION.x += PLAYER_SPEED.x;
+    PLAYER_POSITION.z += PLAYER_SPEED.z;
+    VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER_POSITION.x) * CAMERA_LATENCY;
+    VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER_POSITION.z) * CAMERA_LATENCY;
+}
+
+static void render(GLFWwindow* window, u32 program) {
+    glUniform3f(glGetUniformLocation(program, "VIEW_OFFSET"),
+                VIEW_OFFSET.x,
+                VIEW_OFFSET.y,
+                VIEW_OFFSET.z);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    sizeof(PLAYER_POSITION),
+                    &PLAYER_POSITION);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            sizeof(INDICES) / (sizeof(u8)),
+                            GL_UNSIGNED_BYTE,
+                            (void*)((u64)INDEX_VERTEX),
+                            (i32)LEN_RECTS);
+    EXIT_IF_GL_ERROR();
+    glfwSwapBuffers(window);
 }
 
 i32 main(i32 n, const char** args) {
@@ -323,8 +368,8 @@ i32 main(i32 n, const char** args) {
     const u32 program = get_program(args[1], args[2]);
     const u32 vao = get_vao();
     const u32 vbo = get_vbo(program);
-    const u32 instance_vbo = get_instance_vbo(program);
     const u32 ebo = get_ebo();
+    const u32 instance_vbo = get_instance_vbo(program);
 
     glUniform1f(glGetUniformLocation(program, "FOV_DEGREES"), FOV_DEGREES);
     glUniform1f(glGetUniformLocation(program, "ASPECT_RATIO"),
@@ -344,89 +389,46 @@ i32 main(i32 n, const char** args) {
                 VIEW_TO.y,
                 VIEW_TO.z);
     EXIT_IF_GL_ERROR();
-    u64 prev = now_ns();
-    u64 delta = 0;
-    u64 frame_time = now_ns();
-    u64 frame_count = 0;
-    printf("\n\n");
-    while (!glfwWindowShouldClose(window)) {
-        const u64 start = now_ns();
-        ++frame_count;
-        // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
-        if (NANO_PER_SECOND <= (start - frame_time)) {
-            printf("\033[2A"
-                   "%7.4f ms/f\n"
-                   "%7lu f/s\n",
-                   (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
-                   frame_count);
-            frame_time += NANO_PER_SECOND;
-            frame_count = 0;
-        }
 
-        for (delta += start - prev; FRAME_UPDATE_STEP < delta;
-             delta -= FRAME_UPDATE_STEP)
-        {
-            glfwPollEvents();
-            Vec3f move = {0};
-            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-                move.z -= 1.0f;
+    {
+        u64 update_time = now_ns();
+        u64 update_delta = 0;
+        u64 frame_time = now_ns();
+        u64 frame_count = 0;
+        printf("\n\n");
+        while (!glfwWindowShouldClose(window)) {
+            const u64 now = now_ns();
+            ++frame_count;
+            // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
+            if (NANO_PER_SECOND <= (now - frame_time)) {
+                printf("\033[2A"
+                       "%7.4f ms/f\n"
+                       "%7lu f/s\n",
+                       (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
+                       frame_count);
+                frame_time += NANO_PER_SECOND;
+                frame_count = 0;
             }
-            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-                move.z += 1.0f;
+            for (update_delta += now - update_time;
+                 FRAME_UPDATE_STEP < update_delta;
+                 update_delta -= FRAME_UPDATE_STEP)
+            {
+                update(window);
             }
-            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-                move.x += 1.0f;
+            update_time = now;
+            render(window, program);
+            const u64 elapsed = now_ns() - now;
+            if (elapsed < FRAME_DURATION) {
+                EXIT_IF(usleep(
+                    (u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
             }
-            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-                move.x -= 1.0f;
-            }
-            if ((move.x != 0.0f) || (move.z != 0.0f)) {
-                f32 x = move.x * move.x;
-                f32 z = move.z * move.z;
-                f32 l = sqrtf(x + z);
-                PLAYER_SPEED.x += (move.x / l) * RUN;
-                PLAYER_SPEED.z += (move.z / l) * RUN;
-            }
-            PLAYER_SPEED.x *= FRICTION;
-            PLAYER_SPEED.z *= FRICTION;
-            PLAYER_POSITION.x += PLAYER_SPEED.x;
-            PLAYER_POSITION.z += PLAYER_SPEED.z;
-            VIEW_OFFSET.x -=
-                (VIEW_OFFSET.x - PLAYER_POSITION.x) * CAMERA_LATENCY;
-            VIEW_OFFSET.z -=
-                (VIEW_OFFSET.z - PLAYER_POSITION.z) * CAMERA_LATENCY;
-        }
-        prev = start;
-
-        glUniform3f(glGetUniformLocation(program, "POSITION"),
-                    PLAYER_POSITION.x,
-                    PLAYER_POSITION.y,
-                    PLAYER_POSITION.z);
-        glUniform3f(glGetUniformLocation(program, "VIEW_OFFSET"),
-                    VIEW_OFFSET.x,
-                    VIEW_OFFSET.y,
-                    VIEW_OFFSET.z);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(RECTS[0]), RECTS);
-        glDrawElementsInstanced(GL_TRIANGLES,
-                                sizeof(INDICES) / (sizeof(u8)),
-                                GL_UNSIGNED_BYTE,
-                                (void*)((u64)INDEX_VERTEX),
-                                (i32)LEN_RECTS);
-        EXIT_IF_GL_ERROR();
-        glfwSwapBuffers(window);
-
-        const u64 elapsed = now_ns() - start;
-        if (elapsed < FRAME_DURATION) {
-            EXIT_IF(
-                usleep((u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
         }
     }
 
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &instance_vbo);
     glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &instance_vbo);
     glDeleteProgram(program);
     glfwTerminate();
     return OK;
