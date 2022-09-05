@@ -12,9 +12,7 @@ if [ ! -d "$WD/nixGL" ]; then
     git clone https://github.com/albertgoncalves/nixGL.git
     (
         cd "$WD/nixGL"
-        if grep -iq "mesa" "/var/log/Xorg.0.log"; then
-            nix-build -A nixGLIntel
-        elif grep -iq "nvidia" "/var/log/Xorg.0.log"; then
+        if grep -iq "nvidia" "/var/log/Xorg.0.log"; then
             driver_version=$(
                 grep "X Driver" /var/log/Xorg.0.log \
                     | sed 's/^.*X Driver  \(\S*\)\s*.*/\1/'

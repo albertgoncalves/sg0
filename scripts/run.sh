@@ -29,4 +29,4 @@ flags=(
 
 clang-format -i -verbose "$WD/src/"*
 mold -run clang "${flags[@]}" -o "$WD/bin/main" "$WD/src/main.c"
-"$WD/bin/main" "$WD/src/vert.glsl" "$WD/src/frag.glsl"
+prime-run "$WD/bin/main" "$WD/src/vert.glsl" "$WD/src/frag.glsl"
