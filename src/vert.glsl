@@ -4,7 +4,7 @@ layout(location = 0) in vec3 VERT_IN_POSITION;
 layout(location = 1) in vec3 VERT_IN_NORMAL;
 layout(location = 2) in vec3 VERT_IN_TRANSLATE;
 layout(location = 3) in vec3 VERT_IN_SCALE;
-layout(location = 4) in vec3 VERT_IN_COLOR;
+layout(location = 4) in vec4 VERT_IN_COLOR;
 
 uniform float FOV_DEGREES;
 uniform float ASPECT_RATIO;
@@ -18,7 +18,7 @@ uniform vec3 VIEW_OFFSET;
 
 out vec3 VERT_OUT_POSITION;
 out vec3 VERT_OUT_NORMAL;
-out vec3 VERT_OUT_COLOR;
+out vec4 VERT_OUT_COLOR;
 
 mat4 perspective(float fov_degrees,
                  float aspect_ratio,

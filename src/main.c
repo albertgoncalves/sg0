@@ -18,7 +18,7 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 17.5f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
@@ -33,14 +33,23 @@ static u32 INDEX_VERTEX;
 typedef struct {
     Vec3f translate;
     Vec3f scale;
-    Vec3f color;
+    Vec4f color;
 } Rect;
 
 static Rect RECTS[] = {
-    {{0}, {1.0f, 1.0f, 1.0f}, {0.8f, 0.85f, 0.95f}},
-    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.2125f, 0.2125f, 0.2125f}},
-    {{-5.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.1875f, 0.1875f, 0.1875f}},
-    {{0.0f, 0.0f, -5.0f}, {5.0f, 5.0f, 0.5f}, {0.1875f, 0.1875f, 0.1875f}},
+    {{0}, {1.0f, 1.0f, 1.0f}, {0.8f, 0.85f, 0.95f, 0.9f}},
+    {{0.0f, -1.0f, 0.0f},
+     {20.f, 1.0f, 20.f},
+     {0.2125f, 0.2125f, 0.2125f, 1.0f}},
+    {{-5.0f, 0.5f, 0.0f},
+     {0.5f, 3.5f, 15.0f},
+     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
+    {{5.5f, 0.5f, -5.0f},
+     {10.0f, 3.5f, 0.5f},
+     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
+    {{2.5f, 0.5f, 5.0f},
+     {7.5f, 3.5f, 0.5f},
+     {0.1875f, 0.1875f, 0.1875f, 0.75f}},
 };
 
 #define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
@@ -266,6 +275,8 @@ static u32 get_instance_vbo(u32 program) {
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
+#undef SIZE
+#define SIZE (sizeof(Vec4f) / sizeof(f32))
     {
         u32 index = (u32)glGetAttribLocation(program, "VERT_IN_COLOR");
         glEnableVertexAttribArray(index);
@@ -278,7 +289,6 @@ static u32 get_instance_vbo(u32 program) {
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
-#undef SIZE
 #undef STRIDE
     return instance_vbo;
 }
@@ -359,6 +369,8 @@ i32 main(i32 n, const char** args) {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glClearColor(BACKGROUND_COLOR);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     EXIT_IF_GL_ERROR();
 
     printf("GL_VENDOR    : %s\n"
