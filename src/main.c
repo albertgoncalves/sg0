@@ -25,10 +25,10 @@ static Vec3f VIEW_OFFSET = {0};
 
 static u32 INDEX_VERTEX;
 
-#define RUN      0.001625f
-#define FRICTION 0.95f
+#define RUN      0.00175f
+#define FRICTION 0.9575f
 
-#define CAMERA_LATENCY (1.0f / 200.0f)
+#define CAMERA_LATENCY (1.0f / 250.0f)
 
 typedef struct {
     Vec3f translate;
