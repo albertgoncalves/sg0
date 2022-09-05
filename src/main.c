@@ -10,7 +10,7 @@
 #define WINDOW_HEIGHT 768
 #define WINDOW_NAME   __FILE__
 
-#define BACKGROUND_COLOR 0.20f, 0.20f, 0.20f, 1.0f
+#define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
 
 #define FOV_DEGREES 45.0f
 
@@ -25,8 +25,8 @@ static Vec3f VIEW_OFFSET = {0};
 
 static u32 INDEX_VERTEX;
 
-#define RUN      0.001875f
-#define FRICTION 0.9675f
+#define RUN      0.001625f
+#define FRICTION 0.95f
 
 #define CAMERA_LATENCY (1.0f / 200.0f)
 
@@ -37,9 +37,10 @@ typedef struct {
 } Rect;
 
 static Rect RECTS[] = {
-    {{0}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.0f, 0.25f, 0.25f}},
-    {{-2.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.25f, 0.0f, 0.25f}},
+    {{0}, {1.0f, 1.0f, 1.0f}, {0.8f, 0.85f, 0.95f}},
+    {{0.0f, -1.0f, 0.0f}, {20.f, 1.0f, 20.f}, {0.2125f, 0.2125f, 0.2125f}},
+    {{-5.0f, 0.0f, 0.0f}, {0.5f, 5.0f, 5.0f}, {0.1875f, 0.1875f, 0.1875f}},
+    {{0.0f, 0.0f, -5.0f}, {5.0f, 5.0f, 0.5f}, {0.1875f, 0.1875f, 0.1875f}},
 };
 
 #define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
