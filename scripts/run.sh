@@ -2,18 +2,16 @@
 
 set -eu
 
-    # -D_POSIX_C_SOURCE
-    # "-fsanitize=address"
-    # "-fsanitize=bounds"
-    # "-fsanitize=float-divide-by-zero"
-    # "-fsanitize=implicit-conversion"
-    # "-fsanitize=integer"
-    # "-fsanitize=nullability"
-    # "-fsanitize=undefined"
 flags=(
     -D_DEFAULT_SOURCE
     "-ferror-limit=1"
-    -fshort-enums
+    "-fsanitize=bounds"
+    "-fsanitize=float-divide-by-zero"
+    "-fsanitize=implicit-conversion"
+    "-fsanitize=integer"
+    "-fsanitize=nullability"
+    "-fsanitize=undefined"
+    -g
     -lGL
     -lglfw
     -lm
