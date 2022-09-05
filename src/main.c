@@ -6,8 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
-#define WINDOW_WIDTH  1500
-#define WINDOW_HEIGHT 1000
+#define WINDOW_WIDTH  1024
+#define WINDOW_HEIGHT 768
 #define WINDOW_NAME   __FILE__
 
 #define BACKGROUND_COLOR 0.15f, 0.15f, 0.15f, 1.0f
@@ -25,8 +25,8 @@ static Vec3f VIEW_OFFSET = {0};
 
 static u32 INDEX_VERTEX;
 
-#define RUN      0.005f
-#define FRICTION 0.95f
+#define RUN      0.002f
+#define FRICTION 0.9675f
 
 #define CAMERA_LATENCY (1.0f / 200.0f)
 
