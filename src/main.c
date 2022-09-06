@@ -18,17 +18,17 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 25.0f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
 
 static u32 INDEX_VERTEX;
 
-#define RUN      0.00175f
-#define FRICTION 0.9575f
+#define RUN      0.0025f
+#define FRICTION 0.9325f
 
-#define CAMERA_LATENCY (1.0f / 250.0f)
+#define CAMERA_LATENCY (1.0f / 225.0f)
 
 typedef struct {
     Vec3f translate;
