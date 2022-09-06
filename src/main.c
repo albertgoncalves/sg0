@@ -23,8 +23,6 @@
 
 static Vec3f VIEW_OFFSET = {0};
 
-static u32 INDEX_VERTEX;
-
 #define RUN      0.0025f
 #define FRICTION 0.9325f
 
@@ -226,15 +224,20 @@ static u32 get_vao(void) {
         EXIT_IF_GL_ERROR();                                \
     } while (FALSE)
 
-static u32 get_vbo(u32 program) {
+static u32 get_vbo(void) {
     u32 vbo;
     BIND_BUFFER(vbo, VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    return vbo;
+}
+
+static u32 get_vbo_index(u32 program) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(VERTICES[0])
+    u32 vbo_index;
     {
-        INDEX_VERTEX = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
-        glEnableVertexAttribArray(INDEX_VERTEX);
-        glVertexAttribPointer(INDEX_VERTEX,
+        vbo_index = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
+        glEnableVertexAttribArray(vbo_index);
+        glVertexAttribPointer(vbo_index,
                               SIZE,
                               GL_FLOAT,
                               FALSE,
@@ -255,7 +258,7 @@ static u32 get_vbo(u32 program) {
     }
 #undef SIZE
 #undef STRIDE
-    return vbo;
+    return vbo_index;
 }
 
 static u32 get_instance_vbo(u32 program) {
@@ -339,7 +342,7 @@ static void update(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER_POSITION.z) * CAMERA_LATENCY;
 }
 
-static void render(GLFWwindow* window, u32 program) {
+static void render(GLFWwindow* window, u32 program, u32 vbo_index) {
     glUniform3f(glGetUniformLocation(program, "VIEW_OFFSET"),
                 VIEW_OFFSET.x,
                 VIEW_OFFSET.y,
@@ -352,7 +355,7 @@ static void render(GLFWwindow* window, u32 program) {
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(INDICES) / (sizeof(u8)),
                             GL_UNSIGNED_BYTE,
-                            (void*)((u64)INDEX_VERTEX),
+                            (void*)((u64)vbo_index),
                             (i32)LEN_RECTS);
     EXIT_IF_GL_ERROR();
     glfwSwapBuffers(window);
@@ -390,7 +393,8 @@ i32 main(i32 n, const char** args) {
 
     const u32 program = get_program(args[1], args[2]);
     const u32 vao = get_vao();
-    const u32 vbo = get_vbo(program);
+    const u32 vbo = get_vbo();
+    const u32 vbo_index = get_vbo_index(program);
     const u32 ebo = get_ebo();
     const u32 instance_vbo = get_instance_vbo(program);
 
@@ -439,7 +443,7 @@ i32 main(i32 n, const char** args) {
                 update(window);
             }
             update_time = now;
-            render(window, program);
+            render(window, program, vbo_index);
             const u64 elapsed = now_ns() - now;
             if (elapsed < FRAME_DURATION) {
                 EXIT_IF(usleep(
