@@ -1,14 +1,15 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "math.h"
+#include "geom.h"
 
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768
 
 #define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
 
-#define FOV_DEGREES 45.0f
+#define FOV_DEGREES  45.0f
+#define ASPECT_RATIO (((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT))
 
 #define VIEW_NEAR 0.01f
 #define VIEW_FAR  100.0f
@@ -27,29 +28,28 @@
 
 static Rect RECTS[] = {
     {
-        {0},
-        {1.0f, 1.0f, 1.0f},
-        {0.8f, 0.85f, 0.95f, 0.9f},
+        .scale = {1.0f, 1.0f, 1.0f},
+        .color = {0.8f, 0.85f, 0.95f, 0.9f},
     },
     {
-        {0.0f, -1.0f, 0.0f},
-        {20.f, 1.0f, 20.f},
-        {0.2125f, 0.2125f, 0.2125f, 1.0f},
+        .translate = {0.0f, -1.0f, 0.0f},
+        .scale = {20.f, 1.0f, 20.f},
+        .color = {0.2125f, 0.2125f, 0.2125f, 1.0f},
     },
     {
-        {-5.0f, 0.5f, 0.0f},
-        {0.5f, 3.5f, 15.0f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .translate = {-5.0f, 0.5f, 0.0f},
+        .scale = {0.5f, 3.5f, 15.0f},
+        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
     },
     {
-        {5.5f, 0.5f, -5.0f},
-        {10.0f, 3.5f, 0.5f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .translate = {5.5f, 0.5f, -5.0f},
+        .scale = {10.0f, 3.5f, 0.5f},
+        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
     },
     {
-        {2.5f, 0.5f, 5.0f},
-        {7.5f, 3.5f, 0.5f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .translate = {2.5f, 0.5f, 5.0f},
+        .scale = {7.5f, 3.5f, 0.5f},
+        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
     },
 };
 

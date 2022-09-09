@@ -19,20 +19,9 @@ typedef struct {
     u8 x, y, z;
 } Vec3u;
 
-typedef union {
+typedef struct {
     f32 column_row[4][4];
 } Mat4;
-
-typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
-} Rect;
-
-typedef struct {
-    Vec3f position;
-    Vec3f normal;
-} Vertex;
 
 static f32 radians(f32 degrees) {
     return (degrees * PI) / 180.0f;

@@ -1,7 +1,5 @@
 #include "config.h"
 
-#include <math.h>
-
 #define GL_GLEXT_PROTOTYPES
 
 #include <GLFW/glfw3.h>
@@ -9,48 +7,6 @@
 static Vec3f VIEW_OFFSET = {0};
 
 static Vec3f PLAYER_SPEED = {0};
-
-static const Vertex VERTICES[] = {
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-};
-
-static const Vec3u INDICES[] = {
-    {0, 1, 2},
-    {2, 3, 0},
-    {4, 5, 6},
-    {6, 7, 4},
-    {8, 9, 10},
-    {10, 11, 8},
-    {12, 13, 14},
-    {14, 15, 12},
-    {16, 17, 18},
-    {18, 19, 16},
-    {20, 21, 22},
-    {22, 23, 20},
-};
 
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
@@ -314,10 +270,7 @@ i32 main(void) {
 
     {
         const Mat4 projection =
-            perspective(FOV_DEGREES,
-                        ((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT),
-                        VIEW_NEAR,
-                        VIEW_FAR);
+            perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
         glUniformMatrix4fv(glGetUniformLocation(display_program, "PROJECTION"),
                            1,
                            FALSE,
