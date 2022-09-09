@@ -1,4 +1,4 @@
-#include "prelude.h"
+#include "config.h"
 
 #include <math.h>
 
@@ -6,76 +6,9 @@
 
 #include <GLFW/glfw3.h>
 
-#define WINDOW_WIDTH  1024
-#define WINDOW_HEIGHT 768
-#define WINDOW_NAME   __FILE__
-
-#define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
-
-#define FOV_DEGREES 45.0f
-
-#define VIEW_NEAR 0.1f
-#define VIEW_FAR  100.0f
-#define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
-
-#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
-#define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
-
 static Vec3f VIEW_OFFSET = {0};
 
-#define RUN      0.0025f
-#define FRICTION 0.9325f
-
-#define CAMERA_LATENCY (1.0f / 225.0f)
-
-typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
-} Rect;
-
-static Rect RECTS[] = {
-    {
-        {0},
-        {1.0f, 1.0f, 1.0f},
-        {0.8f, 0.85f, 0.95f, 0.9f},
-    },
-    {
-        {0.0f, -1.0f, 0.0f},
-        {20.f, 1.0f, 20.f},
-        {0.2125f, 0.2125f, 0.2125f, 1.0f},
-    },
-    {
-        {-5.0f, 0.5f, 0.0f},
-        {0.5f, 3.5f, 15.0f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
-    },
-    {
-        {5.5f, 0.5f, -5.0f},
-        {10.0f, 3.5f, 0.5f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
-    },
-    {
-        {2.5f, 0.5f, 5.0f},
-        {7.5f, 3.5f, 0.5f},
-        {0.1875f, 0.1875f, 0.1875f, 0.75f},
-    },
-};
-
-#define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
-
-#define PLAYER_POSITION (RECTS[0].translate)
-
 static Vec3f PLAYER_SPEED = {0};
-
-#define FRAME_UPDATE_COUNT 8
-#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
-#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
-
-typedef struct {
-    Vec3f position;
-    Vec3f normal;
-} Vertex;
 
 static const Vertex VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -342,27 +275,7 @@ static void update(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER_POSITION.z) * CAMERA_LATENCY;
 }
 
-static void render(GLFWwindow* window, u32 program, u32 vbo_index) {
-    glUniform3f(glGetUniformLocation(program, "VIEW_OFFSET"),
-                VIEW_OFFSET.x,
-                VIEW_OFFSET.y,
-                VIEW_OFFSET.z);
-    glBufferSubData(GL_ARRAY_BUFFER,
-                    0,
-                    sizeof(PLAYER_POSITION),
-                    &PLAYER_POSITION);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawElementsInstanced(GL_TRIANGLES,
-                            sizeof(INDICES) / (sizeof(u8)),
-                            GL_UNSIGNED_BYTE,
-                            (void*)((u64)vbo_index),
-                            (i32)LEN_RECTS);
-    EXIT_IF_GL_ERROR();
-    glfwSwapBuffers(window);
-}
-
-i32 main(i32 n, const char** args) {
-    EXIT_IF(n < 2);
+i32 main(void) {
     printf("GLFW version : %s\n", glfwGetVersionString());
 
     EXIT_IF(!glfwInit());
@@ -373,7 +286,7 @@ i32 main(i32 n, const char** args) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, FALSE);
     GLFWwindow* window =
-        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, NULL, NULL);
+        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
     EXIT_IF(!window);
 
     glfwSetKeyCallback(window, callback_key);
@@ -391,27 +304,29 @@ i32 main(i32 n, const char** args) {
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
 
-    const u32 program = get_program(args[1], args[2]);
+    const u32 display_program =
+        get_program(PATH_DISPLAY_VERT, PATH_DISPLAY_FRAG);
     const u32 vao = get_vao();
     const u32 vbo = get_vbo();
-    const u32 vbo_index = get_vbo_index(program);
+    const u32 vbo_index = get_vbo_index(display_program);
     const u32 ebo = get_ebo();
-    const u32 instance_vbo = get_instance_vbo(program);
+    const u32 instance_vbo = get_instance_vbo(display_program);
 
-    glUniform1f(glGetUniformLocation(program, "FOV_DEGREES"), FOV_DEGREES);
-    glUniform1f(glGetUniformLocation(program, "ASPECT_RATIO"),
+    glUniform1f(glGetUniformLocation(display_program, "FOV_DEGREES"),
+                FOV_DEGREES);
+    glUniform1f(glGetUniformLocation(display_program, "ASPECT_RATIO"),
                 ((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT));
-    glUniform1f(glGetUniformLocation(program, "VIEW_NEAR"), VIEW_NEAR);
-    glUniform1f(glGetUniformLocation(program, "VIEW_FAR"), VIEW_FAR);
-    glUniform3f(glGetUniformLocation(program, "VIEW_UP"),
+    glUniform1f(glGetUniformLocation(display_program, "VIEW_NEAR"), VIEW_NEAR);
+    glUniform1f(glGetUniformLocation(display_program, "VIEW_FAR"), VIEW_FAR);
+    glUniform3f(glGetUniformLocation(display_program, "VIEW_UP"),
                 VIEW_UP.x,
                 VIEW_UP.y,
                 VIEW_UP.z);
-    glUniform3f(glGetUniformLocation(program, "VIEW_FROM"),
+    glUniform3f(glGetUniformLocation(display_program, "VIEW_FROM"),
                 VIEW_FROM.x,
                 VIEW_FROM.y,
                 VIEW_FROM.z);
-    glUniform3f(glGetUniformLocation(program, "VIEW_TO"),
+    glUniform3f(glGetUniformLocation(display_program, "VIEW_TO"),
                 VIEW_TO.x,
                 VIEW_TO.y,
                 VIEW_TO.z);
@@ -443,7 +358,23 @@ i32 main(i32 n, const char** args) {
                 update(window);
             }
             update_time = now;
-            render(window, program, vbo_index);
+            glUniform3f(glGetUniformLocation(display_program, "VIEW_OFFSET"),
+                        VIEW_OFFSET.x,
+                        VIEW_OFFSET.y,
+                        VIEW_OFFSET.z);
+            glBufferSubData(GL_ARRAY_BUFFER,
+                            0,
+                            sizeof(PLAYER_POSITION),
+                            &PLAYER_POSITION);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDrawElementsInstanced(GL_TRIANGLES,
+                                    sizeof(INDICES) / (sizeof(u8)),
+                                    GL_UNSIGNED_BYTE,
+                                    (void*)((u64)vbo_index),
+                                    (i32)LEN_RECTS);
+            EXIT_IF_GL_ERROR();
+            glfwSwapBuffers(window);
+
             const u64 elapsed = now_ns() - now;
             if (elapsed < FRAME_DURATION) {
                 EXIT_IF(usleep(
@@ -456,7 +387,7 @@ i32 main(i32 n, const char** args) {
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &instance_vbo);
-    glDeleteProgram(program);
+    glDeleteProgram(display_program);
     glfwTerminate();
     return OK;
 }
