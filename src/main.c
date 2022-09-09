@@ -52,6 +52,8 @@ static const Vec3u INDICES[] = {
     {22, 23, 20},
 };
 
+static const f32 BORDER_COLOR[] = {0};
+
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
         switch (glGetError()) {                            \
@@ -247,6 +249,46 @@ static u32 get_ebo(void) {
     return ebo;
 }
 
+static u32 get_depth_map_fbo(void) {
+    u32 depth_map_fbo;
+    glGenFramebuffers(1, &depth_map_fbo);
+    return depth_map_fbo;
+}
+
+static u32 get_depth_map(u32 depth_map_fbo) {
+    u32 depth_map;
+    glGenTextures(1, &depth_map);
+    glBindTexture(GL_TEXTURE_2D, depth_map);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 WINDOW_WIDTH,
+                 WINDOW_HEIGHT,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 GL_FLOAT,
+                 NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, BORDER_COLOR);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_DEPTH_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           depth_map,
+                           0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return depth_map;
+}
+
 static void update(GLFWwindow* window) {
     glfwPollEvents();
     Vec3f move = {0};
@@ -330,6 +372,31 @@ i32 main(void) {
                 VIEW_TO.x,
                 VIEW_TO.y,
                 VIEW_TO.z);
+    glUniform3f(glGetUniformLocation(display_program, "SHADOW_FROM"),
+                SHADOW_FROM.x,
+                SHADOW_FROM.y,
+                SHADOW_FROM.z);
+    EXIT_IF_GL_ERROR();
+
+    const u32 shadow_program = get_program(PATH_SHADOW_VERT, PATH_SHADOW_FRAG);
+    const u32 depth_map_fbo = get_depth_map_fbo();
+    const u32 depth_map = get_depth_map(depth_map_fbo);
+
+    glUniform1f(glGetUniformLocation(shadow_program, "FOV_DEGREES"),
+                FOV_DEGREES);
+    glUniform1f(glGetUniformLocation(shadow_program, "ASPECT_RATIO"),
+                ((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT));
+    glUniform1f(glGetUniformLocation(shadow_program, "VIEW_NEAR"), VIEW_NEAR);
+    glUniform1f(glGetUniformLocation(shadow_program, "VIEW_FAR"), VIEW_FAR);
+    glUniform3f(glGetUniformLocation(shadow_program, "VIEW_UP"),
+                VIEW_UP.x,
+                VIEW_UP.y,
+                VIEW_UP.z);
+
+    glUniform3f(glGetUniformLocation(shadow_program, "SHADOW_FROM"),
+                SHADOW_FROM.x,
+                SHADOW_FROM.y,
+                SHADOW_FROM.z);
     EXIT_IF_GL_ERROR();
 
     {
@@ -358,15 +425,40 @@ i32 main(void) {
                 update(window);
             }
             update_time = now;
-            glUniform3f(glGetUniformLocation(display_program, "VIEW_OFFSET"),
-                        VIEW_OFFSET.x,
-                        VIEW_OFFSET.y,
-                        VIEW_OFFSET.z);
+
             glBufferSubData(GL_ARRAY_BUFFER,
                             0,
                             sizeof(PLAYER_POSITION),
                             &PLAYER_POSITION);
+            glUseProgram(shadow_program);
+            glUniform3f(glGetUniformLocation(shadow_program, "SHADOW_TO"),
+                        SHADOW_TO.x,
+                        0.0f,
+                        SHADOW_TO.z);
+            glCullFace(GL_FRONT);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glDrawElementsInstanced(GL_TRIANGLES,
+                                    sizeof(INDICES) / (sizeof(u8)),
+                                    GL_UNSIGNED_BYTE,
+                                    (void*)((u64)vbo_index),
+                                    (i32)LEN_RECTS);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glUseProgram(display_program);
+            glCullFace(GL_BACK);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, depth_map);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glUniform3f(glGetUniformLocation(display_program, "VIEW_OFFSET"),
+                        VIEW_OFFSET.x,
+                        VIEW_OFFSET.y,
+                        VIEW_OFFSET.z);
+            glUniform3f(glGetUniformLocation(display_program, "SHADOW_TO"),
+                        SHADOW_TO.x,
+                        0.0f,
+                        SHADOW_TO.z);
             glDrawElementsInstanced(GL_TRIANGLES,
                                     sizeof(INDICES) / (sizeof(u8)),
                                     GL_UNSIGNED_BYTE,
@@ -387,7 +479,10 @@ i32 main(void) {
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &instance_vbo);
+    glDeleteFramebuffers(1, &depth_map_fbo);
+    glDeleteTextures(1, &depth_map);
     glDeleteProgram(display_program);
+    glDeleteProgram(shadow_program);
     glfwTerminate();
     return OK;
 }
