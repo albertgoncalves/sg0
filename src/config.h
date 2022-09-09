@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "prelude.h"
+#include "math.h"
 
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768

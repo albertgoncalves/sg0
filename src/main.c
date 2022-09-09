@@ -263,9 +263,9 @@ static void update(GLFWwindow* window) {
         move.x -= 1.0f;
     }
     if ((move.x != 0.0f) || (move.z != 0.0f)) {
-        f32 len = sqrtf((move.x * move.x) + (move.z * move.z));
-        PLAYER_SPEED.x += (move.x / len) * RUN;
-        PLAYER_SPEED.z += (move.z / len) * RUN;
+        move = normalize(move);
+        PLAYER_SPEED.x += move.x * RUN;
+        PLAYER_SPEED.z += move.z * RUN;
     }
     PLAYER_SPEED.x *= FRICTION;
     PLAYER_SPEED.z *= FRICTION;
@@ -312,24 +312,22 @@ i32 main(void) {
     const u32 ebo = get_ebo();
     const u32 instance_vbo = get_instance_vbo(display_program);
 
-    glUniform1f(glGetUniformLocation(display_program, "FOV_DEGREES"),
-                FOV_DEGREES);
-    glUniform1f(glGetUniformLocation(display_program, "ASPECT_RATIO"),
-                ((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT));
-    glUniform1f(glGetUniformLocation(display_program, "VIEW_NEAR"), VIEW_NEAR);
-    glUniform1f(glGetUniformLocation(display_program, "VIEW_FAR"), VIEW_FAR);
-    glUniform3f(glGetUniformLocation(display_program, "VIEW_UP"),
-                VIEW_UP.x,
-                VIEW_UP.y,
-                VIEW_UP.z);
+    {
+        const Mat4 projection =
+            perspective(FOV_DEGREES,
+                        ((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT),
+                        VIEW_NEAR,
+                        VIEW_FAR);
+        glUniformMatrix4fv(glGetUniformLocation(display_program, "PROJECTION"),
+                           1,
+                           FALSE,
+                           &projection.column_row[0][0]);
+    }
     glUniform3f(glGetUniformLocation(display_program, "VIEW_FROM"),
                 VIEW_FROM.x,
                 VIEW_FROM.y,
                 VIEW_FROM.z);
-    glUniform3f(glGetUniformLocation(display_program, "VIEW_TO"),
-                VIEW_TO.x,
-                VIEW_TO.y,
-                VIEW_TO.z);
+    const i32 uniform_view = glGetUniformLocation(display_program, "VIEW");
     EXIT_IF_GL_ERROR();
 
     {
@@ -358,27 +356,41 @@ i32 main(void) {
                 update(window);
             }
             update_time = now;
-            glUniform3f(glGetUniformLocation(display_program, "VIEW_OFFSET"),
-                        VIEW_OFFSET.x,
-                        VIEW_OFFSET.y,
-                        VIEW_OFFSET.z);
-            glBufferSubData(GL_ARRAY_BUFFER,
-                            0,
-                            sizeof(PLAYER_POSITION),
-                            &PLAYER_POSITION);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDrawElementsInstanced(GL_TRIANGLES,
-                                    sizeof(INDICES) / (sizeof(u8)),
-                                    GL_UNSIGNED_BYTE,
-                                    (void*)((u64)vbo_index),
-                                    (i32)LEN_RECTS);
-            EXIT_IF_GL_ERROR();
-            glfwSwapBuffers(window);
-
-            const u64 elapsed = now_ns() - now;
-            if (elapsed < FRAME_DURATION) {
-                EXIT_IF(usleep(
-                    (u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
+            {
+                const Vec3f view_from = (Vec3f){
+                    .x = VIEW_FROM.x + VIEW_OFFSET.x,
+                    .y = VIEW_FROM.y + VIEW_OFFSET.y,
+                    .z = VIEW_FROM.z + VIEW_OFFSET.z,
+                };
+                const Vec3f view_to = (Vec3f){
+                    .x = VIEW_TO.x + VIEW_OFFSET.x,
+                    .y = VIEW_TO.y + VIEW_OFFSET.y,
+                    .z = VIEW_TO.z + VIEW_OFFSET.z,
+                };
+                const Mat4 view = look_at(view_from, view_to, VIEW_UP);
+                glUniformMatrix4fv(uniform_view,
+                                   1,
+                                   FALSE,
+                                   &view.column_row[0][0]);
+                glBufferSubData(GL_ARRAY_BUFFER,
+                                0,
+                                sizeof(PLAYER_POSITION),
+                                &PLAYER_POSITION);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glDrawElementsInstanced(GL_TRIANGLES,
+                                        sizeof(INDICES) / (sizeof(u8)),
+                                        GL_UNSIGNED_BYTE,
+                                        (void*)((u64)vbo_index),
+                                        (i32)LEN_RECTS);
+                EXIT_IF_GL_ERROR();
+                glfwSwapBuffers(window);
+            }
+            {
+                const u64 elapsed = now_ns() - now;
+                if (elapsed < FRAME_DURATION) {
+                    EXIT_IF(usleep(
+                        (u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
+                }
             }
         }
     }
