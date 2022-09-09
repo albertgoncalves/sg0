@@ -22,8 +22,8 @@
 
 #define CAMERA_LATENCY (1.0f / 225.0f)
 
-#define PATH_DISPLAY_VERT "src/vert.glsl"
-#define PATH_DISPLAY_FRAG "src/frag.glsl"
+#define PATH_DISPLAY_VERT "src/display_vert.glsl"
+#define PATH_DISPLAY_FRAG "src/display_frag.glsl"
 
 static Rect RECTS[] = {
     {
