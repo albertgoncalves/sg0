@@ -17,13 +17,19 @@
 #define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
+#define SHADOW_FROM ((Vec3f){5.0f, 0.0f, 0.0f})
+#define SHADOW_TO   PLAYER_POSITION
+
 #define RUN      0.0025f
 #define FRICTION 0.9325f
 
 #define CAMERA_LATENCY (1.0f / 225.0f)
 
-#define PATH_DISPLAY_VERT "src/vert.glsl"
-#define PATH_DISPLAY_FRAG "src/frag.glsl"
+#define PATH_DISPLAY_VERT "src/display_vert.glsl"
+#define PATH_DISPLAY_FRAG "src/display_frag.glsl"
+
+#define PATH_SHADOW_VERT "src/shadow_vert.glsl"
+#define PATH_SHADOW_FRAG "src/shadow_frag.glsl"
 
 static Rect RECTS[] = {
     {
