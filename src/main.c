@@ -152,9 +152,9 @@ static u32 get_vbo_index(u32 program) {
 
 static u32 get_instance_vbo(u32 program) {
     u32 instance_vbo;
-    BIND_BUFFER(instance_vbo, RECTS, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    BIND_BUFFER(instance_vbo, CUBES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(RECTS[0])
+#define STRIDE sizeof(CUBES[0])
     {
         const u32 index =
             (u32)glGetAttribLocation(program, "VERT_IN_TRANSLATE");
@@ -164,7 +164,7 @@ static u32 get_instance_vbo(u32 program) {
                               GL_FLOAT,
                               FALSE,
                               STRIDE,
-                              (void*)offsetof(Rect, translate));
+                              (void*)offsetof(Cube, translate));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
@@ -176,7 +176,7 @@ static u32 get_instance_vbo(u32 program) {
                               GL_FLOAT,
                               FALSE,
                               STRIDE,
-                              (void*)offsetof(Rect, scale));
+                              (void*)offsetof(Cube, scale));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
@@ -189,7 +189,7 @@ static u32 get_instance_vbo(u32 program) {
                               GL_FLOAT,
                               FALSE,
                               STRIDE,
-                              (void*)offsetof(Rect, color));
+                              (void*)offsetof(Cube, color));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
@@ -225,10 +225,38 @@ static void update(GLFWwindow* window) {
     }
     PLAYER_SPEED.x *= FRICTION;
     PLAYER_SPEED.z *= FRICTION;
-    PLAYER_POSITION.x += PLAYER_SPEED.x;
-    PLAYER_POSITION.z += PLAYER_SPEED.z;
-    VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER_POSITION.x) * CAMERA_LATENCY;
-    VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER_POSITION.z) * CAMERA_LATENCY;
+    {
+        Rect  player;
+        Rect  obstacle;
+        Vec2f speed = (Vec2f){
+            .x = PLAYER_SPEED.x,
+            .y = PLAYER_SPEED.z,
+        };
+        Collision collision = {0};
+        set_rect_from_cube_xz(&PLAYER, &player);
+        for (u32 i = XZ_OBSTACLES_START; i < XZ_OBSTACLES_END; ++i) {
+            set_rect_from_cube_xz(&CUBES[i], &obstacle);
+            Collision candidate =
+                get_rect_collision(&player, &obstacle, &speed);
+            if (!candidate.hit) {
+                continue;
+            }
+            if (!collision.hit || (candidate.time < collision.time)) {
+                collision = candidate;
+            }
+        }
+        if (collision.hit) {
+            PLAYER.translate.x += PLAYER_SPEED.x * collision.time;
+            PLAYER.translate.z += PLAYER_SPEED.z * collision.time;
+            PLAYER_SPEED.x = 0.0f;
+            PLAYER_SPEED.z = 0.0f;
+        } else {
+            PLAYER.translate.x += PLAYER_SPEED.x;
+            PLAYER.translate.z += PLAYER_SPEED.z;
+        }
+    }
+    VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER.translate.x) * CAMERA_LATENCY;
+    VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }
 
 i32 main(void) {
@@ -327,14 +355,14 @@ i32 main(void) {
                                    &view.column_row[0][0]);
                 glBufferSubData(GL_ARRAY_BUFFER,
                                 0,
-                                sizeof(PLAYER_POSITION),
-                                &PLAYER_POSITION);
+                                sizeof(PLAYER.translate),
+                                &PLAYER.translate);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glDrawElementsInstanced(GL_TRIANGLES,
                                         sizeof(INDICES) / (sizeof(u8)),
                                         GL_UNSIGNED_BYTE,
                                         (void*)((u64)vbo_index),
-                                        (i32)LEN_RECTS);
+                                        (i32)LEN_CUBES);
                 EXIT_IF_GL_ERROR();
                 glfwSwapBuffers(window);
             }

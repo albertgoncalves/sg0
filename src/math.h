@@ -8,6 +8,10 @@
 #define PI 3.14159274f
 
 typedef struct {
+    f32 x, y;
+} Vec2f;
+
+typedef struct {
     f32 x, y, z;
 } Vec3f;
 

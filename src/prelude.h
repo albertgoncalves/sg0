@@ -59,6 +59,8 @@ typedef struct {
         }                          \
     } while (FALSE)
 
+#define MAX(l, r) ((l) < (r) ? (r) : (l))
+
 static MemMap path_to_map(const char* path) {
     EXIT_IF(!path);
     const i32 file = open(path, O_RDONLY);

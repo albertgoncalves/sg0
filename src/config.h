@@ -26,7 +26,7 @@
 #define PATH_DISPLAY_VERT "src/display_vert.glsl"
 #define PATH_DISPLAY_FRAG "src/display_frag.glsl"
 
-static Rect RECTS[] = {
+static Cube CUBES[] = {
     {
         .scale = {1.0f, 1.0f, 1.0f},
         .color = {0.8f, 0.85f, 0.95f, 0.9f},
@@ -53,9 +53,12 @@ static Rect RECTS[] = {
     },
 };
 
-#define LEN_RECTS (sizeof(RECTS) / sizeof(RECTS[0]))
+#define LEN_CUBES (sizeof(CUBES) / sizeof(CUBES[0]))
 
-#define PLAYER_POSITION (RECTS[0].translate)
+#define XZ_OBSTACLES_START 2
+#define XZ_OBSTACLES_END   LEN_CUBES
+
+#define PLAYER (CUBES[0])
 
 #define FRAME_UPDATE_COUNT 8
 #define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
