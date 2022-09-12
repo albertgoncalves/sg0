@@ -66,13 +66,6 @@ static const Vec3u INDICES[] = {
     {22, 23, 20},
 };
 
-static Bool overlap(const Rect* l, const Rect* r) {
-    return (l->left_bottom.x <= r->right_top.x) &&
-           (r->left_bottom.x <= l->right_top.x) &&
-           (l->left_bottom.y <= r->right_top.y) &&
-           (r->left_bottom.y <= l->right_top.y);
-}
-
 static void set_rect_from_cube_xz(const Cube* cube, Rect* rect) {
     Vec2f half_scale = (Vec2f){
         .x = cube->scale.x / 2.0f,
@@ -101,30 +94,52 @@ static Collision get_rect_collision(const Rect* move_from,
     } else if (speed->y < 0.0f) {
         time.y = (obstacle->right_top.y - move_from->left_bottom.y) / speed->y;
     }
-    Collision collision = (Collision){
-        .time = MAX(time.x, time.y),
-        .hit = FALSE,
-    };
-    if ((collision.time < 0.0f) || (1.0f < collision.time)) {
-        return collision;
+    Collision collision = {0};
+    if (time.y < time.x) {
+        if ((time.x < 0.0f) || (1.0f < time.x)) {
+            return collision;
+        }
+        Vec2f hit_distance = (Vec2f){
+            .x = speed->x * time.x,
+            .y = speed->y * time.x,
+        };
+        Rect move_to = (Rect){
+            .left_bottom =
+                (Vec2f){
+                    .x = move_from->left_bottom.x + hit_distance.x,
+                    .y = move_from->left_bottom.y + hit_distance.y,
+                },
+            .right_top =
+                (Vec2f){
+                    .x = move_from->right_top.x + hit_distance.x,
+                    .y = move_from->right_top.y + hit_distance.y,
+                },
+        };
+        collision.hit = ((move_to.left_bottom.y < obstacle->right_top.y) &&
+                         (obstacle->left_bottom.y < move_to.right_top.y));
+    } else if (time.x < time.y) {
+        if ((time.y < 0.0f) || (1.0f < time.y)) {
+            return collision;
+        }
+        Vec2f hit_distance = (Vec2f){
+            .x = speed->x * time.y,
+            .y = speed->y * time.y,
+        };
+        Rect move_to = (Rect){
+            .left_bottom =
+                (Vec2f){
+                    .x = move_from->left_bottom.x + hit_distance.x,
+                    .y = move_from->left_bottom.y + hit_distance.y,
+                },
+            .right_top =
+                (Vec2f){
+                    .x = move_from->right_top.x + hit_distance.x,
+                    .y = move_from->right_top.y + hit_distance.y,
+                },
+        };
+        collision.hit = ((move_to.left_bottom.x < obstacle->right_top.x) &&
+                         (obstacle->left_bottom.x < move_to.right_top.x));
     }
-    Vec2f hit_distance = (Vec2f){
-        .x = speed->x * collision.time,
-        .y = speed->y * collision.time,
-    };
-    Rect move_to = (Rect){
-        .left_bottom =
-            (Vec2f){
-                .x = move_from->left_bottom.x + hit_distance.x,
-                .y = move_from->left_bottom.y + hit_distance.y,
-            },
-        .right_top =
-            (Vec2f){
-                .x = move_from->right_top.x + hit_distance.x,
-                .y = move_from->right_top.y + hit_distance.y,
-            },
-    };
-    collision.hit = overlap(&move_to, obstacle);
     return collision;
 }
 
