@@ -26,6 +26,9 @@
 #define PATH_DISPLAY_VERT "src/display_vert.glsl"
 #define PATH_DISPLAY_FRAG "src/display_frag.glsl"
 
+#define COLOR_GROUND ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
+#define COLOR_WALL   ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
+
 static Cube CUBES[] = {
     {
         .scale = {1.0f, 1.0f, 1.0f},
@@ -33,28 +36,43 @@ static Cube CUBES[] = {
     },
     {
         .translate = {0.0f, -1.0f, 0.0f},
-        .scale = {20.f, 1.0f, 20.f},
-        .color = {0.2125f, 0.2125f, 0.2125f, 1.0f},
+        .scale = {20.0f, 1.0f, 20.0f},
+        .color = COLOR_GROUND,
+    },
+    {
+        .translate = {25.0f, -1.0f, 0.0f},
+        .scale = {20.0f, 1.0f, 20.0f},
+        .color = COLOR_GROUND,
+    },
+    {
+        .translate = {10.0f, -1.0f, 0.0f},
+        .scale = {10.0f, 1.0f, 2.0f},
+        .color = COLOR_GROUND,
+    },
+    {
+        .translate = {10.0f, -1.0f, -5.5f},
+        .scale = {10.0f, 1.0f, 1.0f},
+        .color = COLOR_GROUND,
     },
     {
         .translate = {-5.0f, 0.5f, 0.0f},
         .scale = {0.5f, 3.5f, 15.0f},
-        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .color = COLOR_WALL,
     },
     {
-        .translate = {5.5f, 0.5f, -5.0f},
-        .scale = {10.0f, 3.5f, 0.5f},
-        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .translate = {10.0f, 0.5f, -5.0f},
+        .scale = {20.0f, 3.5f, 0.5f},
+        .color = COLOR_WALL,
     },
     {
         .translate = {2.5f, 0.5f, 5.0f},
         .scale = {7.5f, 3.5f, 0.5f},
-        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .color = COLOR_WALL,
     },
     {
         .translate = {2.5f, 0.5f, 5.0f},
         .scale = {0.5f, 3.5f, 7.5f},
-        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
+        .color = COLOR_WALL,
     },
 };
 
