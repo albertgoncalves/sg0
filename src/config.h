@@ -51,6 +51,11 @@ static Cube CUBES[] = {
         .scale = {7.5f, 3.5f, 0.5f},
         .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
     },
+    {
+        .translate = {2.5f, 0.5f, 5.0f},
+        .scale = {0.5f, 3.5f, 7.5f},
+        .color = {0.1875f, 0.1875f, 0.1875f, 0.75f},
+    },
 };
 
 #define LEN_CUBES (sizeof(CUBES) / sizeof(CUBES[0]))

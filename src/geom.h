@@ -19,9 +19,15 @@ typedef struct {
     Vec2f right_top;
 } Rect;
 
+typedef enum {
+    HIT_NONE = 0,
+    HIT_X,
+    HIT_Y,
+} Hit;
+
 typedef struct {
-    f32  time;
-    Bool hit;
+    f32 time;
+    Hit hit;
 } Collision;
 
 static const Vertex VERTICES[] = {
@@ -66,20 +72,22 @@ static const Vec3u INDICES[] = {
     {22, 23, 20},
 };
 
-static void set_rect_from_cube_xz(const Cube* cube, Rect* rect) {
+static Rect get_rect_from_cube_xz(const Cube* cube) {
     Vec2f half_scale = (Vec2f){
         .x = cube->scale.x / 2.0f,
         .y = cube->scale.z / 2.0f,
     };
-    rect->left_bottom.x = cube->translate.x - half_scale.x;
-    rect->left_bottom.y = cube->translate.z - half_scale.y;
-    rect->right_top.x = cube->translate.x + half_scale.x;
-    rect->right_top.y = cube->translate.z + half_scale.y;
+    return (Rect){
+        .left_bottom.x = cube->translate.x - half_scale.x,
+        .left_bottom.y = cube->translate.z - half_scale.y,
+        .right_top.x = cube->translate.x + half_scale.x,
+        .right_top.y = cube->translate.z + half_scale.y,
+    };
 }
 
-static Collision get_rect_collision(const Rect* move_from,
-                                    const Rect* obstacle,
-                                    Vec2f*      speed) {
+static Collision get_rect_collision(const Rect*  move_from,
+                                    const Rect*  obstacle,
+                                    const Vec2f* speed) {
     Vec2f time = {
         .x = -INFINITY,
         .y = -INFINITY,
@@ -115,9 +123,12 @@ static Collision get_rect_collision(const Rect* move_from,
                     .y = move_from->right_top.y + hit_distance.y,
                 },
         };
-        collision.hit = ((move_to.left_bottom.y < obstacle->right_top.y) &&
-                         (obstacle->left_bottom.y < move_to.right_top.y));
-    } else if (time.x < time.y) {
+        if ((move_to.left_bottom.y < obstacle->right_top.y) &&
+            (obstacle->left_bottom.y < move_to.right_top.y))
+        {
+            collision.hit = HIT_X;
+        }
+    } else {
         if ((time.y < 0.0f) || (1.0f < time.y)) {
             return collision;
         }
@@ -137,8 +148,11 @@ static Collision get_rect_collision(const Rect* move_from,
                     .y = move_from->right_top.y + hit_distance.y,
                 },
         };
-        collision.hit = ((move_to.left_bottom.x < obstacle->right_top.x) &&
-                         (obstacle->left_bottom.x < move_to.right_top.x));
+        if ((move_to.left_bottom.x < obstacle->right_top.x) &&
+            (obstacle->left_bottom.x < move_to.right_top.x))
+        {
+            collision.hit = HIT_Y;
+        }
     }
     return collision;
 }

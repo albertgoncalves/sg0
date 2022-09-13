@@ -203,58 +203,75 @@ static u32 get_ebo(void) {
     return ebo;
 }
 
+static Bool resolve_collisions(const Rect* player) {
+    const Vec2f speed = (Vec2f){
+        .x = PLAYER_SPEED.x,
+        .y = PLAYER_SPEED.z,
+    };
+    Collision collision = {0};
+    for (u32 i = XZ_OBSTACLES_START; i < XZ_OBSTACLES_END; ++i) {
+        const Rect obstacle = get_rect_from_cube_xz(&CUBES[i]);
+        Collision  candidate = get_rect_collision(player, &obstacle, &speed);
+        if (!candidate.hit) {
+            continue;
+        }
+        if (!collision.hit || (candidate.time < collision.time)) {
+            collision = candidate;
+        }
+    }
+    switch (collision.hit) {
+    case HIT_NONE: {
+        return FALSE;
+    }
+    case HIT_X: {
+        PLAYER_SPEED.x *= collision.time;
+        break;
+    }
+    case HIT_Y: {
+        PLAYER_SPEED.z *= collision.time;
+        break;
+    }
+    default: {
+        EXIT();
+    }
+    }
+    return TRUE;
+}
+
 static void update(GLFWwindow* window) {
     glfwPollEvents();
-    Vec3f move = {0};
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        move.z -= 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        move.z += 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        move.x += 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        move.x -= 1.0f;
-    }
-    if ((move.x != 0.0f) || (move.z != 0.0f)) {
-        move = normalize(move);
-        PLAYER_SPEED.x += move.x * RUN;
-        PLAYER_SPEED.z += move.z * RUN;
+    {
+        Vec3f move = {0};
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            move.z -= 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            move.z += 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            move.x += 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            move.x -= 1.0f;
+        }
+        if ((move.x != 0.0f) || (move.z != 0.0f)) {
+            move = normalize(move);
+            PLAYER_SPEED.x += move.x * RUN;
+            PLAYER_SPEED.z += move.z * RUN;
+        }
     }
     PLAYER_SPEED.x *= FRICTION;
     PLAYER_SPEED.z *= FRICTION;
     {
-        Rect  player;
-        Rect  obstacle;
-        Vec2f speed = (Vec2f){
-            .x = PLAYER_SPEED.x,
-            .y = PLAYER_SPEED.z,
-        };
-        Collision collision = {0};
-        set_rect_from_cube_xz(&PLAYER, &player);
-        for (u32 i = XZ_OBSTACLES_START; i < XZ_OBSTACLES_END; ++i) {
-            set_rect_from_cube_xz(&CUBES[i], &obstacle);
-            Collision candidate =
-                get_rect_collision(&player, &obstacle, &speed);
-            if (!candidate.hit) {
-                continue;
-            }
-            if (!collision.hit || (candidate.time < collision.time)) {
-                collision = candidate;
-            }
-        }
-        if (collision.hit) {
-            PLAYER.translate.x += PLAYER_SPEED.x * collision.time;
-            PLAYER.translate.z += PLAYER_SPEED.z * collision.time;
-            PLAYER_SPEED.x = 0.0f;
-            PLAYER_SPEED.z = 0.0f;
-        } else {
-            PLAYER.translate.x += PLAYER_SPEED.x;
-            PLAYER.translate.z += PLAYER_SPEED.z;
+        const Rect player = get_rect_from_cube_xz(&PLAYER);
+        if (resolve_collisions(&player)) {
+            // NOTE: If we resolved a collision along one axis, it is possible
+            // we may still be colliding along the other, so let's check again.
+            resolve_collisions(&player);
         }
     }
+    PLAYER.translate.x += PLAYER_SPEED.x;
+    PLAYER.translate.z += PLAYER_SPEED.z;
     VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER.translate.x) * CAMERA_LATENCY;
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }

@@ -11,6 +11,7 @@ flags=(
     "-fsanitize=integer"
     "-fsanitize=nullability"
     "-fsanitize=undefined"
+    -fshort-enums
     -g
     -lGL
     -lglfw
@@ -21,6 +22,7 @@ flags=(
     -Werror
     -Weverything
     -Wno-c2x-extensions
+    -Wno-covered-switch-default
     -Wno-declaration-after-statement
     -Wno-padded
     -Wno-reserved-macro-identifier
