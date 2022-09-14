@@ -28,6 +28,7 @@ typedef enum {
 
 typedef struct {
     f32 time;
+    f32 overlap;
     Hit hit;
 } Collision;
 
@@ -109,6 +110,38 @@ static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
     };
 }
 
+static f32 get_overlap_segment(f32 l0, f32 r0, f32 l1, f32 r1) {
+    f32 a;
+    if (l0 < l1) {
+        a = l1;
+    } else {
+        a = l0;
+    }
+    f32 b;
+    if (r0 < r1) {
+        b = r0;
+    } else {
+        b = r1;
+    }
+    const f32 c = b - a;
+    return c < 0.0f ? 0.0f : c;
+}
+
+static f32 get_overlap_box(const Box* l, const Box* r) {
+    return get_overlap_segment(l->left_bottom_back.x,
+                               l->right_top_forward.x,
+                               r->left_bottom_back.x,
+                               r->right_top_forward.x) +
+           get_overlap_segment(l->left_bottom_back.y,
+                               l->right_top_forward.y,
+                               r->left_bottom_back.y,
+                               r->right_top_forward.y) +
+           get_overlap_segment(l->left_bottom_back.z,
+                               l->right_top_forward.z,
+                               r->left_bottom_back.z,
+                               r->right_top_forward.z);
+}
+
 static Collision get_box_collision(const Box*   move_from,
                                    const Box*   obstacle,
                                    const Vec3f* speed) {
@@ -155,6 +188,7 @@ static Collision get_box_collision(const Box*   move_from,
             (move_to.left_bottom_back.z < obstacle->right_top_forward.z) &&
             (obstacle->left_bottom_back.z < move_to.right_top_forward.z))
         {
+            collision.overlap = get_overlap_box(&move_to, obstacle);
             collision.hit = HIT_X;
         }
     } else if ((time.x < time.y) && (time.z < time.y)) {
@@ -167,6 +201,7 @@ static Collision get_box_collision(const Box*   move_from,
             (move_to.left_bottom_back.z < obstacle->right_top_forward.z) &&
             (obstacle->left_bottom_back.z < move_to.right_top_forward.z))
         {
+            collision.overlap = get_overlap_box(&move_to, obstacle);
             collision.hit = HIT_Y;
         }
     } else {
@@ -179,42 +214,11 @@ static Collision get_box_collision(const Box*   move_from,
             (move_to.left_bottom_back.y < obstacle->right_top_forward.y) &&
             (obstacle->left_bottom_back.y < move_to.right_top_forward.y))
         {
+            collision.overlap = get_overlap_box(&move_to, obstacle);
             collision.hit = HIT_Z;
         }
     }
     return collision;
-}
-
-static f32 get_overlap(f32 l0, f32 r0, f32 l1, f32 r1) {
-    f32 a;
-    if (l0 < l1) {
-        a = l1;
-    } else {
-        a = l0;
-    }
-    f32 b;
-    if (r0 < r1) {
-        b = r0;
-    } else {
-        b = r1;
-    }
-    const f32 c = b - a;
-    return c < 0.0f ? 0.0f : c;
-}
-
-static f32 get_surface_overlap(const Box* l, const Box* r) {
-    return get_overlap(l->left_bottom_back.x,
-                       l->right_top_forward.x,
-                       r->left_bottom_back.x,
-                       r->right_top_forward.x) +
-           get_overlap(l->left_bottom_back.y,
-                       l->right_top_forward.y,
-                       r->left_bottom_back.y,
-                       r->right_top_forward.y) +
-           get_overlap(l->left_bottom_back.z,
-                       l->right_top_forward.z,
-                       r->left_bottom_back.z,
-                       r->right_top_forward.z);
 }
 
 #endif

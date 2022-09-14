@@ -206,32 +206,18 @@ static u32 get_ebo(void) {
 }
 
 static Bool resolve_collisions(void) {
-    Collision  collision = {0};
-    const Box* obstacle = NULL;
+    Collision collision = {0};
     for (u32 i = 1; i < LEN_CUBES; ++i) {
         const Collision candidate =
             get_box_collision(&BOXES[0], &BOXES[i], &PLAYER_SPEED);
         if (!candidate.hit) {
             continue;
         }
-        if (!collision.hit) {
+        if (!collision.hit || (candidate.time < collision.time) ||
+            ((candidate.time == collision.time) &&
+             (collision.overlap < candidate.overlap)))
+        {
             collision = candidate;
-            obstacle = &BOXES[i];
-            continue;
-        }
-        if (candidate.time < collision.time) {
-            collision = candidate;
-            obstacle = &BOXES[i];
-            continue;
-        }
-        if (candidate.time == 0.0f) {
-            EXIT_IF(!obstacle);
-            if (get_surface_overlap(&BOXES[0], obstacle) <
-                get_surface_overlap(&BOXES[0], &BOXES[i]))
-            {
-                collision = candidate;
-                obstacle = &BOXES[i];
-            }
         }
     }
     switch (collision.hit) {
