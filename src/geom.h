@@ -21,9 +21,9 @@ typedef struct {
 
 typedef enum {
     HIT_NONE = 0,
-    HIT_X,
-    HIT_Y,
-    HIT_Z,
+    HIT_X = 1 << 0,
+    HIT_Y = 1 << 1,
+    HIT_Z = 1 << 2,
 } Hit;
 
 typedef struct {

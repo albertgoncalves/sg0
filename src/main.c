@@ -205,44 +205,6 @@ static u32 get_ebo(void) {
     return ebo;
 }
 
-static Bool resolve_collisions(void) {
-    Collision collision = {0};
-    for (u32 i = 1; i < LEN_CUBES; ++i) {
-        const Collision candidate =
-            get_box_collision(&BOXES[0], &BOXES[i], &PLAYER_SPEED);
-        if (!candidate.hit) {
-            continue;
-        }
-        if (!collision.hit || (candidate.time < collision.time) ||
-            ((candidate.time == collision.time) &&
-             (collision.overlap < candidate.overlap)))
-        {
-            collision = candidate;
-        }
-    }
-    switch (collision.hit) {
-    case HIT_NONE: {
-        return TRUE;
-    }
-    case HIT_X: {
-        PLAYER_SPEED.x *= collision.time;
-        break;
-    }
-    case HIT_Y: {
-        PLAYER_SPEED.y *= collision.time;
-        break;
-    }
-    case HIT_Z: {
-        PLAYER_SPEED.z *= collision.time;
-        break;
-    }
-    default: {
-        EXIT();
-    }
-    }
-    return FALSE;
-}
-
 static void update(GLFWwindow* window) {
     glfwPollEvents();
     EXIT_IF(0.0f < PLAYER_SPEED.y);
@@ -272,15 +234,74 @@ static void update(GLFWwindow* window) {
         PLAYER_SPEED.z *= FRICTION;
     }
     PLAYER_SPEED.y -= GRAVITY;
-    set_box_from_cube(&CUBES[0], &BOXES[0]);
-    for (u32 _ = 0; _ < 3; ++_) {
-        if (resolve_collisions()) {
-            break;
+    {
+        Vec3f speed = PLAYER_SPEED;
+        Vec3f remaining = PLAYER_SPEED;
+        u8    hit = 0;
+        for (u32 _ = 0; _ < 3; ++_) {
+            set_box_from_cube(&PLAYER, &BOXES[0]);
+            Collision collision = {0};
+            for (u32 i = 1; i < LEN_CUBES; ++i) {
+                const Collision candidate =
+                    get_box_collision(&BOXES[0], &BOXES[i], &speed);
+                if (!candidate.hit) {
+                    continue;
+                }
+                if (!collision.hit || (candidate.time < collision.time) ||
+                    ((candidate.time == collision.time) &&
+                     (collision.overlap < candidate.overlap)))
+                {
+                    collision = candidate;
+                }
+            }
+            if (!collision.hit) {
+                PLAYER.translate.x += speed.x;
+                PLAYER.translate.y += speed.y;
+                PLAYER.translate.z += speed.z;
+                break;
+            }
+            speed.x *= collision.time;
+            speed.y *= collision.time;
+            speed.z *= collision.time;
+            PLAYER.translate.x += speed.x;
+            PLAYER.translate.y += speed.y;
+            PLAYER.translate.z += speed.z;
+            remaining.x -= speed.x;
+            remaining.y -= speed.y;
+            remaining.z -= speed.z;
+            switch (collision.hit) {
+            case HIT_X: {
+                remaining.x = 0.0f;
+                break;
+            }
+            case HIT_Y: {
+                remaining.y = 0.0f;
+                break;
+            }
+            case HIT_Z: {
+                remaining.z = 0.0f;
+                break;
+            }
+            case HIT_NONE:
+            default: {
+                EXIT();
+            }
+            }
+            speed.x = remaining.x;
+            speed.y = remaining.y;
+            speed.z = remaining.z;
+            hit |= collision.hit;
+        }
+        if (hit & HIT_X) {
+            PLAYER_SPEED.x = 0.0f;
+        }
+        if (hit & HIT_Y) {
+            PLAYER_SPEED.y = 0.0f;
+        }
+        if (hit & HIT_Z) {
+            PLAYER_SPEED.z = 0.0f;
         }
     }
-    PLAYER.translate.x += PLAYER_SPEED.x;
-    PLAYER.translate.y += PLAYER_SPEED.y;
-    PLAYER.translate.z += PLAYER_SPEED.z;
     if (PLAYER.translate.y < FLOOR) {
         PLAYER.translate = PLAYER_TRANSLATE_INIT;
         PLAYER_SPEED = (Vec3f){0};
