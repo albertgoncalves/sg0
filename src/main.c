@@ -8,6 +8,8 @@ static Vec3f VIEW_OFFSET = {0};
 
 static Vec3f PLAYER_SPEED = {0};
 
+static Box BOXES[LEN_CUBES];
+
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
         switch (glGetError()) {                            \
@@ -203,23 +205,33 @@ static u32 get_ebo(void) {
     return ebo;
 }
 
-static Bool resolve_collisions(const Box* player) {
-    Collision collision = {0};
+static Bool resolve_collisions(void) {
+    Collision  collision = {0};
+    const Box* obstacle = NULL;
     for (u32 i = 1; i < LEN_CUBES; ++i) {
-        const Box       obstacle = get_box_from_cube(&CUBES[i]);
         const Collision candidate =
-            get_box_collision(player, &obstacle, &PLAYER_SPEED);
+            get_box_collision(&BOXES[0], &BOXES[i], &PLAYER_SPEED);
         if (!candidate.hit) {
             continue;
         }
         if (!collision.hit) {
             collision = candidate;
+            obstacle = &BOXES[i];
+            continue;
         }
-        if ((candidate.time < collision.time) ||
-            ((candidate.time == collision.time) &&
-             (candidate.hit < collision.hit)))
-        {
+        if (candidate.time < collision.time) {
             collision = candidate;
+            obstacle = &BOXES[i];
+            continue;
+        }
+        if (candidate.time == 0.0f) {
+            EXIT_IF(!obstacle);
+            if (get_surface_overlap(&BOXES[0], obstacle) <
+                get_surface_overlap(&BOXES[0], &BOXES[i]))
+            {
+                collision = candidate;
+                obstacle = &BOXES[i];
+            }
         }
     }
     switch (collision.hit) {
@@ -274,12 +286,10 @@ static void update(GLFWwindow* window) {
         PLAYER_SPEED.z *= FRICTION;
     }
     PLAYER_SPEED.y -= GRAVITY;
-    {
-        const Box player = get_box_from_cube(&PLAYER);
-        for (u32 _ = 0; _ < 3; ++_) {
-            if (resolve_collisions(&player)) {
-                break;
-            }
+    set_box_from_cube(&CUBES[0], &BOXES[0]);
+    for (u32 _ = 0; _ < 3; ++_) {
+        if (resolve_collisions()) {
+            break;
         }
     }
     PLAYER.translate.x += PLAYER_SPEED.x;
@@ -345,6 +355,9 @@ i32 main(void) {
     const i32 uniform_view = glGetUniformLocation(display_program, "VIEW");
     EXIT_IF_GL_ERROR();
 
+    for (u32 i = 0; i < LEN_CUBES; ++i) {
+        set_box_from_cube(&CUBES[i], &BOXES[i]);
+    }
     {
         u64 update_time = now_ns();
         u64 update_delta = 0;

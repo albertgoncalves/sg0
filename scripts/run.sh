@@ -24,7 +24,6 @@ flags=(
     -Wno-c2x-extensions
     -Wno-covered-switch-default
     -Wno-declaration-after-statement
-    -Wno-float-equal
     -Wno-padded
     -Wno-reserved-macro-identifier
 )

@@ -21,10 +21,8 @@ typedef struct {
 
 typedef enum {
     HIT_NONE = 0,
-
-    HIT_Y,
-
     HIT_X,
+    HIT_Y,
     HIT_Z,
 } Hit;
 
@@ -75,20 +73,18 @@ static const Vec3u INDICES[] = {
     {22, 23, 20},
 };
 
-static Box get_box_from_cube(const Cube* cube) {
+static void set_box_from_cube(const Cube* cube, Box* box) {
     Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,
         .y = cube->scale.y / 2.0f,
         .z = cube->scale.z / 2.0f,
     };
-    return (Box){
-        .left_bottom_back.x = cube->translate.x - half_scale.x,
-        .left_bottom_back.y = cube->translate.y - half_scale.y,
-        .left_bottom_back.z = cube->translate.z - half_scale.z,
-        .right_top_forward.x = cube->translate.x + half_scale.x,
-        .right_top_forward.y = cube->translate.y + half_scale.y,
-        .right_top_forward.z = cube->translate.z + half_scale.z,
-    };
+    box->left_bottom_back.x = cube->translate.x - half_scale.x;
+    box->left_bottom_back.y = cube->translate.y - half_scale.y;
+    box->left_bottom_back.z = cube->translate.z - half_scale.z;
+    box->right_top_forward.x = cube->translate.x + half_scale.x;
+    box->right_top_forward.y = cube->translate.y + half_scale.y;
+    box->right_top_forward.z = cube->translate.z + half_scale.z;
 }
 
 static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
@@ -187,6 +183,38 @@ static Collision get_box_collision(const Box*   move_from,
         }
     }
     return collision;
+}
+
+static f32 get_overlap(f32 l0, f32 r0, f32 l1, f32 r1) {
+    f32 a;
+    if (l0 < l1) {
+        a = l1;
+    } else {
+        a = l0;
+    }
+    f32 b;
+    if (r0 < r1) {
+        b = r0;
+    } else {
+        b = r1;
+    }
+    const f32 c = b - a;
+    return c < 0.0f ? 0.0f : c;
+}
+
+static f32 get_surface_overlap(const Box* l, const Box* r) {
+    return get_overlap(l->left_bottom_back.x,
+                       l->right_top_forward.x,
+                       r->left_bottom_back.x,
+                       r->right_top_forward.x) +
+           get_overlap(l->left_bottom_back.y,
+                       l->right_top_forward.y,
+                       r->left_bottom_back.y,
+                       r->right_top_forward.y) +
+           get_overlap(l->left_bottom_back.z,
+                       l->right_top_forward.z,
+                       r->left_bottom_back.z,
+                       r->right_top_forward.z);
 }
 
 #endif
