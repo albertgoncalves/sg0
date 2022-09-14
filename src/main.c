@@ -203,39 +203,46 @@ static u32 get_ebo(void) {
     return ebo;
 }
 
-static Bool resolve_collisions(const Box* player, Vec3f* speed) {
+static Bool resolve_collisions(const Box* player) {
     Collision collision = {0};
     for (u32 i = 1; i < LEN_CUBES; ++i) {
-        const Box obstacle = get_box_from_cube(&CUBES[i]);
-        Collision candidate = get_box_collision(player, &obstacle, speed);
+        const Box       obstacle = get_box_from_cube(&CUBES[i]);
+        const Collision candidate =
+            get_box_collision(player, &obstacle, &PLAYER_SPEED);
         if (!candidate.hit) {
             continue;
         }
-        if (!collision.hit || (candidate.time < collision.time)) {
+        if (!collision.hit) {
+            collision = candidate;
+        }
+        if ((candidate.time < collision.time) ||
+            ((candidate.time == collision.time) &&
+             (candidate.hit < collision.hit)))
+        {
             collision = candidate;
         }
     }
     switch (collision.hit) {
     case HIT_NONE: {
-        return FALSE;
+        return TRUE;
     }
     case HIT_X: {
-        speed->x *= collision.time;
+        PLAYER_SPEED.x *= collision.time;
         break;
     }
     case HIT_Y: {
-        speed->y *= collision.time;
+        PLAYER_SPEED.y *= collision.time;
         break;
     }
     case HIT_Z: {
-        speed->z *= collision.time;
+        PLAYER_SPEED.z *= collision.time;
         break;
     }
     default: {
         EXIT();
     }
     }
-    return TRUE;
+    return FALSE;
 }
 
 static void update(GLFWwindow* window) {
@@ -269,26 +276,10 @@ static void update(GLFWwindow* window) {
     PLAYER_SPEED.y -= GRAVITY;
     {
         const Box player = get_box_from_cube(&PLAYER);
-        {
-            Vec3f speed = (Vec3f){
-                .x = PLAYER_SPEED.x,
-                .y = 0.0f,
-                .z = PLAYER_SPEED.z,
-            };
-            if (resolve_collisions(&player, &speed)) {
-                resolve_collisions(&player, &speed);
+        for (u32 _ = 0; _ < 3; ++_) {
+            if (resolve_collisions(&player)) {
+                break;
             }
-            PLAYER_SPEED.x = speed.x;
-            PLAYER_SPEED.z = speed.z;
-        }
-        {
-            Vec3f speed = (Vec3f){
-                .x = 0.0f,
-                .y = PLAYER_SPEED.y,
-                .z = 0.0f,
-            };
-            resolve_collisions(&player, &speed);
-            PLAYER_SPEED.y = speed.y;
         }
     }
     PLAYER.translate.x += PLAYER_SPEED.x;

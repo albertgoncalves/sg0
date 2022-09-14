@@ -21,8 +21,10 @@ typedef struct {
 
 typedef enum {
     HIT_NONE = 0,
-    HIT_X,
+
     HIT_Y,
+
+    HIT_X,
     HIT_Z,
 } Hit;
 
