@@ -32,34 +32,34 @@
 #define PATH_DISPLAY_VERT "src/display_vert.glsl"
 #define PATH_DISPLAY_FRAG "src/display_frag.glsl"
 
-#define COLOR_GROUND ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
-#define COLOR_WALL   ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
+#define COLOR_PLATFORM ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
+#define COLOR_WALL     ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
 
 static Cube CUBES[] = {
     {
         .translate = PLAYER_TRANSLATE_INIT,
         .scale = {1.0f, 1.0f, 1.0f},
-        .color = {0.8f, 0.85f, 0.95f, 0.9f},
+        .color = {0.8f, 0.85f, 0.95f, 0.95f},
     },
     {
         .translate = {0.0f, -1.0f, 0.0f},
         .scale = {20.0f, 1.0f, 20.0f},
-        .color = COLOR_GROUND,
+        .color = COLOR_PLATFORM,
     },
     {
         .translate = {25.0f, -1.0f, 0.0f},
         .scale = {20.0f, 1.0f, 20.0f},
-        .color = COLOR_GROUND,
+        .color = COLOR_PLATFORM,
     },
     {
         .translate = {10.0f, -1.0f, 0.0f},
         .scale = {10.0f, 1.0f, 2.0f},
-        .color = COLOR_GROUND,
+        .color = COLOR_PLATFORM,
     },
     {
         .translate = {10.0f, -1.0f, -5.5f},
         .scale = {10.0f, 1.0f, 1.0f},
-        .color = COLOR_GROUND,
+        .color = COLOR_PLATFORM,
     },
     {
         .translate = {-5.0f, 0.5f, 0.0f},
