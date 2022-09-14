@@ -15,14 +15,15 @@ typedef struct {
 } Cube;
 
 typedef struct {
-    Vec2f left_bottom;
-    Vec2f right_top;
-} Rect;
+    Vec3f left_bottom_back;
+    Vec3f right_top_forward;
+} Box;
 
 typedef enum {
     HIT_NONE = 0,
     HIT_X,
     HIT_Y,
+    HIT_Z,
 } Hit;
 
 typedef struct {
@@ -72,86 +73,115 @@ static const Vec3u INDICES[] = {
     {22, 23, 20},
 };
 
-static Rect get_rect_from_cube_xz(const Cube* cube) {
-    Vec2f half_scale = (Vec2f){
+static Box get_box_from_cube(const Cube* cube) {
+    Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,
-        .y = cube->scale.z / 2.0f,
+        .y = cube->scale.y / 2.0f,
+        .z = cube->scale.z / 2.0f,
     };
-    return (Rect){
-        .left_bottom.x = cube->translate.x - half_scale.x,
-        .left_bottom.y = cube->translate.z - half_scale.y,
-        .right_top.x = cube->translate.x + half_scale.x,
-        .right_top.y = cube->translate.z + half_scale.y,
+    return (Box){
+        .left_bottom_back.x = cube->translate.x - half_scale.x,
+        .left_bottom_back.y = cube->translate.y - half_scale.y,
+        .left_bottom_back.z = cube->translate.z - half_scale.z,
+        .right_top_forward.x = cube->translate.x + half_scale.x,
+        .right_top_forward.y = cube->translate.y + half_scale.y,
+        .right_top_forward.z = cube->translate.z + half_scale.z,
     };
 }
 
-static Collision get_rect_collision(const Rect*  move_from,
-                                    const Rect*  obstacle,
-                                    const Vec2f* speed) {
-    Vec2f time = {
+static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
+    Vec3f hit_distance = (Vec3f){
+        .x = speed->x * time,
+        .y = speed->y * time,
+        .z = speed->z * time,
+    };
+    return (Box){
+        .left_bottom_back =
+            (Vec3f){
+                .x = move_from->left_bottom_back.x + hit_distance.x,
+                .y = move_from->left_bottom_back.y + hit_distance.y,
+                .z = move_from->left_bottom_back.z + hit_distance.z,
+            },
+        .right_top_forward =
+            (Vec3f){
+                .x = move_from->right_top_forward.x + hit_distance.x,
+                .y = move_from->right_top_forward.y + hit_distance.y,
+                .z = move_from->right_top_forward.z + hit_distance.z,
+            },
+    };
+}
+
+static Collision get_box_collision(const Box*   move_from,
+                                   const Box*   obstacle,
+                                   const Vec3f* speed) {
+    Vec3f time = {
         .x = -INFINITY,
         .y = -INFINITY,
+        .z = -INFINITY,
     };
     if (0.0f < speed->x) {
-        time.x = (obstacle->left_bottom.x - move_from->right_top.x) / speed->x;
+        time.x =
+            (obstacle->left_bottom_back.x - move_from->right_top_forward.x) /
+            speed->x;
     } else if (speed->x < 0.0f) {
-        time.x = (obstacle->right_top.x - move_from->left_bottom.x) / speed->x;
+        time.x =
+            (obstacle->right_top_forward.x - move_from->left_bottom_back.x) /
+            speed->x;
     }
     if (0.0f < speed->y) {
-        time.y = (obstacle->left_bottom.y - move_from->right_top.y) / speed->y;
+        time.y =
+            (obstacle->left_bottom_back.y - move_from->right_top_forward.y) /
+            speed->y;
     } else if (speed->y < 0.0f) {
-        time.y = (obstacle->right_top.y - move_from->left_bottom.y) / speed->y;
+        time.y =
+            (obstacle->right_top_forward.y - move_from->left_bottom_back.y) /
+            speed->y;
+    }
+    if (0.0f < speed->z) {
+        time.z =
+            (obstacle->left_bottom_back.z - move_from->right_top_forward.z) /
+            speed->z;
+    } else if (speed->z < 0.0f) {
+        time.z =
+            (obstacle->right_top_forward.z - move_from->left_bottom_back.z) /
+            speed->z;
     }
     Collision collision = {0};
-    if (time.y < time.x) {
+    if ((time.y < time.x) && (time.z < time.x)) {
         if ((time.x < 0.0f) || (1.0f < time.x)) {
             return collision;
         }
-        Vec2f hit_distance = (Vec2f){
-            .x = speed->x * time.x,
-            .y = speed->y * time.x,
-        };
-        Rect move_to = (Rect){
-            .left_bottom =
-                (Vec2f){
-                    .x = move_from->left_bottom.x + hit_distance.x,
-                    .y = move_from->left_bottom.y + hit_distance.y,
-                },
-            .right_top =
-                (Vec2f){
-                    .x = move_from->right_top.x + hit_distance.x,
-                    .y = move_from->right_top.y + hit_distance.y,
-                },
-        };
-        if ((move_to.left_bottom.y < obstacle->right_top.y) &&
-            (obstacle->left_bottom.y < move_to.right_top.y))
+        Box move_to = get_move_to(move_from, speed, time.x);
+        if ((move_to.left_bottom_back.y < obstacle->right_top_forward.y) &&
+            (obstacle->left_bottom_back.y < move_to.right_top_forward.y) &&
+            (move_to.left_bottom_back.z < obstacle->right_top_forward.z) &&
+            (obstacle->left_bottom_back.z < move_to.right_top_forward.z))
         {
             collision.hit = HIT_X;
         }
-    } else {
+    } else if ((time.x < time.y) && (time.z < time.y)) {
         if ((time.y < 0.0f) || (1.0f < time.y)) {
             return collision;
         }
-        Vec2f hit_distance = (Vec2f){
-            .x = speed->x * time.y,
-            .y = speed->y * time.y,
-        };
-        Rect move_to = (Rect){
-            .left_bottom =
-                (Vec2f){
-                    .x = move_from->left_bottom.x + hit_distance.x,
-                    .y = move_from->left_bottom.y + hit_distance.y,
-                },
-            .right_top =
-                (Vec2f){
-                    .x = move_from->right_top.x + hit_distance.x,
-                    .y = move_from->right_top.y + hit_distance.y,
-                },
-        };
-        if ((move_to.left_bottom.x < obstacle->right_top.x) &&
-            (obstacle->left_bottom.x < move_to.right_top.x))
+        Box move_to = get_move_to(move_from, speed, time.y);
+        if ((move_to.left_bottom_back.x < obstacle->right_top_forward.x) &&
+            (obstacle->left_bottom_back.x < move_to.right_top_forward.x) &&
+            (move_to.left_bottom_back.z < obstacle->right_top_forward.z) &&
+            (obstacle->left_bottom_back.z < move_to.right_top_forward.z))
         {
             collision.hit = HIT_Y;
+        }
+    } else {
+        if ((time.z < 0.0f) || (1.0f < time.z)) {
+            return collision;
+        }
+        Box move_to = get_move_to(move_from, speed, time.z);
+        if ((move_to.left_bottom_back.x < obstacle->right_top_forward.x) &&
+            (obstacle->left_bottom_back.x < move_to.right_top_forward.x) &&
+            (move_to.left_bottom_back.y < obstacle->right_top_forward.y) &&
+            (obstacle->left_bottom_back.y < move_to.right_top_forward.y))
+        {
+            collision.hit = HIT_Z;
         }
     }
     return collision;

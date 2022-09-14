@@ -20,6 +20,12 @@
 
 #define RUN      0.0025f
 #define FRICTION 0.9325f
+#define DRAG     0.999f
+#define GRAVITY  0.000675f
+
+#define FLOOR -10.0f
+
+#define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 5.0f, .z = 0.0f})
 
 #define CAMERA_LATENCY (1.0f / 225.0f)
 
@@ -31,6 +37,7 @@
 
 static Cube CUBES[] = {
     {
+        .translate = PLAYER_TRANSLATE_INIT,
         .scale = {1.0f, 1.0f, 1.0f},
         .color = {0.8f, 0.85f, 0.95f, 0.9f},
     },
@@ -77,9 +84,6 @@ static Cube CUBES[] = {
 };
 
 #define LEN_CUBES (sizeof(CUBES) / sizeof(CUBES[0]))
-
-#define XZ_OBSTACLES_START 2
-#define XZ_OBSTACLES_END   LEN_CUBES
 
 #define PLAYER (CUBES[0])
 
