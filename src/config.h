@@ -3,6 +3,9 @@
 
 #include "geom.h"
 
+#define PATH_DISPLAY_VERT "src/display_vert.glsl"
+#define PATH_DISPLAY_FRAG "src/display_frag.glsl"
+
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768
 
@@ -18,28 +21,43 @@
 #define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
-#define RUN      0.0025f
+#define RUN      0.002375f
 #define FRICTION 0.9325f
 #define DRAG     0.999f
 #define GRAVITY  0.000675f
 
 #define FLOOR -10.0f
 
+#define CAMERA_LATENCY (1.0f / 235.0f)
+
+#define FRAME_UPDATE_COUNT 8
+#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
+#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
+
 #define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 5.0f, .z = 0.0f})
 
-#define CAMERA_LATENCY (1.0f / 225.0f)
-
-#define PATH_DISPLAY_VERT "src/display_vert.glsl"
-#define PATH_DISPLAY_FRAG "src/display_frag.glsl"
-
+#define COLOR_PLAYER   ((Vec4f){0.8f, 0.85f, 0.95f, 0.95f})
+#define COLOR_ENEMY    ((Vec4f){0.9f, 0.5f, 0.5f, 0.9f})
 #define COLOR_PLATFORM ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
 #define COLOR_WALL     ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
+
+#define SCALE_PLAYER_ENEMY ((Vec3f){0.875f, 1.0f, 0.875f})
 
 static Cube CUBES[] = {
     {
         .translate = PLAYER_TRANSLATE_INIT,
-        .scale = {1.0f, 1.0f, 1.0f},
-        .color = {0.8f, 0.85f, 0.95f, 0.95f},
+        .scale = SCALE_PLAYER_ENEMY,
+        .color = COLOR_PLAYER,
+    },
+    {
+        .translate = {30.0f, 0.0f, 0.0f},
+        .scale = SCALE_PLAYER_ENEMY,
+        .color = COLOR_ENEMY,
+    },
+    {
+        .translate = {25.0f, 0.0f, -5.0f},
+        .scale = SCALE_PLAYER_ENEMY,
+        .color = COLOR_ENEMY,
     },
     {
         .translate = {0.0f, -1.0f, 0.0f},
@@ -86,9 +104,5 @@ static Cube CUBES[] = {
 #define LEN_CUBES (sizeof(CUBES) / sizeof(CUBES[0]))
 
 #define PLAYER (CUBES[0])
-
-#define FRAME_UPDATE_COUNT 8
-#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
-#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
 
 #endif
