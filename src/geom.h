@@ -32,7 +32,7 @@ typedef struct {
     Hit hit;
 } Collision;
 
-static const Vertex VERTICES[] = {
+static const Vertex CUBE_VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -59,7 +59,7 @@ static const Vertex VERTICES[] = {
     {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 };
 
-static const Vec3u INDICES[] = {
+static const Vec3u CUBE_INDICES[] = {
     {0, 1, 2},
     {2, 3, 0},
     {4, 5, 6},

@@ -117,13 +117,13 @@ static u32 get_vao(void) {
 
 static u32 get_vbo(void) {
     u32 vbo;
-    BIND_BUFFER(vbo, VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(vbo, CUBE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     return vbo;
 }
 
 static u32 get_vbo_index(u32 program) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(VERTICES[0])
+#define STRIDE sizeof(CUBE_VERTICES[0])
     u32 vbo_index;
     {
         vbo_index = (u32)glGetAttribLocation(program, "VERT_IN_POSITION");
@@ -201,7 +201,7 @@ static u32 get_instance_vbo(u32 program) {
 
 static u32 get_ebo(void) {
     u32 ebo;
-    BIND_BUFFER(ebo, INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(ebo, CUBE_INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
     return ebo;
 }
 
@@ -339,27 +339,29 @@ i32 main(void) {
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
 
-    const u32 display_program =
-        get_program(PATH_DISPLAY_VERT, PATH_DISPLAY_FRAG);
+    const u32 display_cube_program =
+        get_program(PATH_DISPLAY_CUBE_VERT, PATH_DISPLAY_CUBE_FRAG);
     const u32 vao = get_vao();
     const u32 vbo = get_vbo();
-    const u32 vbo_index = get_vbo_index(display_program);
+    const u32 vbo_index = get_vbo_index(display_cube_program);
     const u32 ebo = get_ebo();
-    const u32 instance_vbo = get_instance_vbo(display_program);
+    const u32 instance_vbo = get_instance_vbo(display_cube_program);
 
     {
         const Mat4 projection =
             perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
-        glUniformMatrix4fv(glGetUniformLocation(display_program, "PROJECTION"),
-                           1,
-                           FALSE,
-                           &projection.column_row[0][0]);
+        glUniformMatrix4fv(
+            glGetUniformLocation(display_cube_program, "PROJECTION"),
+            1,
+            FALSE,
+            &projection.column_row[0][0]);
     }
-    glUniform3f(glGetUniformLocation(display_program, "VIEW_FROM"),
+    glUniform3f(glGetUniformLocation(display_cube_program, "VIEW_FROM"),
                 VIEW_FROM.x,
                 VIEW_FROM.y,
                 VIEW_FROM.z);
-    const i32 uniform_view = glGetUniformLocation(display_program, "VIEW");
+    const i32 uniform_view =
+        glGetUniformLocation(display_cube_program, "VIEW");
     EXIT_IF_GL_ERROR();
 
     for (u32 i = 0; i < LEN_CUBES; ++i) {
@@ -413,7 +415,7 @@ i32 main(void) {
                                 &PLAYER.translate);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glDrawElementsInstanced(GL_TRIANGLES,
-                                        sizeof(INDICES) / (sizeof(u8)),
+                                        sizeof(CUBE_INDICES) / (sizeof(u8)),
                                         GL_UNSIGNED_BYTE,
                                         (void*)((u64)vbo_index),
                                         (i32)LEN_CUBES);
@@ -434,7 +436,7 @@ i32 main(void) {
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &instance_vbo);
-    glDeleteProgram(display_program);
+    glDeleteProgram(display_cube_program);
     glfwTerminate();
     return OK;
 }
