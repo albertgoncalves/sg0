@@ -70,12 +70,12 @@ static Cube CUBES[] = {
         .color = COLOR_PLATFORM,
     },
     {
-        .translate = {10.0f, -1.0f, 0.0f},
+        .translate = {12.5f, -1.0f, 0.0f},
         .scale = {10.0f, 1.0f, 2.0f},
         .color = COLOR_PLATFORM,
     },
     {
-        .translate = {10.0f, -1.0f, -5.5f},
+        .translate = {12.5f, -1.0f, -5.5f},
         .scale = {10.0f, 1.0f, 1.0f},
         .color = COLOR_PLATFORM,
     },
