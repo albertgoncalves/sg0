@@ -266,10 +266,8 @@ i32 main(void) {
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
 
-    const u32 display_cube_program =
-        get_program(PATH_DISPLAY_CUBE_VERT, PATH_DISPLAY_CUBE_FRAG);
-    const u32 display_line_program =
-        get_program(PATH_DISPLAY_LINE_VERT, PATH_DISPLAY_LINE_FRAG);
+    const u32 cube_program = get_program(PATH_CUBE_VERT, PATH_CUBE_FRAG);
+    const u32 line_program = get_program(PATH_LINE_VERT, PATH_LINE_FRAG);
 
     glGenVertexArrays(CAP_VAO, &VAO[0]);
     glGenBuffers(CAP_VBO, &VBO[0]);
@@ -277,7 +275,7 @@ i32 main(void) {
     glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     EXIT_IF_GL_ERROR();
 
-    glUseProgram(display_cube_program);
+    glUseProgram(cube_program);
     glBindVertexArray(VAO[0]);
 
     BIND_BUFFER(VBO[0], CUBE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
@@ -286,12 +284,12 @@ i32 main(void) {
 #define STRIDE sizeof(CUBE_VERTICES[0])
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_cube_program, "VERT_IN_POSITION");
+            (u32)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vertex, position));
     }
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_cube_program, "VERT_IN_NORMAL");
+            (u32)glGetAttribLocation(cube_program, "VERT_IN_NORMAL");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vertex, normal));
     }
 #undef SIZE
@@ -303,15 +301,15 @@ i32 main(void) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBES[0])
     {
-        const u32 index = (u32)glGetAttribLocation(display_cube_program,
-                                                   "VERT_IN_TRANSLATE");
+        const u32 index =
+            (u32)glGetAttribLocation(cube_program, "VERT_IN_TRANSLATE");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, translate));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_cube_program, "VERT_IN_SCALE");
+            (u32)glGetAttribLocation(cube_program, "VERT_IN_SCALE");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, scale));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
@@ -320,7 +318,7 @@ i32 main(void) {
 #define SIZE (sizeof(Vec4f) / sizeof(f32))
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_cube_program, "VERT_IN_COLOR");
+            (u32)glGetAttribLocation(cube_program, "VERT_IN_COLOR");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, color));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
@@ -330,23 +328,21 @@ i32 main(void) {
 
     const Mat4 projection =
         perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
-    glUniformMatrix4fv(
-        glGetUniformLocation(display_cube_program, "PROJECTION"),
-        1,
-        FALSE,
-        &projection.column_row[0][0]);
-    glUniform3f(glGetUniformLocation(display_cube_program, "VIEW_FROM"),
+    glUniformMatrix4fv(glGetUniformLocation(cube_program, "PROJECTION"),
+                       1,
+                       FALSE,
+                       &projection.column_row[0][0]);
+    glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
                 VIEW_FROM.x,
                 VIEW_FROM.y,
                 VIEW_FROM.z);
-    const i32 display_cube_uniform_view =
-        glGetUniformLocation(display_cube_program, "VIEW");
+    const i32 cube_uniform_view = glGetUniformLocation(cube_program, "VIEW");
     EXIT_IF_GL_ERROR();
 
-    const u64 display_cube_vbo_index =
-        (u64)glGetAttribLocation(display_cube_program, "VERT_IN_POSITION");
+    const u64 cube_vbo_index =
+        (u64)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
 
-    glUseProgram(display_line_program);
+    glUseProgram(line_program);
     glBindVertexArray(VAO[1]);
 
     BIND_BUFFER(VBO[1], LINE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
@@ -355,7 +351,7 @@ i32 main(void) {
 #define STRIDE sizeof(Vec3f)
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_line_program, "VERT_IN_POSITION");
+            (u32)glGetAttribLocation(line_program, "VERT_IN_POSITION");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vec3f, x));
     }
 #undef SIZE
@@ -365,15 +361,15 @@ i32 main(void) {
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(LINES[0])
     {
-        const u32 index = (u32)glGetAttribLocation(display_line_program,
-                                                   "VERT_IN_TRANSLATE");
+        const u32 index =
+            (u32)glGetAttribLocation(line_program, "VERT_IN_TRANSLATE");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, translate));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_line_program, "VERT_IN_SCALE");
+            (u32)glGetAttribLocation(line_program, "VERT_IN_SCALE");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, scale));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
@@ -382,7 +378,7 @@ i32 main(void) {
 #define SIZE (sizeof(Vec4f) / sizeof(f32))
     {
         const u32 index =
-            (u32)glGetAttribLocation(display_line_program, "VERT_IN_COLOR");
+            (u32)glGetAttribLocation(line_program, "VERT_IN_COLOR");
         SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, color));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
@@ -390,13 +386,11 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(display_line_program, "PROJECTION"),
-        1,
-        FALSE,
-        &projection.column_row[0][0]);
-    const i32 display_line_uniform_view =
-        glGetUniformLocation(display_line_program, "VIEW");
+    glUniformMatrix4fv(glGetUniformLocation(line_program, "PROJECTION"),
+                       1,
+                       FALSE,
+                       &projection.column_row[0][0]);
+    const i32 line_uniform_view = glGetUniformLocation(line_program, "VIEW");
 
     for (u32 i = 0; i < LEN_CUBES; ++i) {
         set_box_from_cube(&CUBES[i], &BOXES[i]);
@@ -443,9 +437,9 @@ i32 main(void) {
                 set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
                 set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
 
-                glUseProgram(display_cube_program);
+                glUseProgram(cube_program);
                 glBindVertexArray(VAO[0]);
-                glUniformMatrix4fv(display_cube_uniform_view,
+                glUniformMatrix4fv(cube_uniform_view,
                                    1,
                                    FALSE,
                                    &view.column_row[0][0]);
@@ -459,11 +453,11 @@ i32 main(void) {
                 glDrawElementsInstanced(GL_TRIANGLES,
                                         sizeof(CUBE_INDICES) / (sizeof(u8)),
                                         GL_UNSIGNED_BYTE,
-                                        (void*)display_cube_vbo_index,
+                                        (void*)cube_vbo_index,
                                         LEN_CUBES);
 
-                glUseProgram(display_line_program);
-                glUniformMatrix4fv(display_line_uniform_view,
+                glUseProgram(line_program);
+                glUniformMatrix4fv(line_uniform_view,
                                    1,
                                    FALSE,
                                    &view.column_row[0][0]);
@@ -485,8 +479,8 @@ i32 main(void) {
         }
     }
 
-    glDeleteProgram(display_cube_program);
-    glDeleteProgram(display_line_program);
+    glDeleteProgram(cube_program);
+    glDeleteProgram(line_program);
     glDeleteVertexArrays(CAP_VAO, &VAO[0]);
     glDeleteBuffers(CAP_VBO, &VBO[0]);
     glDeleteBuffers(CAP_EBO, &EBO[0]);
