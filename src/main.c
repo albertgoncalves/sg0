@@ -25,6 +25,16 @@ static u32 EBO[CAP_EBO];
 #define CAP_INSTANCE_VBO 2
 static u32 INSTANCE_VBO[CAP_INSTANCE_VBO];
 
+#define CAP_UBO 1
+static u32 UBO[CAP_UBO];
+
+typedef struct {
+    Mat4 projection;
+    Mat4 view;
+} Uniform;
+
+#define UNIFORM_INDEX 0
+
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
         switch (glGetError()) {                            \
@@ -273,6 +283,8 @@ i32 main(void) {
     glGenBuffers(CAP_VBO, &VBO[0]);
     glGenBuffers(CAP_EBO, &EBO[0]);
     glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
+    glGenBuffers(CAP_UBO, &UBO[0]);
+
     EXIT_IF_GL_ERROR();
 
     glUseProgram(cube_program);
@@ -338,17 +350,15 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    const Mat4 projection =
-        perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
-    glUniformMatrix4fv(glGetUniformLocation(cube_program, "PROJECTION"),
-                       1,
-                       FALSE,
-                       &projection.column_row[0][0]);
     glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
                 VIEW_FROM.x,
                 VIEW_FROM.y,
                 VIEW_FROM.z);
-    const i32 cube_uniform_view = glGetUniformLocation(cube_program, "VIEW");
+    const u32 cube_uniform_buffer_matrices =
+        glGetUniformBlockIndex(cube_program, "MATRICES");
+    glUniformBlockBinding(cube_program,
+                          cube_uniform_buffer_matrices,
+                          UNIFORM_INDEX);
     EXIT_IF_GL_ERROR();
 
     const u64 cube_vbo_index =
@@ -406,11 +416,27 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    glUniformMatrix4fv(glGetUniformLocation(line_program, "PROJECTION"),
-                       1,
-                       FALSE,
-                       &projection.column_row[0][0]);
-    const i32 line_uniform_view = glGetUniformLocation(line_program, "VIEW");
+    const u32 line_uniform_buffer_matrices =
+        glGetUniformBlockIndex(line_program, "MATRICES");
+    glUniformBlockBinding(line_program,
+                          line_uniform_buffer_matrices,
+                          UNIFORM_INDEX);
+
+    Uniform uniform = {
+        .projection =
+            perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR),
+    };
+    BIND_BUFFER(UBO[0],
+                &uniform,
+                sizeof(Uniform),
+                GL_UNIFORM_BUFFER,
+                GL_DYNAMIC_DRAW);
+    glBindBufferRange(GL_UNIFORM_BUFFER,
+                      UNIFORM_INDEX,
+                      UBO[0],
+                      0,
+                      sizeof(Uniform));
+    EXIT_IF_GL_ERROR();
 
     for (u32 i = 0; i < LEN_CUBES; ++i) {
         set_box_from_cube(&CUBES[i], &BOXES[i]);
@@ -452,23 +478,26 @@ i32 main(void) {
                     .y = VIEW_TO.y + VIEW_OFFSET.y,
                     .z = VIEW_TO.z + VIEW_OFFSET.z,
                 };
-                const Mat4 view = look_at(view_from, view_to, VIEW_UP);
+                uniform.view = look_at(view_from, view_to, VIEW_UP);
 
                 set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
                 set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
 
                 glUseProgram(cube_program);
                 glBindVertexArray(VAO[0]);
-                glUniformMatrix4fv(cube_uniform_view,
-                                   1,
-                                   FALSE,
-                                   &view.column_row[0][0]);
+
+                glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
+                glBufferSubData(GL_UNIFORM_BUFFER,
+                                offsetof(Uniform, view),
+                                sizeof(Mat4),
+                                &uniform.view.column_row[0][0]);
 
                 glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
                 glBufferSubData(GL_ARRAY_BUFFER,
                                 0,
                                 sizeof(PLAYER.translate),
                                 &PLAYER.translate);
+
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glDrawElementsInstanced(GL_TRIANGLES,
                                         sizeof(CUBE_INDICES) / (sizeof(u8)),
@@ -477,10 +506,6 @@ i32 main(void) {
                                         LEN_CUBES);
 
                 glUseProgram(line_program);
-                glUniformMatrix4fv(line_uniform_view,
-                                   1,
-                                   FALSE,
-                                   &view.column_row[0][0]);
                 glBindVertexArray(VAO[1]);
                 glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
                 glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
@@ -505,6 +530,7 @@ i32 main(void) {
     glDeleteBuffers(CAP_VBO, &VBO[0]);
     glDeleteBuffers(CAP_EBO, &EBO[0]);
     glDeleteBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
+    glDeleteBuffers(CAP_UBO, &UBO[0]);
     glfwTerminate();
     return OK;
 }

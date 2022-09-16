@@ -6,8 +6,10 @@ layout(location = 2) in vec3 VERT_IN_TRANSLATE;
 layout(location = 3) in vec3 VERT_IN_SCALE;
 layout(location = 4) in vec4 VERT_IN_COLOR;
 
-uniform mat4 PROJECTION;
-uniform mat4 VIEW;
+layout(std140) uniform MATRICES {
+    mat4 PROJECTION;
+    mat4 VIEW;
+};
 
 out vec3 VERT_OUT_POSITION;
 out vec3 VERT_OUT_NORMAL;
