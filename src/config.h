@@ -6,6 +6,9 @@
 #define PATH_DISPLAY_CUBE_VERT "src/display_cube_vert.glsl"
 #define PATH_DISPLAY_CUBE_FRAG "src/display_cube_frag.glsl"
 
+#define PATH_DISPLAY_LINE_VERT "src/display_line_vert.glsl"
+#define PATH_DISPLAY_LINE_FRAG "src/display_line_frag.glsl"
+
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768
 

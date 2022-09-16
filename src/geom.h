@@ -15,6 +15,12 @@ typedef struct {
 } Cube;
 
 typedef struct {
+    Vec3f translate;
+    Vec3f scale;
+    Vec4f color;
+} Line;
+
+typedef struct {
     Vec3f left_bottom_back;
     Vec3f right_top_forward;
 } Box;
@@ -31,6 +37,11 @@ typedef struct {
     f32 overlap;
     Hit hit;
 } Collision;
+
+static const Vec3f LINE_VERTICES[] = {
+    {-0.5f, -0.5f, -0.5f},
+    {0.5f, 0.5f, 0.5f},
+};
 
 static const Vertex CUBE_VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -209,6 +220,19 @@ static Collision get_box_collision(const Box*   move_from,
         }
     }
     return collision;
+}
+
+static void set_line_between(const Cube* c0, const Cube* c1, Line* l) {
+    l->translate.x = (c0->translate.x / 2.0f) + (c1->translate.x / 2.0f);
+    l->translate.y = (c0->translate.y / 2.0f) + (c1->translate.y / 2.0f);
+    l->translate.z = (c0->translate.z / 2.0f) + (c1->translate.z / 2.0f);
+    l->scale.x = c0->translate.x - c1->translate.x;
+    l->scale.y = c0->translate.y - c1->translate.y;
+    l->scale.z = c0->translate.z - c1->translate.z;
+    l->color.x = (c0->color.x / 2.0f) + (c1->color.x / 2.0f);
+    l->color.y = (c0->color.y / 2.0f) + (c1->color.y / 2.0f);
+    l->color.z = (c0->color.z / 2.0f) + (c1->color.z / 2.0f);
+    l->color.w = (c0->color.w / 2.0f) + (c1->color.w / 2.0f);
 }
 
 #endif
