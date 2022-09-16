@@ -13,10 +13,17 @@ static Box BOXES[LEN_CUBES];
 #define CAP_LINES 2
 static Line LINES[CAP_LINES];
 
-static u32 VAO;
-static u32 VBO;
-static u32 EBO;
-static u32 INSTANCE_VBO;
+#define CAP_VAO 2
+static u32 VAO[CAP_VAO];
+
+#define CAP_VBO 2
+static u32 VBO[CAP_VBO];
+
+#define CAP_EBO 1
+static u32 EBO[CAP_EBO];
+
+#define CAP_INSTANCE_VBO 2
+static u32 INSTANCE_VBO[CAP_INSTANCE_VBO];
 
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
@@ -264,16 +271,16 @@ i32 main(void) {
     const u32 display_line_program =
         get_program(PATH_DISPLAY_LINE_VERT, PATH_DISPLAY_LINE_FRAG);
 
-    glGenVertexArrays(2, &VAO);
-    glGenBuffers(2, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenBuffers(2, &INSTANCE_VBO);
+    glGenVertexArrays(CAP_VAO, &VAO[0]);
+    glGenBuffers(CAP_VBO, &VBO[0]);
+    glGenBuffers(CAP_EBO, &EBO[0]);
+    glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     EXIT_IF_GL_ERROR();
 
     glUseProgram(display_cube_program);
-    glBindVertexArray(VAO);
+    glBindVertexArray(VAO[0]);
 
-    BIND_BUFFER(VBO, CUBE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[0], CUBE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBE_VERTICES[0])
@@ -290,9 +297,9 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    BIND_BUFFER(EBO, CUBE_INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(EBO[0], CUBE_INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 
-    BIND_BUFFER(INSTANCE_VBO, CUBES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[0], CUBES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBES[0])
     {
@@ -340,9 +347,9 @@ i32 main(void) {
         (u64)glGetAttribLocation(display_cube_program, "VERT_IN_POSITION");
 
     glUseProgram(display_line_program);
-    glBindVertexArray(VAO + 1);
+    glBindVertexArray(VAO[1]);
 
-    BIND_BUFFER(VBO + 1, LINE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[1], LINE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(Vec3f)
@@ -354,7 +361,7 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    BIND_BUFFER(INSTANCE_VBO + 1, LINES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[1], LINES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(LINES[0])
     {
@@ -441,13 +448,13 @@ i32 main(void) {
                 set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
 
                 glUseProgram(display_cube_program);
-                glBindVertexArray(VAO);
+                glBindVertexArray(VAO[0]);
                 glUniformMatrix4fv(display_cube_uniform_view,
                                    1,
                                    FALSE,
                                    &view.column_row[0][0]);
 
-                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO);
+                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
                 glBufferSubData(GL_ARRAY_BUFFER,
                                 0,
                                 sizeof(PLAYER.translate),
@@ -464,8 +471,8 @@ i32 main(void) {
                                    1,
                                    FALSE,
                                    &view.column_row[0][0]);
-                glBindVertexArray(VAO + 1);
-                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO + 1);
+                glBindVertexArray(VAO[1]);
+                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
                 glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
                 glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
 
@@ -482,12 +489,12 @@ i32 main(void) {
         }
     }
 
-    glDeleteVertexArrays(2, &VAO);
-    glDeleteBuffers(2, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteBuffers(2, &INSTANCE_VBO);
     glDeleteProgram(display_cube_program);
     glDeleteProgram(display_line_program);
+    glDeleteVertexArrays(CAP_VAO, &VAO[0]);
+    glDeleteBuffers(CAP_VBO, &VBO[0]);
+    glDeleteBuffers(CAP_EBO, &EBO[0]);
+    glDeleteBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     glfwTerminate();
     return OK;
 }
