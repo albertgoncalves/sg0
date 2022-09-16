@@ -111,18 +111,8 @@ static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
 }
 
 static f32 get_overlap_segment(f32 l0, f32 r0, f32 l1, f32 r1) {
-    f32 a;
-    if (l0 < l1) {
-        a = l1;
-    } else {
-        a = l0;
-    }
-    f32 b;
-    if (r0 < r1) {
-        b = r0;
-    } else {
-        b = r1;
-    }
+    const f32 a = l0 < l1 ? l1 : l0;
+    const f32 b = r0 < r1 ? r0 : r1;
     const f32 c = b - a;
     return c < 0.0f ? 0.0f : c;
 }
