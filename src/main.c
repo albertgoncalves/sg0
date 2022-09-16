@@ -395,10 +395,6 @@ i32 main(void) {
         1,
         FALSE,
         &projection.column_row[0][0]);
-    glUniform3f(glGetUniformLocation(display_line_program, "VIEW_FROM"),
-                VIEW_FROM.x,
-                VIEW_FROM.y,
-                VIEW_FROM.z);
     const i32 display_line_uniform_view =
         glGetUniformLocation(display_line_program, "VIEW");
 
