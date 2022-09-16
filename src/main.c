@@ -218,11 +218,11 @@ static void update(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }
 
-#define BIND_BUFFER(object, array, target, usage)          \
-    do {                                                   \
-        glBindBuffer(target, object);                      \
-        glBufferData(target, sizeof(array), array, usage); \
-        EXIT_IF_GL_ERROR();                                \
+#define BIND_BUFFER(object, data, size, target, usage) \
+    do {                                               \
+        glBindBuffer(target, object);                  \
+        glBufferData(target, size, data, usage);       \
+        EXIT_IF_GL_ERROR();                            \
     } while (FALSE)
 
 #define SET_VERTEX_ATTRIB(index, size, stride, offset) \
@@ -278,7 +278,11 @@ i32 main(void) {
     glUseProgram(cube_program);
     glBindVertexArray(VAO[0]);
 
-    BIND_BUFFER(VBO[0], CUBE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[0],
+                CUBE_VERTICES,
+                sizeof(CUBE_VERTICES),
+                GL_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBE_VERTICES[0])
@@ -295,9 +299,17 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    BIND_BUFFER(EBO[0], CUBE_INDICES, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(EBO[0],
+                CUBE_INDICES,
+                sizeof(CUBE_INDICES),
+                GL_ELEMENT_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
 
-    BIND_BUFFER(INSTANCE_VBO[0], CUBES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[0],
+                CUBES,
+                sizeof(CUBES),
+                GL_ARRAY_BUFFER,
+                GL_DYNAMIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBES[0])
     {
@@ -345,7 +357,11 @@ i32 main(void) {
     glUseProgram(line_program);
     glBindVertexArray(VAO[1]);
 
-    BIND_BUFFER(VBO[1], LINE_VERTICES, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[1],
+                LINE_VERTICES,
+                sizeof(LINE_VERTICES),
+                GL_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(Vec3f)
@@ -357,7 +373,11 @@ i32 main(void) {
 #undef SIZE
 #undef STRIDE
 
-    BIND_BUFFER(INSTANCE_VBO[1], LINES, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[1],
+                LINES,
+                sizeof(LINES),
+                GL_ARRAY_BUFFER,
+                GL_DYNAMIC_DRAW);
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(LINES[0])
     {
