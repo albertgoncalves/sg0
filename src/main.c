@@ -479,7 +479,6 @@ static void update(GLFWwindow* window,
 static void draw(GLFWwindow*     window,
                  const Uniforms* uniforms,
                  u32             cube_program,
-                 u64             cube_vbo_index,
                  u32             line_program) {
     glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
     glBufferSubData(GL_UNIFORM_BUFFER,
@@ -499,7 +498,7 @@ static void draw(GLFWwindow*     window,
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(CUBE_INDICES) / (sizeof(u8)),
                             GL_UNSIGNED_BYTE,
-                            (void*)cube_vbo_index,
+                            NULL,
                             LEN_CUBES);
 
     glUseProgram(line_program);
@@ -516,8 +515,6 @@ static void loop(GLFWwindow* window,
                  Uniforms*   uniforms,
                  u32         cube_program,
                  u32         line_program) {
-    const u64 cube_vbo_index =
-        (u64)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
     u64 update_time = now_ns();
     u64 update_delta = 0;
     u64 frame_time = update_time;
@@ -539,7 +536,7 @@ static void loop(GLFWwindow* window,
             }
         }
         update(window, now, &update_time, &update_delta, uniforms);
-        draw(window, uniforms, cube_program, cube_vbo_index, line_program);
+        draw(window, uniforms, cube_program, line_program);
         {
             const u64 elapsed = now_ns() - now;
             if (elapsed < FRAME_DURATION) {
