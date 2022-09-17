@@ -4,6 +4,13 @@
 
 #include <GLFW/glfw3.h>
 
+typedef struct {
+    Mat4 projection;
+    Mat4 view;
+} Uniform;
+
+#define UNIFORM_INDEX 0
+
 static Vec3f VIEW_OFFSET = {0};
 
 static Vec3f PLAYER_SPEED = {0};
@@ -27,13 +34,6 @@ static u32 INSTANCE_VBO[CAP_INSTANCE_VBO];
 
 #define CAP_UBO 1
 static u32 UBO[CAP_UBO];
-
-typedef struct {
-    Mat4 projection;
-    Mat4 view;
-} Uniform;
-
-#define UNIFORM_INDEX 0
 
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
@@ -441,7 +441,7 @@ i32 main(void) {
     {
         u64 update_time = now_ns();
         u64 update_delta = 0;
-        u64 frame_time = now_ns();
+        u64 frame_time = update_time;
         u64 frame_count = 0;
         printf("\n\n");
         while (!glfwWindowShouldClose(window)) {
