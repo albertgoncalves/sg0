@@ -9,7 +9,7 @@
 typedef struct {
     Mat4 projection;
     Mat4 view;
-} Uniform;
+} Uniforms;
 
 #define UNIFORM_INDEX 0
 
@@ -78,6 +78,48 @@ static void callback_key(GLFWwindow* window, i32 key, i32, i32 action, i32) {
     }
 }
 
+static GLFWwindow* init_window(void) {
+    EXIT_IF(!glfwInit());
+    glfwSetErrorCallback(callback_error);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, FALSE);
+    GLFWwindow* window =
+        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
+    EXIT_IF(!window);
+
+    glfwSetKeyCallback(window, callback_key);
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glClearColor(BACKGROUND_COLOR);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    EXIT_IF_GL_ERROR();
+    return window;
+}
+
+static void init_graphics(void) {
+    glGenVertexArrays(CAP_VAO, &VAO[0]);
+    glGenBuffers(CAP_VBO, &VBO[0]);
+    glGenBuffers(CAP_EBO, &EBO[0]);
+    glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
+    glGenBuffers(CAP_UBO, &UBO[0]);
+    EXIT_IF_GL_ERROR();
+}
+
+static void free_graphics(void) {
+    glDeleteVertexArrays(CAP_VAO, &VAO[0]);
+    glDeleteBuffers(CAP_VBO, &VBO[0]);
+    glDeleteBuffers(CAP_EBO, &EBO[0]);
+    glDeleteBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
+    glDeleteBuffers(CAP_UBO, &UBO[0]);
+    EXIT_IF_GL_ERROR();
+}
+
 static void compile_shader(const char* path, u32 shader) {
     const MemMap map = path_to_map(path);
     const char*  source = map_to_buffer(map);
@@ -125,7 +167,182 @@ static u32 get_program(const char* source_vert, const char* source_frag) {
     return program;
 }
 
-static void update(GLFWwindow* window) {
+#define BIND_BUFFER(object, data, size, target, usage) \
+    do {                                               \
+        glBindBuffer(target, object);                  \
+        glBufferData(target, size, data, usage);       \
+        EXIT_IF_GL_ERROR();                            \
+    } while (FALSE)
+
+#define SET_VERTEX_ATTRIB(program, label, size, stride, offset)     \
+    do {                                                            \
+        const u32 index = (u32)glGetAttribLocation(program, label); \
+        glEnableVertexAttribArray(index);                           \
+        glVertexAttribPointer(index,                                \
+                              size,                                 \
+                              GL_FLOAT,                             \
+                              FALSE,                                \
+                              stride,                               \
+                              (void*)(offset));                     \
+        EXIT_IF_GL_ERROR();                                         \
+    } while (FALSE)
+
+#define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset) \
+    do {                                                            \
+        const u32 index = (u32)glGetAttribLocation(program, label); \
+        glEnableVertexAttribArray(index);                           \
+        glVertexAttribPointer(index,                                \
+                              size,                                 \
+                              GL_FLOAT,                             \
+                              FALSE,                                \
+                              stride,                               \
+                              (void*)(offset));                     \
+        glVertexAttribDivisor(index, 1);                            \
+        EXIT_IF_GL_ERROR();                                         \
+    } while (FALSE)
+
+static u32 init_cubes(void) {
+    const u32 cube_program = get_program(PATH_CUBE_VERT, PATH_CUBE_FRAG);
+    glUseProgram(cube_program);
+    glBindVertexArray(VAO[0]);
+
+    BIND_BUFFER(VBO[0],
+                CUBE_VERTICES,
+                sizeof(CUBE_VERTICES),
+                GL_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
+
+#define SIZE   (sizeof(Vec3f) / sizeof(f32))
+#define STRIDE sizeof(CUBE_VERTICES[0])
+    SET_VERTEX_ATTRIB(cube_program,
+                      "VERT_IN_POSITION",
+                      SIZE,
+                      STRIDE,
+                      offsetof(Vertex, position));
+    SET_VERTEX_ATTRIB(cube_program,
+                      "VERT_IN_NORMAL",
+                      SIZE,
+                      STRIDE,
+                      offsetof(Vertex, normal));
+#undef SIZE
+#undef STRIDE
+
+    BIND_BUFFER(EBO[0],
+                CUBE_INDICES,
+                sizeof(CUBE_INDICES),
+                GL_ELEMENT_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[0],
+                CUBES,
+                sizeof(CUBES),
+                GL_ARRAY_BUFFER,
+                GL_DYNAMIC_DRAW);
+
+#define SIZE   (sizeof(Vec3f) / sizeof(f32))
+#define STRIDE sizeof(CUBES[0])
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_TRANSLATE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Cube, translate));
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_SCALE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Cube, scale));
+#undef SIZE
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_COLOR",
+                          sizeof(Vec4f) / sizeof(f32),
+                          STRIDE,
+                          offsetof(Cube, color));
+#undef STRIDE
+
+    glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
+                VIEW_FROM.x,
+                VIEW_FROM.y,
+                VIEW_FROM.z);
+    glUniformBlockBinding(cube_program,
+                          glGetUniformBlockIndex(cube_program, "MATRICES"),
+                          UNIFORM_INDEX);
+    EXIT_IF_GL_ERROR();
+    return cube_program;
+}
+
+static u32 init_lines(void) {
+    const u32 line_program = get_program(PATH_LINE_VERT, PATH_LINE_FRAG);
+    glUseProgram(line_program);
+    glBindVertexArray(VAO[1]);
+
+    BIND_BUFFER(VBO[1],
+                LINE_VERTICES,
+                sizeof(LINE_VERTICES),
+                GL_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
+    SET_VERTEX_ATTRIB(line_program,
+                      "VERT_IN_POSITION",
+                      sizeof(Vec3f) / sizeof(f32),
+                      sizeof(Vec3f),
+                      offsetof(Vec3f, x));
+    BIND_BUFFER(INSTANCE_VBO[1],
+                LINES,
+                sizeof(LINES),
+                GL_ARRAY_BUFFER,
+                GL_DYNAMIC_DRAW);
+
+#define SIZE   (sizeof(Vec3f) / sizeof(f32))
+#define STRIDE sizeof(LINES[0])
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_TRANSLATE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Line, translate));
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_SCALE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Line, scale));
+#undef SIZE
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_COLOR",
+                          sizeof(Vec4f) / sizeof(f32),
+                          STRIDE,
+                          offsetof(Line, color));
+#undef STRIDE
+
+    glUniformBlockBinding(line_program,
+                          glGetUniformBlockIndex(line_program, "MATRICES"),
+                          UNIFORM_INDEX);
+    EXIT_IF_GL_ERROR();
+    return line_program;
+}
+
+static Uniforms init_uniforms(void) {
+    Uniforms uniforms = {
+        .projection =
+            perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR),
+    };
+    BIND_BUFFER(UBO[0],
+                &uniforms,
+                sizeof(Uniforms),
+                GL_UNIFORM_BUFFER,
+                GL_DYNAMIC_DRAW);
+    glBindBufferRange(GL_UNIFORM_BUFFER,
+                      UNIFORM_INDEX,
+                      UBO[0],
+                      0,
+                      sizeof(Uniforms));
+    EXIT_IF_GL_ERROR();
+    return uniforms;
+}
+
+static void init_world(void) {
+    for (u32 i = 0; i < LEN_CUBES; ++i) {
+        set_box_from_cube(&CUBES[i], &BOXES[i]);
+    }
+}
+
+static void update_world(GLFWwindow* window) {
     glfwPollEvents();
     EXIT_IF(0.0f < PLAYER_SPEED.y);
     if (PLAYER_SPEED.y < 0.0f) {
@@ -230,224 +447,85 @@ static void update(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }
 
-#define BIND_BUFFER(object, data, size, target, usage) \
-    do {                                               \
-        glBindBuffer(target, object);                  \
-        glBufferData(target, size, data, usage);       \
-        EXIT_IF_GL_ERROR();                            \
-    } while (FALSE)
+static void update(GLFWwindow* window,
+                   u64         now,
+                   u64*        update_time,
+                   u64*        update_delta,
+                   Uniforms*   uniforms) {
+    for (*update_delta += now - *update_time;
+         FRAME_UPDATE_STEP < *update_delta;
+         *update_delta -= FRAME_UPDATE_STEP)
+    {
+        update_world(window);
+    }
+    *update_time = now;
+    set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
+    set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
+    {
+        const Vec3f view_from = (Vec3f){
+            .x = VIEW_FROM.x + VIEW_OFFSET.x,
+            .y = VIEW_FROM.y + VIEW_OFFSET.y,
+            .z = VIEW_FROM.z + VIEW_OFFSET.z,
+        };
+        const Vec3f view_to = (Vec3f){
+            .x = VIEW_TO.x + VIEW_OFFSET.x,
+            .y = VIEW_TO.y + VIEW_OFFSET.y,
+            .z = VIEW_TO.z + VIEW_OFFSET.z,
+        };
+        uniforms->view = look_at(view_from, view_to, VIEW_UP);
+    }
+}
 
-#define SET_VERTEX_ATTRIB(program, label, size, stride, offset)     \
-    do {                                                            \
-        const u32 index = (u32)glGetAttribLocation(program, label); \
-        glEnableVertexAttribArray(index);                           \
-        glVertexAttribPointer(index,                                \
-                              size,                                 \
-                              GL_FLOAT,                             \
-                              FALSE,                                \
-                              stride,                               \
-                              (void*)(offset));                     \
-        EXIT_IF_GL_ERROR();                                         \
-    } while (FALSE)
+static void draw(GLFWwindow*     window,
+                 const Uniforms* uniforms,
+                 u32             cube_program,
+                 u64             cube_vbo_index,
+                 u32             line_program) {
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER,
+                    offsetof(Uniforms, view),
+                    sizeof(Mat4),
+                    &uniforms->view.column_row[0][0]);
 
-#define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset) \
-    do {                                                            \
-        const u32 index = (u32)glGetAttribLocation(program, label); \
-        glEnableVertexAttribArray(index);                           \
-        glVertexAttribPointer(index,                                \
-                              size,                                 \
-                              GL_FLOAT,                             \
-                              FALSE,                                \
-                              stride,                               \
-                              (void*)(offset));                     \
-        glVertexAttribDivisor(index, 1);                            \
-        EXIT_IF_GL_ERROR();                                         \
-    } while (FALSE)
-
-i32 main(void) {
-    printf("GLFW version : %s\n", glfwGetVersionString());
-
-    EXIT_IF(!glfwInit());
-    glfwSetErrorCallback(callback_error);
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, FALSE);
-    GLFWwindow* window =
-        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
-    EXIT_IF(!window);
-
-    glfwSetKeyCallback(window, callback_key);
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glClearColor(BACKGROUND_COLOR);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    EXIT_IF_GL_ERROR();
-
-    printf("GL_VENDOR    : %s\n"
-           "GL_RENDERER  : %s\n",
-           glGetString(GL_VENDOR),
-           glGetString(GL_RENDERER));
-
-    const u32 cube_program = get_program(PATH_CUBE_VERT, PATH_CUBE_FRAG);
-    const u32 line_program = get_program(PATH_LINE_VERT, PATH_LINE_FRAG);
-
-    glGenVertexArrays(CAP_VAO, &VAO[0]);
-    glGenBuffers(CAP_VBO, &VBO[0]);
-    glGenBuffers(CAP_EBO, &EBO[0]);
-    glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
-    glGenBuffers(CAP_UBO, &UBO[0]);
-
-    EXIT_IF_GL_ERROR();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(cube_program);
     glBindVertexArray(VAO[0]);
-
-    BIND_BUFFER(VBO[0],
-                CUBE_VERTICES,
-                sizeof(CUBE_VERTICES),
-                GL_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
-
-#define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(CUBE_VERTICES[0])
-    SET_VERTEX_ATTRIB(cube_program,
-                      "VERT_IN_POSITION",
-                      SIZE,
-                      STRIDE,
-                      offsetof(Vertex, position));
-    SET_VERTEX_ATTRIB(cube_program,
-                      "VERT_IN_NORMAL",
-                      SIZE,
-                      STRIDE,
-                      offsetof(Vertex, normal));
-#undef SIZE
-#undef STRIDE
-
-    BIND_BUFFER(EBO[0],
-                CUBE_INDICES,
-                sizeof(CUBE_INDICES),
-                GL_ELEMENT_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
-
-    BIND_BUFFER(INSTANCE_VBO[0],
-                CUBES,
-                sizeof(CUBES),
-                GL_ARRAY_BUFFER,
-                GL_DYNAMIC_DRAW);
-
-#define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(CUBES[0])
-    SET_VERTEX_ATTRIB_DIV(cube_program,
-                          "VERT_IN_TRANSLATE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Cube, translate));
-    SET_VERTEX_ATTRIB_DIV(cube_program,
-                          "VERT_IN_SCALE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Cube, scale));
-#undef SIZE
-    SET_VERTEX_ATTRIB_DIV(cube_program,
-                          "VERT_IN_COLOR",
-                          sizeof(Vec4f) / sizeof(f32),
-                          STRIDE,
-                          offsetof(Cube, color));
-#undef STRIDE
-
-    glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
-                VIEW_FROM.x,
-                VIEW_FROM.y,
-                VIEW_FROM.z);
-    const u32 cube_uniform_buffer_matrices =
-        glGetUniformBlockIndex(cube_program, "MATRICES");
-    glUniformBlockBinding(cube_program,
-                          cube_uniform_buffer_matrices,
-                          UNIFORM_INDEX);
-    EXIT_IF_GL_ERROR();
-
-    const u64 cube_vbo_index =
-        (u64)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    sizeof(PLAYER.translate),
+                    &PLAYER.translate);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            sizeof(CUBE_INDICES) / (sizeof(u8)),
+                            GL_UNSIGNED_BYTE,
+                            (void*)cube_vbo_index,
+                            LEN_CUBES);
 
     glUseProgram(line_program);
     glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
+    glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
 
-    BIND_BUFFER(VBO[1],
-                LINE_VERTICES,
-                sizeof(LINE_VERTICES),
-                GL_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
-
-    SET_VERTEX_ATTRIB(line_program,
-                      "VERT_IN_POSITION",
-                      sizeof(Vec3f) / sizeof(f32),
-                      sizeof(Vec3f),
-                      offsetof(Vec3f, x));
-
-    BIND_BUFFER(INSTANCE_VBO[1],
-                LINES,
-                sizeof(LINES),
-                GL_ARRAY_BUFFER,
-                GL_DYNAMIC_DRAW);
-
-#define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(LINES[0])
-    SET_VERTEX_ATTRIB_DIV(line_program,
-                          "VERT_IN_TRANSLATE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Line, translate));
-    SET_VERTEX_ATTRIB_DIV(line_program,
-                          "VERT_IN_SCALE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Line, scale));
-#undef SIZE
-    SET_VERTEX_ATTRIB_DIV(line_program,
-                          "VERT_IN_COLOR",
-                          sizeof(Vec4f) / sizeof(f32),
-                          STRIDE,
-                          offsetof(Line, color));
-#undef STRIDE
-
-    const u32 line_uniform_buffer_matrices =
-        glGetUniformBlockIndex(line_program, "MATRICES");
-    glUniformBlockBinding(line_program,
-                          line_uniform_buffer_matrices,
-                          UNIFORM_INDEX);
-
-    Uniform uniform = {
-        .projection =
-            perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR),
-    };
-    BIND_BUFFER(UBO[0],
-                &uniform,
-                sizeof(Uniform),
-                GL_UNIFORM_BUFFER,
-                GL_DYNAMIC_DRAW);
-    glBindBufferRange(GL_UNIFORM_BUFFER,
-                      UNIFORM_INDEX,
-                      UBO[0],
-                      0,
-                      sizeof(Uniform));
+    glfwSwapBuffers(window);
     EXIT_IF_GL_ERROR();
+}
 
-    for (u32 i = 0; i < LEN_CUBES; ++i) {
-        set_box_from_cube(&CUBES[i], &BOXES[i]);
-    }
-    {
-        u64 update_time = now_ns();
-        u64 update_delta = 0;
-        u64 frame_time = update_time;
-        u64 frame_count = 0;
-        printf("\n\n");
-        while (!glfwWindowShouldClose(window)) {
-            const u64 now = now_ns();
+static void loop(GLFWwindow* window,
+                 Uniforms*   uniforms,
+                 u32         cube_program,
+                 u32         line_program) {
+    const u64 cube_vbo_index =
+        (u64)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
+    u64 update_time = now_ns();
+    u64 update_delta = 0;
+    u64 frame_time = update_time;
+    u64 frame_count = 0;
+    printf("\n\n");
+    while (!glfwWindowShouldClose(window)) {
+        const u64 now = now_ns();
+        {
             ++frame_count;
             // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
             if (NANO_PER_SECOND <= (now - frame_time)) {
@@ -459,77 +537,35 @@ i32 main(void) {
                 frame_time += NANO_PER_SECOND;
                 frame_count = 0;
             }
-            for (update_delta += now - update_time;
-                 FRAME_UPDATE_STEP < update_delta;
-                 update_delta -= FRAME_UPDATE_STEP)
-            {
-                update(window);
-            }
-            update_time = now;
-            {
-                const Vec3f view_from = (Vec3f){
-                    .x = VIEW_FROM.x + VIEW_OFFSET.x,
-                    .y = VIEW_FROM.y + VIEW_OFFSET.y,
-                    .z = VIEW_FROM.z + VIEW_OFFSET.z,
-                };
-                const Vec3f view_to = (Vec3f){
-                    .x = VIEW_TO.x + VIEW_OFFSET.x,
-                    .y = VIEW_TO.y + VIEW_OFFSET.y,
-                    .z = VIEW_TO.z + VIEW_OFFSET.z,
-                };
-                uniform.view = look_at(view_from, view_to, VIEW_UP);
-
-                set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
-                set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
-
-                glUseProgram(cube_program);
-                glBindVertexArray(VAO[0]);
-
-                glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
-                glBufferSubData(GL_UNIFORM_BUFFER,
-                                offsetof(Uniform, view),
-                                sizeof(Mat4),
-                                &uniform.view.column_row[0][0]);
-
-                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
-                glBufferSubData(GL_ARRAY_BUFFER,
-                                0,
-                                sizeof(PLAYER.translate),
-                                &PLAYER.translate);
-
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glDrawElementsInstanced(GL_TRIANGLES,
-                                        sizeof(CUBE_INDICES) / (sizeof(u8)),
-                                        GL_UNSIGNED_BYTE,
-                                        (void*)cube_vbo_index,
-                                        LEN_CUBES);
-
-                glUseProgram(line_program);
-                glBindVertexArray(VAO[1]);
-                glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
-                glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
-
-                EXIT_IF_GL_ERROR();
-                glfwSwapBuffers(window);
-            }
-            {
-                const u64 elapsed = now_ns() - now;
-                if (elapsed < FRAME_DURATION) {
-                    EXIT_IF(usleep(
-                        (u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
-                }
+        }
+        update(window, now, &update_time, &update_delta, uniforms);
+        draw(window, uniforms, cube_program, cube_vbo_index, line_program);
+        {
+            const u64 elapsed = now_ns() - now;
+            if (elapsed < FRAME_DURATION) {
+                EXIT_IF(usleep(
+                    (u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
             }
         }
     }
+}
 
+i32 main(void) {
+    printf("GLFW version : %s\n", glfwGetVersionString());
+    GLFWwindow* window = init_window();
+    printf("GL_VENDOR    : %s\n"
+           "GL_RENDERER  : %s\n",
+           glGetString(GL_VENDOR),
+           glGetString(GL_RENDERER));
+    init_graphics();
+    const u32 cube_program = init_cubes();
+    const u32 line_program = init_lines();
+    Uniforms  uniforms = init_uniforms();
+    init_world();
+    loop(window, &uniforms, cube_program, line_program);
+    free_graphics();
     glDeleteProgram(cube_program);
     glDeleteProgram(line_program);
-    glDeleteVertexArrays(CAP_VAO, &VAO[0]);
-    glDeleteBuffers(CAP_VBO, &VBO[0]);
-    glDeleteBuffers(CAP_EBO, &EBO[0]);
-    glDeleteBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
-    glDeleteBuffers(CAP_UBO, &UBO[0]);
     glfwTerminate();
     return OK;
 }
