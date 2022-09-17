@@ -2,9 +2,9 @@
 
 layout(location = 0) out vec4 FRAG_OUT_COLOR;
 
-in vec3 VERT_OUT_POSITION;
-in vec3 VERT_OUT_NORMAL;
-in vec4 VERT_OUT_COLOR;
+flat in vec3 VERT_OUT_POSITION;
+flat in vec3 VERT_OUT_NORMAL;
+flat in vec4 VERT_OUT_COLOR;
 
 uniform vec3 VIEW_FROM;
 

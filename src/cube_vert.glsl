@@ -11,9 +11,9 @@ layout(std140) uniform MATRICES {
     mat4 VIEW;
 };
 
-out vec3 VERT_OUT_POSITION;
-out vec3 VERT_OUT_NORMAL;
-out vec4 VERT_OUT_COLOR;
+flat out vec3 VERT_OUT_POSITION;
+flat out vec3 VERT_OUT_NORMAL;
+flat out vec4 VERT_OUT_COLOR;
 
 void main() {
     gl_Position =

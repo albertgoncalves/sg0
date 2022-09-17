@@ -10,7 +10,7 @@ layout(std140) uniform MATRICES {
     mat4 VIEW;
 };
 
-out vec4 VERT_OUT_COLOR;
+flat out vec4 VERT_OUT_COLOR;
 
 void main() {
     gl_Position =
