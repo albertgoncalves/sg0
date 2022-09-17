@@ -2,9 +2,27 @@
 
 set -eu
 
-flags=(
-    -D_DEFAULT_SOURCE
+flags_shared=(
     "-ferror-limit=1"
+    "-march=native"
+    -O3
+    -Werror
+    -Weverything
+    -Wno-declaration-after-statement
+    -Wno-padded
+    -Wno-reserved-macro-identifier
+)
+flags_stb=(
+    -Wno-cast-align
+    -Wno-cast-qual
+    -Wno-disabled-macro-expansion
+    -Wno-double-promotion
+    -Wno-implicit-int-conversion
+    -Wno-missing-prototypes
+    -Wno-sign-conversion
+)
+flags_main=(
+    -D_DEFAULT_SOURCE
     "-fsanitize=bounds"
     "-fsanitize=float-divide-by-zero"
     "-fsanitize=implicit-conversion"
@@ -16,19 +34,18 @@ flags=(
     -lGL
     -lglfw
     -lm
-    "-march=native"
-    -O3
     "-std=c99"
-    -Werror
-    -Weverything
     -Wno-c2x-extensions
     -Wno-covered-switch-default
-    -Wno-declaration-after-statement
     -Wno-float-equal
-    -Wno-padded
-    -Wno-reserved-macro-identifier
 )
 
 clang-format -i -verbose "$WD/src/"*
-mold -run clang "${flags[@]}" -o "$WD/bin/main" "$WD/src/main.c"
+
+if [ ! -f "$WD/build/image.o" ]; then
+    mold -run clang "${flags_shared[@]}" "${flags_stb[@]}" "-I$WD/lib" -c \
+        -o "$WD/build/image.o" "$WD/src/image.c"
+fi
+mold -run clang "${flags_shared[@]}" "${flags_main[@]}" -o "$WD/bin/main" \
+    "$WD/build/image.o" "$WD/src/main.c"
 prime-run "$WD/bin/main"
