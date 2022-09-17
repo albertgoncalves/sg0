@@ -45,11 +45,6 @@ typedef struct {
     Hit hit;
 } Collision;
 
-static const Vec3f LINE_VERTICES[] = {
-    {-0.5f, -0.5f, -0.5f},
-    {0.5f, 0.5f, 0.5f},
-};
-
 static const CubeVertex CUBE_VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -102,6 +97,11 @@ static const Vec3f QUAD_VERTICES[] = {
 static Vec3u QUAD_INDICES[] = {
     {0, 1, 3},
     {1, 2, 3},
+};
+
+static const Vec3f LINE_VERTICES[] = {
+    {-0.5f, -0.5f, -0.5f},
+    {0.5f, 0.5f, 0.5f},
 };
 
 static void set_box_from_cube(const Cube* cube, Box* box) {

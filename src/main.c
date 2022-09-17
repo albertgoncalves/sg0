@@ -669,12 +669,12 @@ i32 main(void) {
            "GL_RENDERER  : %s\n",
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
+    init_world();
     init_graphics();
+    Uniforms  uniforms = init_uniforms();
     const u32 cube_program = init_cubes();
     const u32 line_program = init_lines();
-    Uniforms  uniforms = init_uniforms();
     const u32 sprite_program = init_sprites();
-    init_world();
     loop(window, &uniforms, cube_program, line_program, sprite_program);
     free_graphics();
     glDeleteProgram(cube_program);
