@@ -1,4 +1,6 @@
 #include "config.h"
+#include "string.h"
+#include "time.h"
 
 #define GL_GLEXT_PROTOTYPES
 
