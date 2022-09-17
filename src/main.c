@@ -1,4 +1,5 @@
 #include "config.h"
+#include "image.h"
 #include "string.h"
 #include "time.h"
 
@@ -19,23 +20,29 @@ static Vec3f PLAYER_SPEED = {0};
 
 static Box BOXES[LEN_CUBES];
 
+#define CAP_SPRITES 1
+static Sprite SPRITES[CAP_SPRITES];
+
 #define CAP_LINES 2
 static Line LINES[CAP_LINES];
 
-#define CAP_VAO 2
+#define CAP_VAO 3
 static u32 VAO[CAP_VAO];
 
-#define CAP_VBO 2
+#define CAP_VBO 3
 static u32 VBO[CAP_VBO];
 
-#define CAP_EBO 1
+#define CAP_EBO 2
 static u32 EBO[CAP_EBO];
 
-#define CAP_INSTANCE_VBO 2
+#define CAP_INSTANCE_VBO 3
 static u32 INSTANCE_VBO[CAP_INSTANCE_VBO];
 
 #define CAP_UBO 1
 static u32 UBO[CAP_UBO];
+
+#define CAP_TEXTURES 1
+static u32 TEXTURES[CAP_TEXTURES];
 
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
@@ -108,6 +115,7 @@ static void init_graphics(void) {
     glGenBuffers(CAP_EBO, &EBO[0]);
     glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     glGenBuffers(CAP_UBO, &UBO[0]);
+    glGenTextures(CAP_TEXTURES, &TEXTURES[0]);
     EXIT_IF_GL_ERROR();
 }
 
@@ -117,6 +125,7 @@ static void free_graphics(void) {
     glDeleteBuffers(CAP_EBO, &EBO[0]);
     glDeleteBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     glDeleteBuffers(CAP_UBO, &UBO[0]);
+    glDeleteTextures(CAP_TEXTURES, &TEXTURES[0]);
     EXIT_IF_GL_ERROR();
 }
 
@@ -218,12 +227,12 @@ static u32 init_cubes(void) {
                       "VERT_IN_POSITION",
                       SIZE,
                       STRIDE,
-                      offsetof(Vertex, position));
+                      offsetof(CubeVertex, position));
     SET_VERTEX_ATTRIB(cube_program,
                       "VERT_IN_NORMAL",
                       SIZE,
                       STRIDE,
-                      offsetof(Vertex, normal));
+                      offsetof(CubeVertex, normal));
 #undef SIZE
 #undef STRIDE
 
@@ -317,6 +326,95 @@ static u32 init_lines(void) {
     return line_program;
 }
 
+static u32 init_sprites(void) {
+    {
+        const Image sprite_run = image_rgba_from_path(PATH_SPRITE_RUN);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, TEXTURES[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     sprite_run.width,
+                     sprite_run.height,
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     sprite_run.pixels);
+        image_free(sprite_run);
+        EXIT_IF_GL_ERROR();
+    }
+
+    const u32 sprite_program = get_program(PATH_SPRITE_VERT, PATH_SPRITE_FRAG);
+    glUseProgram(sprite_program);
+    glBindVertexArray(VAO[2]);
+
+    BIND_BUFFER(VBO[2],
+                QUAD_VERTICES,
+                sizeof(QUAD_VERTICES),
+                GL_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
+    SET_VERTEX_ATTRIB(sprite_program,
+                      "VERT_IN_POSITION",
+                      sizeof(Vec3f) / sizeof(f32),
+                      sizeof(QUAD_VERTICES[0]),
+                      offsetof(Vec3f, x));
+    BIND_BUFFER(EBO[1],
+                QUAD_INDICES,
+                sizeof(QUAD_INDICES),
+                GL_ELEMENT_ARRAY_BUFFER,
+                GL_STATIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[2],
+                SPRITES,
+                sizeof(SPRITES),
+                GL_ARRAY_BUFFER,
+                GL_DYNAMIC_DRAW);
+
+#define SIZE   (sizeof(Vec3f) / sizeof(f32))
+#define STRIDE sizeof(SPRITES[0])
+    SET_VERTEX_ATTRIB_DIV(sprite_program,
+                          "VERT_IN_TRANSLATE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Sprite, translate));
+    SET_VERTEX_ATTRIB_DIV(sprite_program,
+                          "VERT_IN_SCALE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Sprite, scale));
+#undef SIZE
+    SET_VERTEX_ATTRIB_DIV(sprite_program,
+                          "VERT_IN_COLOR",
+                          sizeof(Vec4f) / sizeof(f32),
+                          STRIDE,
+                          offsetof(Sprite, color));
+    {
+        const u32 index =
+            (u32)glGetAttribLocation(sprite_program, "VERT_IN_CELL");
+        glEnableVertexAttribArray(index);
+        glVertexAttribIPointer(index,
+                               sizeof(Vec2u) / sizeof(u8),
+                               GL_UNSIGNED_BYTE,
+                               STRIDE,
+                               (void*)offsetof(Sprite, cell));
+        glVertexAttribDivisor(index, 1);
+        EXIT_IF_GL_ERROR();
+    }
+#undef STRIDE
+
+    glUniform2ui(glGetUniformLocation(sprite_program, "COLS_ROWS"),
+                 SPRITE_RUN_COLS,
+                 SPRITE_RUN_ROWS);
+    glUniformBlockBinding(sprite_program,
+                          glGetUniformBlockIndex(sprite_program, "MATRICES"),
+                          UNIFORM_INDEX);
+    EXIT_IF_GL_ERROR();
+    return sprite_program;
+}
+
 static Uniforms init_uniforms(void) {
     Uniforms uniforms = {
         .projection =
@@ -340,6 +438,9 @@ static void init_world(void) {
     for (u32 i = 0; i < LEN_CUBES; ++i) {
         set_box_from_cube(&CUBES[i], &BOXES[i]);
     }
+    SPRITES[0].scale = (Vec3f){2.0f, 2.0f, 1.0f};
+    SPRITES[0].color = PLAYER.color;
+    SPRITES[0].cell = (Vec2u){1, 1};
 }
 
 static void update_world(GLFWwindow* window) {
@@ -461,6 +562,7 @@ static void update(GLFWwindow* window,
     *update_time = now;
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
     set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
+    SPRITES[0].translate = PLAYER.translate;
     {
         const Vec3f view_from = (Vec3f){
             .x = VIEW_FROM.x + VIEW_OFFSET.x,
@@ -479,7 +581,8 @@ static void update(GLFWwindow* window,
 static void draw(GLFWwindow*     window,
                  const Uniforms* uniforms,
                  u32             cube_program,
-                 u32             line_program) {
+                 u32             line_program,
+                 u32             sprite_program) {
     glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
     glBufferSubData(GL_UNIFORM_BUFFER,
                     offsetof(Uniforms, view),
@@ -507,6 +610,17 @@ static void draw(GLFWwindow*     window,
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
     glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
 
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glUseProgram(sprite_program);
+    glBindVertexArray(VAO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SPRITES), &SPRITES[0]);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            sizeof(QUAD_INDICES) / (sizeof(u8)),
+                            GL_UNSIGNED_BYTE,
+                            NULL,
+                            CAP_SPRITES);
+
     glfwSwapBuffers(window);
     EXIT_IF_GL_ERROR();
 }
@@ -514,7 +628,8 @@ static void draw(GLFWwindow*     window,
 static void loop(GLFWwindow* window,
                  Uniforms*   uniforms,
                  u32         cube_program,
-                 u32         line_program) {
+                 u32         line_program,
+                 u32         sprite_program) {
     u64 update_time = now_ns();
     u64 update_delta = 0;
     u64 frame_time = update_time;
@@ -536,7 +651,7 @@ static void loop(GLFWwindow* window,
             }
         }
         update(window, now, &update_time, &update_delta, uniforms);
-        draw(window, uniforms, cube_program, line_program);
+        draw(window, uniforms, cube_program, line_program, sprite_program);
         {
             const u64 elapsed = now_ns() - now;
             if (elapsed < FRAME_DURATION) {
@@ -558,11 +673,13 @@ i32 main(void) {
     const u32 cube_program = init_cubes();
     const u32 line_program = init_lines();
     Uniforms  uniforms = init_uniforms();
+    const u32 sprite_program = init_sprites();
     init_world();
-    loop(window, &uniforms, cube_program, line_program);
+    loop(window, &uniforms, cube_program, line_program, sprite_program);
     free_graphics();
     glDeleteProgram(cube_program);
     glDeleteProgram(line_program);
+    glDeleteProgram(sprite_program);
     glfwTerminate();
     return OK;
 }

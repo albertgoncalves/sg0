@@ -20,6 +20,10 @@ typedef struct {
 } Vec4f;
 
 typedef struct {
+    u8 x, y;
+} Vec2u;
+
+typedef struct {
     u8 x, y, z;
 } Vec3u;
 

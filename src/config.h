@@ -9,6 +9,14 @@
 #define PATH_LINE_VERT "src/line_vert.glsl"
 #define PATH_LINE_FRAG "src/line_frag.glsl"
 
+#define PATH_SPRITE_VERT "src/sprite_vert.glsl"
+#define PATH_SPRITE_FRAG "src/sprite_frag.glsl"
+
+#define PATH_SPRITE_RUN "assets/sprite_run.png"
+
+#define SPRITE_RUN_COLS 5
+#define SPRITE_RUN_ROWS 8
+
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768
 
@@ -21,7 +29,7 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 10.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 #define RUN      0.001625f
@@ -44,7 +52,7 @@
 #define COLOR_PLATFORM ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
 #define COLOR_WALL     ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
 
-#define SCALE_PLAYER_ENEMY ((Vec3f){0.875f, 1.0f, 0.875f})
+#define SCALE_PLAYER_ENEMY ((Vec3f){1.0f, 2.0f, 1.0f})
 
 static Cube CUBES[] = {
     {
@@ -53,12 +61,12 @@ static Cube CUBES[] = {
         .color = COLOR_PLAYER,
     },
     {
-        .translate = {30.0f, 0.0f, 0.0f},
+        .translate = {30.0f, 1.0f, 0.0f},
         .scale = SCALE_PLAYER_ENEMY,
         .color = COLOR_ENEMY,
     },
     {
-        .translate = {25.0f, 0.0f, -5.0f},
+        .translate = {25.0f, 1.0f, -5.0f},
         .scale = SCALE_PLAYER_ENEMY,
         .color = COLOR_ENEMY,
     },

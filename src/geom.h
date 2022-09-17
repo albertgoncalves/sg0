@@ -6,7 +6,7 @@
 typedef struct {
     Vec3f position;
     Vec3f normal;
-} Vertex;
+} CubeVertex;
 
 typedef struct {
     Vec3f translate;
@@ -19,6 +19,13 @@ typedef struct {
     Vec3f scale;
     Vec4f color;
 } Line;
+
+typedef struct {
+    Vec3f translate;
+    Vec3f scale;
+    Vec4f color;
+    Vec2u cell;
+} Sprite;
 
 typedef struct {
     Vec3f left_bottom_back;
@@ -43,7 +50,7 @@ static const Vec3f LINE_VERTICES[] = {
     {0.5f, 0.5f, 0.5f},
 };
 
-static const Vertex CUBE_VERTICES[] = {
+static const CubeVertex CUBE_VERTICES[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -83,6 +90,18 @@ static const Vec3u CUBE_INDICES[] = {
     {18, 19, 16},
     {20, 21, 22},
     {22, 23, 20},
+};
+
+static const Vec3f QUAD_VERTICES[] = {
+    {0.5f, 0.5f, 0.0f},
+    {0.5f, -0.5f, 0.0f},
+    {-0.5f, -0.5f, 0.0f},
+    {-0.5f, 0.5f, 0.0f},
+};
+
+static Vec3u QUAD_INDICES[] = {
+    {0, 1, 3},
+    {1, 2, 3},
 };
 
 static void set_box_from_cube(const Cube* cube, Box* box) {
