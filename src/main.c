@@ -235,16 +235,31 @@ static void update(GLFWwindow* window) {
         EXIT_IF_GL_ERROR();                            \
     } while (FALSE)
 
-#define SET_VERTEX_ATTRIB(index, size, stride, offset) \
-    do {                                               \
-        glEnableVertexAttribArray(index);              \
-        glVertexAttribPointer(index,                   \
-                              size,                    \
-                              GL_FLOAT,                \
-                              FALSE,                   \
-                              stride,                  \
-                              (void*)(offset));        \
-        EXIT_IF_GL_ERROR();                            \
+#define SET_VERTEX_ATTRIB(program, label, size, stride, offset)     \
+    do {                                                            \
+        const u32 index = (u32)glGetAttribLocation(program, label); \
+        glEnableVertexAttribArray(index);                           \
+        glVertexAttribPointer(index,                                \
+                              size,                                 \
+                              GL_FLOAT,                             \
+                              FALSE,                                \
+                              stride,                               \
+                              (void*)(offset));                     \
+        EXIT_IF_GL_ERROR();                                         \
+    } while (FALSE)
+
+#define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset) \
+    do {                                                            \
+        const u32 index = (u32)glGetAttribLocation(program, label); \
+        glEnableVertexAttribArray(index);                           \
+        glVertexAttribPointer(index,                                \
+                              size,                                 \
+                              GL_FLOAT,                             \
+                              FALSE,                                \
+                              stride,                               \
+                              (void*)(offset));                     \
+        glVertexAttribDivisor(index, 1);                            \
+        EXIT_IF_GL_ERROR();                                         \
     } while (FALSE)
 
 i32 main(void) {
@@ -298,16 +313,16 @@ i32 main(void) {
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBE_VERTICES[0])
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(cube_program, "VERT_IN_POSITION");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vertex, position));
-    }
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(cube_program, "VERT_IN_NORMAL");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vertex, normal));
-    }
+    SET_VERTEX_ATTRIB(cube_program,
+                      "VERT_IN_POSITION",
+                      SIZE,
+                      STRIDE,
+                      offsetof(Vertex, position));
+    SET_VERTEX_ATTRIB(cube_program,
+                      "VERT_IN_NORMAL",
+                      SIZE,
+                      STRIDE,
+                      offsetof(Vertex, normal));
 #undef SIZE
 #undef STRIDE
 
@@ -322,32 +337,25 @@ i32 main(void) {
                 sizeof(CUBES),
                 GL_ARRAY_BUFFER,
                 GL_DYNAMIC_DRAW);
+
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBES[0])
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(cube_program, "VERT_IN_TRANSLATE");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, translate));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(cube_program, "VERT_IN_SCALE");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, scale));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_TRANSLATE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Cube, translate));
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_SCALE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Cube, scale));
 #undef SIZE
-#define SIZE (sizeof(Vec4f) / sizeof(f32))
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(cube_program, "VERT_IN_COLOR");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Cube, color));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
-#undef SIZE
+    SET_VERTEX_ATTRIB_DIV(cube_program,
+                          "VERT_IN_COLOR",
+                          sizeof(Vec4f) / sizeof(f32),
+                          STRIDE,
+                          offsetof(Cube, color));
 #undef STRIDE
 
     glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
@@ -373,47 +381,36 @@ i32 main(void) {
                 GL_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
 
-#define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(Vec3f)
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(line_program, "VERT_IN_POSITION");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Vec3f, x));
-    }
-#undef SIZE
-#undef STRIDE
+    SET_VERTEX_ATTRIB(line_program,
+                      "VERT_IN_POSITION",
+                      sizeof(Vec3f) / sizeof(f32),
+                      sizeof(Vec3f),
+                      offsetof(Vec3f, x));
 
     BIND_BUFFER(INSTANCE_VBO[1],
                 LINES,
                 sizeof(LINES),
                 GL_ARRAY_BUFFER,
                 GL_DYNAMIC_DRAW);
+
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(LINES[0])
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(line_program, "VERT_IN_TRANSLATE");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, translate));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(line_program, "VERT_IN_SCALE");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, scale));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_TRANSLATE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Line, translate));
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_SCALE",
+                          SIZE,
+                          STRIDE,
+                          offsetof(Line, scale));
 #undef SIZE
-#define SIZE (sizeof(Vec4f) / sizeof(f32))
-    {
-        const u32 index =
-            (u32)glGetAttribLocation(line_program, "VERT_IN_COLOR");
-        SET_VERTEX_ATTRIB(index, SIZE, STRIDE, offsetof(Line, color));
-        glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
-    }
-#undef SIZE
+    SET_VERTEX_ATTRIB_DIV(line_program,
+                          "VERT_IN_COLOR",
+                          sizeof(Vec4f) / sizeof(f32),
+                          STRIDE,
+                          offsetof(Line, color));
 #undef STRIDE
 
     const u32 line_uniform_buffer_matrices =
