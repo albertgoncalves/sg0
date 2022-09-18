@@ -10,7 +10,7 @@ Quick start
 ---
 ```
 $ nix-shell
-[nix-shell:path/to/kez]$ ./scripts/run.sh
+[nix-shell:path/to/sg0]$ ./scripts/run.sh
 ```
 
 Attribution
