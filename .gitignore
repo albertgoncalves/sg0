@@ -13,3 +13,6 @@
 !*.h
 !*.c
 !*.glsl
+
+!assets/
+!*.png

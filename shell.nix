@@ -2,6 +2,7 @@ with import <nixpkgs> {};
 mkShell.override { stdenv = llvmPackages_14.stdenv; } {
     buildInputs = [
         feh
+        gimp
         glfw3
         libGL
         linuxPackages.perf
