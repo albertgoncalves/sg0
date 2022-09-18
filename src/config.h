@@ -37,7 +37,7 @@
 #define DRAG     0.999f
 #define GRAVITY  0.000675f
 
-#define FLOOR -10.0f
+#define FLOOR -2.5f
 
 #define CAMERA_LATENCY (1.0f / 235.0f)
 
@@ -47,7 +47,7 @@
 
 #define SPRITE_UPDATE_STEP 250
 
-#define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 5.0f, .z = 0.0f})
+#define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 2.0f, .z = 0.0f})
 
 #define COLOR_PLAYER   ((Vec4f){0.8f, 0.85f, 0.95f, 0.5f})
 #define COLOR_ENEMY    ((Vec4f){0.9f, 0.5f, 0.5f, 0.9f})
