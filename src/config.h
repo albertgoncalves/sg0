@@ -45,6 +45,8 @@
 #define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
 #define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
 
+#define SPRITE_UPDATE_STEP 250
+
 #define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 5.0f, .z = 0.0f})
 
 #define COLOR_PLAYER   ((Vec4f){0.8f, 0.85f, 0.95f, 0.5f})

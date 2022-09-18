@@ -20,6 +20,8 @@ static Vec3f PLAYER_SPEED = {0};
 
 static Box BOXES[LEN_CUBES];
 
+static u64 SPRITE_TIME = 0;
+
 #define CAP_SPRITES 1
 static Sprite SPRITES[CAP_SPRITES];
 
@@ -548,7 +550,8 @@ static void update_world(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }
 
-static void animate(u64 now) {
+static void animate(void) {
+    SPRITE_TIME += SPRITE_UPDATE_STEP;
     if (near_zero(PLAYER_SPEED.x) && near_zero(PLAYER_SPEED.z)) {
         SPRITES[0].cell.x = 4;
     } else {
@@ -559,7 +562,7 @@ static void animate(u64 now) {
         u8  direction = (u8)((angle + 22.5f) / 45.0f);
         u8  rows[8] = {3, 4, 0, 7, 6, 5, 1, 2};
         SPRITES[0].cell.y = rows[direction % 8];
-        SPRITES[0].cell.x = (now / (NANO_PER_SECOND / 16)) % 4;
+        SPRITES[0].cell.x = (SPRITE_TIME / 10000) % 4;
     }
 }
 
@@ -573,6 +576,7 @@ static void update(GLFWwindow* window,
          *update_delta -= FRAME_UPDATE_STEP)
     {
         update_world(window);
+        animate();
     }
     *update_time = now;
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
@@ -666,7 +670,6 @@ static void loop(GLFWwindow* window,
             }
         }
         update(window, now, &update_time, &update_delta, uniforms);
-        animate(now);
         draw(window, uniforms, cube_program, line_program, sprite_program);
         {
             const u64 elapsed = now_ns() - now;
