@@ -439,7 +439,7 @@ static void init_world(void) {
         set_box_from_cube(&CUBES[i], &BOXES[i]);
     }
     SPRITES[0].scale = (Vec3f){2.0f, 2.0f, 1.0f};
-    SPRITES[0].color = PLAYER.color;
+    SPRITES[0].color = (Vec4f){1.0f, 1.0f, 1.0f, 1.0f};
     SPRITES[0].cell = (Vec2u){1, 1};
 }
 
@@ -548,6 +548,21 @@ static void update_world(GLFWwindow* window) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
 }
 
+static void animate(u64 now) {
+    if (near_zero(PLAYER_SPEED.x) && near_zero(PLAYER_SPEED.z)) {
+        SPRITES[0].cell.x = 4;
+    } else {
+        f32 angle = polar_degrees((Vec2f){
+            .x = PLAYER_SPEED.x == 0.0f ? EPSILON : PLAYER_SPEED.x,
+            .y = PLAYER_SPEED.z == 0.0f ? EPSILON : -PLAYER_SPEED.z,
+        });
+        u8  direction = (u8)((angle + 22.5f) / 45.0f);
+        u8  rows[8] = {3, 4, 0, 7, 6, 5, 1, 2};
+        SPRITES[0].cell.y = rows[direction % 8];
+        SPRITES[0].cell.x = (now / (NANO_PER_SECOND / 16)) % 4;
+    }
+}
+
 static void update(GLFWwindow* window,
                    u64         now,
                    u64*        update_time,
@@ -563,6 +578,7 @@ static void update(GLFWwindow* window,
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
     set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
     SPRITES[0].translate = PLAYER.translate;
+    SPRITES[0].translate.y += 1.0f;
     {
         const Vec3f view_from = (Vec3f){
             .x = VIEW_FROM.x + VIEW_OFFSET.x,
@@ -591,6 +607,22 @@ static void draw(GLFWwindow*     window,
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glUseProgram(sprite_program);
+    glBindVertexArray(VAO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SPRITES), &SPRITES[0]);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            sizeof(QUAD_INDICES) / (sizeof(u8)),
+                            GL_UNSIGNED_BYTE,
+                            NULL,
+                            CAP_SPRITES);
+
+    glUseProgram(line_program);
+    glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
+    glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
+
     glUseProgram(cube_program);
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
@@ -603,23 +635,6 @@ static void draw(GLFWwindow*     window,
                             GL_UNSIGNED_BYTE,
                             NULL,
                             LEN_CUBES);
-
-    glUseProgram(line_program);
-    glBindVertexArray(VAO[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LINES), &LINES[0]);
-    glDrawArraysInstanced(GL_LINES, 0, 2, CAP_LINES);
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glUseProgram(sprite_program);
-    glBindVertexArray(VAO[2]);
-    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SPRITES), &SPRITES[0]);
-    glDrawElementsInstanced(GL_TRIANGLES,
-                            sizeof(QUAD_INDICES) / (sizeof(u8)),
-                            GL_UNSIGNED_BYTE,
-                            NULL,
-                            CAP_SPRITES);
 
     glfwSwapBuffers(window);
     EXIT_IF_GL_ERROR();
@@ -651,6 +666,7 @@ static void loop(GLFWwindow* window,
             }
         }
         update(window, now, &update_time, &update_delta, uniforms);
+        animate(now);
         draw(window, uniforms, cube_program, line_program, sprite_program);
         {
             const u64 elapsed = now_ns() - now;

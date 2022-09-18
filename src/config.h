@@ -29,10 +29,10 @@
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 10.0f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
-#define RUN      0.001625f
+#define RUN      0.0016f
 #define FRICTION 0.96f
 #define DRAG     0.999f
 #define GRAVITY  0.000675f
@@ -47,27 +47,28 @@
 
 #define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 5.0f, .z = 0.0f})
 
-#define COLOR_PLAYER   ((Vec4f){0.8f, 0.85f, 0.95f, 0.95f})
+#define COLOR_PLAYER   ((Vec4f){0.8f, 0.85f, 0.95f, 0.5f})
 #define COLOR_ENEMY    ((Vec4f){0.9f, 0.5f, 0.5f, 0.9f})
 #define COLOR_PLATFORM ((Vec4f){0.2125f, 0.3f, 0.425f, 1.0f})
 #define COLOR_WALL     ((Vec4f){0.1875f, 0.2f, 0.3f, 0.675f})
 
-#define SCALE_PLAYER_ENEMY ((Vec3f){1.0f, 2.0f, 1.0f})
+#define SCALE_PLAYER ((Vec3f){1.0f, 0.1f, 1.0f})
+#define SCALE_ENEMY  ((Vec3f){1.0f, 1.0f, 1.0f})
 
 static Cube CUBES[] = {
     {
         .translate = PLAYER_TRANSLATE_INIT,
-        .scale = SCALE_PLAYER_ENEMY,
+        .scale = SCALE_PLAYER,
         .color = COLOR_PLAYER,
     },
     {
-        .translate = {30.0f, 1.0f, 0.0f},
-        .scale = SCALE_PLAYER_ENEMY,
+        .translate = {30.0f, 0.0f, 0.0f},
+        .scale = SCALE_ENEMY,
         .color = COLOR_ENEMY,
     },
     {
-        .translate = {25.0f, 1.0f, -5.0f},
-        .scale = SCALE_PLAYER_ENEMY,
+        .translate = {25.0f, 0.0f, -5.0f},
+        .scale = SCALE_ENEMY,
         .color = COLOR_ENEMY,
     },
     {

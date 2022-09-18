@@ -17,5 +17,5 @@ void main() {
     if (pixel.a < EPSILON) {
         discard;
     }
-    FRAG_OUT_COLOR = mix(pixel, VERT_OUT_COLOR, 0.5f);
+    FRAG_OUT_COLOR = VERT_OUT_COLOR;
 }
