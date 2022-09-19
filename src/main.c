@@ -1,11 +1,33 @@
 #include "config.h"
 #include "image.h"
+#include "sprite.h"
 #include "string.h"
 #include "time.h"
 
 #define GL_GLEXT_PROTOTYPES
 
 #include <GLFW/glfw3.h>
+
+#define WINDOW_WIDTH  1024
+#define WINDOW_HEIGHT 768
+
+#define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
+
+#define FOV_DEGREES  45.0f
+#define ASPECT_RATIO (((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT))
+
+#define VIEW_NEAR 0.01f
+#define VIEW_FAR  100.0f
+#define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
+
+#define PATH_CUBE_VERT "src/cube_vert.glsl"
+#define PATH_CUBE_FRAG "src/cube_frag.glsl"
+
+#define PATH_LINE_VERT "src/line_vert.glsl"
+#define PATH_LINE_FRAG "src/line_frag.glsl"
+
+#define PATH_SPRITE_VERT "src/sprite_vert.glsl"
+#define PATH_SPRITE_FRAG "src/sprite_frag.glsl"
 
 typedef struct {
     Mat4 projection;
@@ -19,8 +41,6 @@ static Vec3f VIEW_OFFSET = {0};
 static Vec3f PLAYER_SPEED = {0};
 
 static Box BOXES[LEN_CUBES];
-
-static u64 SPRITE_TIME = 0;
 
 #define CAP_SPRITES 1
 static Sprite SPRITES[CAP_SPRITES];
@@ -546,24 +566,9 @@ static void update_world(GLFWwindow* window) {
         PLAYER.translate = PLAYER_TRANSLATE_INIT;
         PLAYER_SPEED = (Vec3f){0};
     }
-    VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER.translate.x) * CAMERA_LATENCY;
-    VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) * CAMERA_LATENCY;
-}
-
-static void animate(void) {
+    VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER.translate.x) / CAMERA_INTERVAL;
+    VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) / CAMERA_INTERVAL;
     SPRITE_TIME += SPRITE_UPDATE_STEP;
-    if (near_zero(PLAYER_SPEED.x) && near_zero(PLAYER_SPEED.z)) {
-        SPRITES[0].cell.x = 4;
-    } else {
-        f32 angle = polar_degrees((Vec2f){
-            .x = PLAYER_SPEED.x == 0.0f ? EPSILON : PLAYER_SPEED.x,
-            .y = PLAYER_SPEED.z == 0.0f ? EPSILON : -PLAYER_SPEED.z,
-        });
-        u8  direction = (u8)((angle + 22.5f) / 45.0f);
-        u8  rows[8] = {3, 4, 0, 7, 6, 5, 1, 2};
-        SPRITES[0].cell.y = rows[direction % 8];
-        SPRITES[0].cell.x = (SPRITE_TIME / 10000) % 4;
-    }
 }
 
 static void update(GLFWwindow* window,
@@ -576,7 +581,6 @@ static void update(GLFWwindow* window,
          *update_delta -= FRAME_UPDATE_STEP)
     {
         update_world(window);
-        animate();
     }
     *update_time = now;
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
@@ -596,6 +600,8 @@ static void update(GLFWwindow* window,
         };
         uniforms->view = look_at(view_from, view_to, VIEW_UP);
     }
+    animate_sprite_run((Vec2f){.x = PLAYER_SPEED.x, .y = -PLAYER_SPEED.z},
+                       &SPRITES[0].cell);
 }
 
 static void draw(GLFWwindow*     window,

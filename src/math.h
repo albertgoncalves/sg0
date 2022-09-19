@@ -7,8 +7,6 @@
 
 #define PI 3.14159274f
 
-#define EPSILON 0.001f
-
 typedef struct {
     f32 x, y;
 } Vec2f;
@@ -32,10 +30,6 @@ typedef struct {
 typedef struct {
     f32 column_row[4][4];
 } Mat4;
-
-static Bool near_zero(f32 x) {
-    return (-EPSILON < x) && (x < EPSILON);
-}
 
 static f32 radians(f32 degrees) {
     return (degrees * PI) / 180.0f;

@@ -22,6 +22,8 @@ typedef enum {
 #define OK    0
 #define ERROR 1
 
+#define EPSILON 0.001f
+
 #define EXIT()                                              \
     do {                                                    \
         printf("%s:%s:%d\n", __FILE__, __func__, __LINE__); \
@@ -40,5 +42,7 @@ typedef enum {
             EXIT_WITH(#condition); \
         }                          \
     } while (FALSE)
+
+#define NEAR_ZERO(x) ((-EPSILON < x) && (x < EPSILON))
 
 #endif

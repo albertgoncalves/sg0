@@ -3,49 +3,21 @@
 
 #include "geom.h"
 
-#define PATH_CUBE_VERT "src/cube_vert.glsl"
-#define PATH_CUBE_FRAG "src/cube_frag.glsl"
-
-#define PATH_LINE_VERT "src/line_vert.glsl"
-#define PATH_LINE_FRAG "src/line_frag.glsl"
-
-#define PATH_SPRITE_VERT "src/sprite_vert.glsl"
-#define PATH_SPRITE_FRAG "src/sprite_frag.glsl"
-
-#define PATH_SPRITE_RUN "assets/sprite_run.png"
-
-#define SPRITE_RUN_COLS 5
-#define SPRITE_RUN_ROWS 8
-
-#define WINDOW_WIDTH  1024
-#define WINDOW_HEIGHT 768
-
-#define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
-
-#define FOV_DEGREES  45.0f
-#define ASPECT_RATIO (((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT))
-
-#define VIEW_NEAR 0.01f
-#define VIEW_FAR  100.0f
-#define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
-
 #define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
-#define RUN      0.0016f
+#define RUN      0.0015f
 #define FRICTION 0.96f
 #define DRAG     0.999f
 #define GRAVITY  0.000675f
 
 #define FLOOR -2.5f
 
-#define CAMERA_LATENCY (1.0f / 235.0f)
+#define CAMERA_INTERVAL 235.0f
 
 #define FRAME_UPDATE_COUNT 6
 #define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
 #define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
-
-#define SPRITE_UPDATE_STEP 250
 
 #define PLAYER_TRANSLATE_INIT ((Vec3f){.x = 0.0f, .y = 2.0f, .z = 0.0f})
 

@@ -21,13 +21,6 @@ typedef struct {
 } Line;
 
 typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
-    Vec2u cell;
-} Sprite;
-
-typedef struct {
     Vec3f left_bottom_back;
     Vec3f right_top_forward;
 } Box;
