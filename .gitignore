@@ -9,6 +9,7 @@
 !scripts/
 !*.sh
 
+!lib/
 !src/
 !*.h
 !*.c
