@@ -31,16 +31,16 @@ typedef struct {
     f32 column_row[4][4];
 } Mat4;
 
-static f32 radians(f32 degrees) {
+static f32 get_radians(f32 degrees) {
     return (degrees * PI) / 180.0f;
 }
 
-static f32 degrees(f32 radians) {
+static f32 get_degrees(f32 radians) {
     return (radians / PI) * 180.0f;
 }
 
-static f32 polar_degrees(Vec2f point) {
-    const f32 angle = degrees(atanf(point.y / point.x));
+static f32 get_polar_degrees(Vec2f point) {
+    const f32 angle = get_degrees(atanf(point.y / point.x));
     if (point.x < 0.0f) {
         return 180.0f + angle;
     }
@@ -107,7 +107,7 @@ static Mat4 perspective(f32 fov_degrees,
                         f32 aspect_ratio,
                         f32 view_near,
                         f32 view_far) {
-    const f32 cotangent = 1.0f / tanf(radians(fov_degrees) / 2.0f);
+    const f32 cotangent = 1.0f / tanf(get_radians(fov_degrees) / 2.0f);
     const f32 d = view_near - view_far;
     return (Mat4){
         .column_row[0][0] = cotangent / aspect_ratio,

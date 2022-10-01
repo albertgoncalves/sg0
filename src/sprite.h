@@ -24,7 +24,7 @@ static void animate_sprite_player(Vec2f speed, Vec2u* cell) {
         cell->x = 4;
         return;
     }
-    const f32 angle = polar_degrees((Vec2f){
+    const f32 angle = get_polar_degrees((Vec2f){
         .x = speed.x == 0.0f ? EPSILON : speed.x,
         .y = speed.y == 0.0f ? EPSILON : speed.y,
     });
