@@ -98,7 +98,7 @@ static const Vec3f LINE_VERTICES[] = {
 };
 
 static void set_box_from_cube(const Cube* cube, Box* box) {
-    Vec3f half_scale = (Vec3f){
+    const Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,
         .y = cube->scale.y / 2.0f,
         .z = cube->scale.z / 2.0f,
@@ -112,7 +112,7 @@ static void set_box_from_cube(const Cube* cube, Box* box) {
 }
 
 static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
-    Vec3f hit_distance = (Vec3f){
+    const Vec3f hit_distance = (Vec3f){
         .x = speed->x * time,
         .y = speed->y * time,
         .z = speed->z * time,
