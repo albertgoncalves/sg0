@@ -89,6 +89,7 @@ static Cube CUBES[] = {
 
 #define LEN_CUBES (sizeof(CUBES) / sizeof(CUBES[0]))
 
-#define PLAYER (CUBES[0])
+#define PLAYER_INDEX 0
+#define PLAYER       CUBES[PLAYER_INDEX]
 
 #endif

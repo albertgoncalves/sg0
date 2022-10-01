@@ -499,11 +499,11 @@ static void update_world(GLFWwindow* window) {
         Vec3f remaining = PLAYER_SPEED;
         u8    hit = 0;
         for (u32 _ = 0; _ < 3; ++_) {
-            set_box_from_cube(&PLAYER, &BOXES[0]);
+            set_box_from_cube(&PLAYER, &BOXES[PLAYER_INDEX]);
             Collision collision = {0};
-            for (u32 i = 1; i < LEN_CUBES; ++i) {
+            for (u32 i = PLAYER_INDEX; i < LEN_CUBES; ++i) {
                 const Collision candidate =
-                    get_box_collision(&BOXES[0], &BOXES[i], &speed);
+                    get_box_collision(&BOXES[PLAYER_INDEX], &BOXES[i], &speed);
                 if (!candidate.hit) {
                     continue;
                 }
