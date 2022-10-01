@@ -16,7 +16,7 @@ typedef struct {
     Vec3f translate;
     Vec3f scale;
     Vec4f color;
-    Vec2u cell;
+    Vec2u col_row;
 } Sprite;
 
 static void animate_sprite_player(Vec2f speed, Vec2u* cell) {

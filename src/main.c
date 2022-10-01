@@ -415,13 +415,13 @@ static u32 init_sprites(void) {
                           offsetof(Sprite, color));
     {
         const u32 index =
-            (u32)glGetAttribLocation(sprite_program, "VERT_IN_CELL");
+            (u32)glGetAttribLocation(sprite_program, "VERT_IN_COL_ROW");
         glEnableVertexAttribArray(index);
         glVertexAttribIPointer(index,
                                sizeof(Vec2u) / sizeof(u8),
                                GL_UNSIGNED_BYTE,
                                STRIDE,
-                               (void*)offsetof(Sprite, cell));
+                               (void*)offsetof(Sprite, col_row));
         glVertexAttribDivisor(index, 1);
         EXIT_IF_GL_ERROR();
     }
@@ -462,7 +462,7 @@ static void init_world(void) {
     }
     SPRITES[0].scale = (Vec3f){2.0f, 2.0f, 1.0f};
     SPRITES[0].color = (Vec4f){1.0f, 1.0f, 1.0f, 1.0f};
-    SPRITES[0].cell = (Vec2u){1, 1};
+    SPRITES[0].col_row = (Vec2u){1, 1};
 }
 
 static void update_world(GLFWwindow* window) {
@@ -601,7 +601,7 @@ static void update(GLFWwindow* window,
         uniforms->view = look_at(view_from, view_to, VIEW_UP);
     }
     animate_sprite_player((Vec2f){.x = PLAYER_SPEED.x, .y = -PLAYER_SPEED.z},
-                          &SPRITES[0].cell);
+                          &SPRITES[0].col_row);
 }
 
 static void draw(GLFWwindow*     window,

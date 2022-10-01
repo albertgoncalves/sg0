@@ -4,7 +4,7 @@ layout(location = 0) out vec4 FRAG_OUT_COLOR;
 
 in vec2       VERT_OUT_POSITION;
 flat in vec4  VERT_OUT_COLOR;
-flat in uvec2 VERT_OUT_CELL;
+flat in uvec2 VERT_OUT_COL_ROW;
 
 uniform sampler2D TEXTURE;
 uniform uvec2     COLS_ROWS;
@@ -13,7 +13,7 @@ uniform uvec2     COLS_ROWS;
 
 void main() {
     vec4 pixel =
-        texture(TEXTURE, (VERT_OUT_CELL + VERT_OUT_POSITION) / COLS_ROWS);
+        texture(TEXTURE, (VERT_OUT_COL_ROW + VERT_OUT_POSITION) / COLS_ROWS);
     if (pixel.a < EPSILON) {
         discard;
     }
