@@ -620,7 +620,14 @@ static void draw(GLFWwindow*     window,
     glUseProgram(sprite_program);
     glBindVertexArray(VAO[2]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SPRITES), &SPRITES[0]);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    offsetof(Sprite, translate),
+                    sizeof(Vec3f),
+                    &SPRITES[0].translate);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    offsetof(Sprite, col_row),
+                    sizeof(Vec2u),
+                    &SPRITES[0].col_row);
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(QUAD_INDICES) / (sizeof(u8)),
                             GL_UNSIGNED_BYTE,
