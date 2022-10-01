@@ -350,7 +350,7 @@ static u32 init_lines(void) {
 
 static u32 init_sprites(void) {
     {
-        const Image sprite_run = image_rgba_from_path(PATH_SPRITE_RUN);
+        const Image sprite_player = image_rgba_from_path(PATH_SPRITE_PLAYER);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, TEXTURES[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -360,13 +360,13 @@ static u32 init_sprites(void) {
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_RGBA,
-                     sprite_run.width,
-                     sprite_run.height,
+                     sprite_player.width,
+                     sprite_player.height,
                      0,
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
-                     sprite_run.pixels);
-        image_free(sprite_run);
+                     sprite_player.pixels);
+        image_free(sprite_player);
         EXIT_IF_GL_ERROR();
     }
 
@@ -428,8 +428,8 @@ static u32 init_sprites(void) {
 #undef STRIDE
 
     glUniform2ui(glGetUniformLocation(sprite_program, "COLS_ROWS"),
-                 SPRITE_RUN_COLS,
-                 SPRITE_RUN_ROWS);
+                 SPRITE_PLAYER_COLS,
+                 SPRITE_PLAYER_ROWS);
     glUniformBlockBinding(sprite_program,
                           glGetUniformBlockIndex(sprite_program, "MATRICES"),
                           UNIFORM_INDEX);
@@ -600,8 +600,8 @@ static void update(GLFWwindow* window,
         };
         uniforms->view = look_at(view_from, view_to, VIEW_UP);
     }
-    animate_sprite_run((Vec2f){.x = PLAYER_SPEED.x, .y = -PLAYER_SPEED.z},
-                       &SPRITES[0].cell);
+    animate_sprite_player((Vec2f){.x = PLAYER_SPEED.x, .y = -PLAYER_SPEED.z},
+                          &SPRITES[0].cell);
 }
 
 static void draw(GLFWwindow*     window,
