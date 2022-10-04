@@ -465,31 +465,34 @@ static void init_world(void) {
     SPRITES[0].col_row = (Vec2u){1, 1};
 }
 
-static void update_world(GLFWwindow* window) {
-    glfwPollEvents();
+static Vec3f get_move(GLFWwindow* window) {
+    Vec3f move = {0};
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        move.z -= 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        move.z += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        move.x -= 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        move.x += 1.0f;
+    }
+    if ((move.x == 0.0f) && (move.z == 0.0f)) {
+        return move;
+    }
+    return normalize(move);
+}
+
+static void update_player(Vec3f move) {
     EXIT_IF(0.0f < PLAYER_SPEED.y);
     if (PLAYER_SPEED.y < 0.0f) {
         PLAYER_SPEED.x *= DRAG;
         PLAYER_SPEED.z *= DRAG;
     } else {
-        Vec3f move = {0};
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            move.z -= 1.0f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            move.z += 1.0f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            move.x += 1.0f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            move.x -= 1.0f;
-        }
-        if ((move.x != 0.0f) || (move.z != 0.0f)) {
-            move = normalize(move);
-            PLAYER_SPEED.x += move.x * RUN;
-            PLAYER_SPEED.z += move.z * RUN;
-        }
+        PLAYER_SPEED.x += move.x * RUN;
+        PLAYER_SPEED.z += move.z * RUN;
         PLAYER_SPEED.x *= FRICTION;
         PLAYER_SPEED.z *= FRICTION;
     }
@@ -566,8 +569,14 @@ static void update_world(GLFWwindow* window) {
         PLAYER.translate = PLAYER_TRANSLATE_INIT;
         PLAYER_SPEED = (Vec3f){0};
     }
+}
+
+static void update_camera(void) {
     VIEW_OFFSET.x -= (VIEW_OFFSET.x - PLAYER.translate.x) / CAMERA_INTERVAL;
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - PLAYER.translate.z) / CAMERA_INTERVAL;
+}
+
+static void update_sprites(void) {
     SPRITE_TIME += SPRITE_UPDATE_STEP;
 }
 
@@ -580,7 +589,10 @@ static void update(GLFWwindow* window,
          FRAME_UPDATE_STEP < *update_delta;
          *update_delta -= FRAME_UPDATE_STEP)
     {
-        update_world(window);
+        glfwPollEvents();
+        update_player(get_move(window));
+        update_camera();
+        update_sprites();
     }
     *update_time = now;
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
