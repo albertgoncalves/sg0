@@ -6,7 +6,7 @@
 #define VIEW_FROM ((Vec3f){0.0f, 20.0f, 10.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
-#define RUN      0.0015f
+#define RUN      0.00175f
 #define FRICTION 0.96f
 #define DRAG     0.999f
 #define GRAVITY  0.000675f
