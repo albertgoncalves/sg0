@@ -4,21 +4,15 @@
 #include "math.h"
 
 typedef struct {
+    Vec3f translate;
+    Vec3f scale;
+    Vec4f color;
+} Geom;
+
+typedef struct {
     Vec3f position;
     Vec3f normal;
 } CubeVertex;
-
-typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
-} Cube;
-
-typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
-} Line;
 
 typedef struct {
     Vec3f left_bottom_back;
@@ -97,7 +91,7 @@ static const Vec3f LINE_VERTICES[] = {
     {0.5f, 0.5f, 0.5f},
 };
 
-static void set_box_from_cube(const Cube* cube, Box* box) {
+static void set_box_from_cube(const Geom* cube, Box* box) {
     const Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,
         .y = cube->scale.y / 2.0f,
@@ -234,17 +228,22 @@ static Collision get_box_collision(const Box*   move_from,
     return collision;
 }
 
-static void set_line_between(const Cube* c0, const Cube* c1, Line* l) {
-    l->translate.x = (c0->translate.x / 2.0f) + (c1->translate.x / 2.0f);
-    l->translate.y = (c0->translate.y / 2.0f) + (c1->translate.y / 2.0f);
-    l->translate.z = (c0->translate.z / 2.0f) + (c1->translate.z / 2.0f);
-    l->scale.x = c0->translate.x - c1->translate.x;
-    l->scale.y = c0->translate.y - c1->translate.y;
-    l->scale.z = c0->translate.z - c1->translate.z;
-    l->color.x = (c0->color.x / 2.0f) + (c1->color.x / 2.0f);
-    l->color.y = (c0->color.y / 2.0f) + (c1->color.y / 2.0f);
-    l->color.z = (c0->color.z / 2.0f) + (c1->color.z / 2.0f);
-    l->color.w = (c0->color.w / 2.0f) + (c1->color.w / 2.0f);
+static void set_line_between(const Geom* cube0,
+                             const Geom* cube1,
+                             Geom*       line) {
+    line->translate.x =
+        (cube0->translate.x / 2.0f) + (cube1->translate.x / 2.0f);
+    line->translate.y =
+        (cube0->translate.y / 2.0f) + (cube1->translate.y / 2.0f);
+    line->translate.z =
+        (cube0->translate.z / 2.0f) + (cube1->translate.z / 2.0f);
+    line->scale.x = cube0->translate.x - cube1->translate.x;
+    line->scale.y = cube0->translate.y - cube1->translate.y;
+    line->scale.z = cube0->translate.z - cube1->translate.z;
+    line->color.x = (cube0->color.x / 2.0f) + (cube1->color.x / 2.0f);
+    line->color.y = (cube0->color.y / 2.0f) + (cube1->color.y / 2.0f);
+    line->color.z = (cube0->color.z / 2.0f) + (cube1->color.z / 2.0f);
+    line->color.w = (cube0->color.w / 2.0f) + (cube1->color.w / 2.0f);
 }
 
 #endif

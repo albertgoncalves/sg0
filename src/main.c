@@ -46,7 +46,7 @@ static Box BOXES[LEN_CUBES];
 static Sprite SPRITES[CAP_SPRITES];
 
 #define CAP_LINES 2
-static Line LINES[CAP_LINES];
+static Geom LINES[CAP_LINES];
 
 #define CAP_VAO 3
 static u32 VAO[CAP_VAO];
@@ -275,18 +275,18 @@ static u32 init_cubes(void) {
                           "VERT_IN_TRANSLATE",
                           SIZE,
                           STRIDE,
-                          offsetof(Cube, translate));
+                          offsetof(Geom, translate));
     SET_VERTEX_ATTRIB_DIV(cube_program,
                           "VERT_IN_SCALE",
                           SIZE,
                           STRIDE,
-                          offsetof(Cube, scale));
+                          offsetof(Geom, scale));
 #undef SIZE
     SET_VERTEX_ATTRIB_DIV(cube_program,
                           "VERT_IN_COLOR",
                           sizeof(Vec4f) / sizeof(f32),
                           STRIDE,
-                          offsetof(Cube, color));
+                          offsetof(Geom, color));
 #undef STRIDE
 
     glUniform3f(glGetUniformLocation(cube_program, "VIEW_FROM"),
@@ -327,18 +327,18 @@ static u32 init_lines(void) {
                           "VERT_IN_TRANSLATE",
                           SIZE,
                           STRIDE,
-                          offsetof(Line, translate));
+                          offsetof(Geom, translate));
     SET_VERTEX_ATTRIB_DIV(line_program,
                           "VERT_IN_SCALE",
                           SIZE,
                           STRIDE,
-                          offsetof(Line, scale));
+                          offsetof(Geom, scale));
 #undef SIZE
     SET_VERTEX_ATTRIB_DIV(line_program,
                           "VERT_IN_COLOR",
                           sizeof(Vec4f) / sizeof(f32),
                           STRIDE,
-                          offsetof(Line, color));
+                          offsetof(Geom, color));
 #undef STRIDE
 
     glUniformBlockBinding(line_program,
@@ -401,18 +401,18 @@ static u32 init_sprites(void) {
                           "VERT_IN_TRANSLATE",
                           SIZE,
                           STRIDE,
-                          offsetof(Sprite, translate));
+                          offsetof(Sprite, geom) + offsetof(Geom, translate));
     SET_VERTEX_ATTRIB_DIV(sprite_program,
                           "VERT_IN_SCALE",
                           SIZE,
                           STRIDE,
-                          offsetof(Sprite, scale));
+                          offsetof(Sprite, geom) + offsetof(Geom, scale));
 #undef SIZE
     SET_VERTEX_ATTRIB_DIV(sprite_program,
                           "VERT_IN_COLOR",
                           sizeof(Vec4f) / sizeof(f32),
                           STRIDE,
-                          offsetof(Sprite, color));
+                          offsetof(Sprite, geom) + offsetof(Geom, color));
     {
         const u32 index =
             (u32)glGetAttribLocation(sprite_program, "VERT_IN_COL_ROW");
@@ -460,8 +460,8 @@ static void init_world(void) {
     for (u32 i = 0; i < LEN_CUBES; ++i) {
         set_box_from_cube(&CUBES[i], &BOXES[i]);
     }
-    SPRITES[0].scale = (Vec3f){2.0f, 2.0f, 1.0f};
-    SPRITES[0].color = (Vec4f){1.0f, 1.0f, 1.0f, 1.0f};
+    SPRITES[0].geom.scale = (Vec3f){2.0f, 2.0f, 1.0f};
+    SPRITES[0].geom.color = (Vec4f){1.0f, 1.0f, 1.0f, 1.0f};
     SPRITES[0].col_row = (Vec2u){1, 1};
 }
 
@@ -597,8 +597,8 @@ static void update(GLFWwindow* window,
     *update_time = now;
     set_line_between(&PLAYER, &CUBES[1], &LINES[0]);
     set_line_between(&PLAYER, &CUBES[2], &LINES[1]);
-    SPRITES[0].translate = PLAYER.translate;
-    SPRITES[0].translate.y += 1.0f;
+    SPRITES[0].geom.translate = PLAYER.translate;
+    SPRITES[0].geom.translate.y += 1.0f;
     {
         const Vec3f view_from = (Vec3f){
             .x = VIEW_FROM.x + VIEW_OFFSET.x,
@@ -633,9 +633,9 @@ static void draw(GLFWwindow*     window,
     glBindVertexArray(VAO[2]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
     glBufferSubData(GL_ARRAY_BUFFER,
-                    offsetof(Sprite, translate),
+                    offsetof(Sprite, geom) + offsetof(Geom, translate),
                     sizeof(Vec3f),
-                    &SPRITES[0].translate);
+                    &SPRITES[0].geom.translate);
     glBufferSubData(GL_ARRAY_BUFFER,
                     offsetof(Sprite, col_row),
                     sizeof(Vec2u),

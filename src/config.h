@@ -29,7 +29,7 @@
 #define SCALE_PLAYER ((Vec3f){1.0f, 0.1f, 1.0f})
 #define SCALE_ENEMY  ((Vec3f){1.0f, 1.0f, 1.0f})
 
-static Cube CUBES[] = {
+static Geom CUBES[] = {
     {
         .translate = PLAYER_TRANSLATE_INIT,
         .scale = SCALE_PLAYER,

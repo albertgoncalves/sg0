@@ -13,9 +13,7 @@ static u64 SPRITE_TIME = 0;
 #define SPRITE_UPDATE_STEP 250
 
 typedef struct {
-    Vec3f translate;
-    Vec3f scale;
-    Vec4f color;
+    Geom  geom;
     Vec2u col_row;
 } Sprite;
 
