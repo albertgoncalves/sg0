@@ -13,13 +13,13 @@ typedef struct {
 #define ENEMY_SPRITE_TRANSLATE_Y 0.69f
 
 #define ENEMY_SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
-#define ENEMY_SCALE_SPRITE ((Vec3f){2.0f, 2.0f, 1.0f})
+#define ENEMY_SCALE_SPRITE ((Vec3f){2.0f, 3.0f, 1.0f})
 
 #define ENEMY_COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define ENEMY_COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
 #define ENEMY_LINE_RADIUS      3.5f
-#define ENEMY_LINE_TRANSLATE_Y 1.4f
+#define ENEMY_LINE_TRANSLATE_Y 1.75f
 #define ENEMY_LINE_COLOR_W     0.75f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
