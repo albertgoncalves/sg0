@@ -1,7 +1,6 @@
 #ifndef __WORLD_H__
 #define __WORLD_H__
 
-#include "geom.h"
 #include "memory.h"
 
 #define WORLD_GRAVITY 0.000675f

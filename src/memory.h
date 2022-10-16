@@ -1,7 +1,6 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
-#include "geom.h"
 #include "sprite.h"
 
 #define CAP_CUBES (1 << 6)

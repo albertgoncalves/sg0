@@ -1,8 +1,8 @@
 #ifndef __ENEMY_H__
 #define __ENEMY_H__
 
+#include "memory.h"
 #include "sprite.h"
-#include "world.h"
 
 typedef struct {
     Vec3f translate;

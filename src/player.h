@@ -1,7 +1,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
-#include "sprite.h"
+#include "memory.h"
 #include "world.h"
 
 #define PLAYER_RUN      0.00175f

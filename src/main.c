@@ -2,7 +2,6 @@
 #include "graphics.h"
 #include "player.h"
 #include "time.h"
-#include "world.h"
 
 static Vec3f get_move(GLFWwindow* window) {
     Vec3f move = {0};
