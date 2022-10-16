@@ -124,17 +124,13 @@ static void update_player(Vec3f move) {
 static void animate_player(void) {
     PLAYER_SPRITE.geom.translate = PLAYER_CUBE.translate;
     PLAYER_SPRITE.geom.translate.y += PLAYER_SPRITE_TRANSLATE_Y;
-    const Vec2f speed = {
-        .x = PLAYER_SPEED.x,
-        .y = -PLAYER_SPEED.z,
-    };
-    if (NEAR_ZERO(speed.x) && NEAR_ZERO(speed.y)) {
+    if (NEAR_ZERO(PLAYER_SPEED.x) && NEAR_ZERO(PLAYER_SPEED.z)) {
         PLAYER_SPRITE.col_row.x = 4;
         return;
     }
     const f32 polar_degrees = get_polar_degrees((Vec2f){
-        .x = speed.x == 0.0f ? EPSILON : speed.x,
-        .y = speed.y == 0.0f ? EPSILON : speed.y,
+        .x = PLAYER_SPEED.x == 0.0f ? EPSILON : PLAYER_SPEED.x,
+        .y = PLAYER_SPEED.z == 0.0f ? EPSILON : -PLAYER_SPEED.z,
     });
 #define PLAYER_SPRITE_TURN      (360.0f / SPRITE_PLAYER_ROWS)
 #define PLAYER_SPRITE_TURN_HALF (PLAYER_SPRITE_TURN / 2.0f)
