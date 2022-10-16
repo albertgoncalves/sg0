@@ -228,22 +228,28 @@ static Collision get_box_collision(const Box*   move_from,
     return collision;
 }
 
-static void set_line_between(const Geom* cube0,
-                             const Geom* cube1,
-                             Geom*       line) {
-    line->translate.x =
-        (cube0->translate.x / 2.0f) + (cube1->translate.x / 2.0f);
-    line->translate.y =
-        (cube0->translate.y / 2.0f) + (cube1->translate.y / 2.0f);
-    line->translate.z =
-        (cube0->translate.z / 2.0f) + (cube1->translate.z / 2.0f);
-    line->scale.x = cube0->translate.x - cube1->translate.x;
-    line->scale.y = cube0->translate.y - cube1->translate.y;
-    line->scale.z = cube0->translate.z - cube1->translate.z;
-    line->color.x = (cube0->color.x / 2.0f) + (cube1->color.x / 2.0f);
-    line->color.y = (cube0->color.y / 2.0f) + (cube1->color.y / 2.0f);
-    line->color.z = (cube0->color.z / 2.0f) + (cube1->color.z / 2.0f);
-    line->color.w = (cube0->color.w / 2.0f) + (cube1->color.w / 2.0f);
+static Geom get_geom_between(const Geom* l, const Geom* r) {
+    return (Geom){
+        .translate =
+            (Vec3f){
+                .x = (l->translate.x / 2.0f) + (r->translate.x / 2.0f),
+                .y = (l->translate.y / 2.0f) + (r->translate.y / 2.0f),
+                .z = (l->translate.z / 2.0f) + (r->translate.z / 2.0f),
+            },
+        .scale =
+            (Vec3f){
+                .x = l->translate.x - r->translate.x,
+                .y = l->translate.y - r->translate.y,
+                .z = l->translate.z - r->translate.z,
+            },
+        .color =
+            (Vec4f){
+                .x = (l->color.x / 2.0f) + (r->color.x / 2.0f),
+                .y = (l->color.y / 2.0f) + (r->color.y / 2.0f),
+                .z = (l->color.z / 2.0f) + (r->color.z / 2.0f),
+                .w = (l->color.w / 2.0f) + (r->color.w / 2.0f),
+            },
+    };
 }
 
 #endif
