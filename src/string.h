@@ -1,16 +1,12 @@
 #ifndef __STRING_H__
 #define __STRING_H__
 
-#include "prelude.h"
+#include "memory.h"
 
 #include <fcntl.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-
-#define CAP_BUFFER (1 << 12)
-static char BUFFER[CAP_BUFFER];
-static u32  LEN_BUFFER = 0;
 
 typedef struct stat FileStat;
 

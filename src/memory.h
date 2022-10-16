@@ -27,4 +27,8 @@ static u32  LEN_LINES = 0;
 static Sprite SPRITES[CAP_SPRITES];
 #define LEN_SPRITES (CAP_PLAYER + LEN_ENEMIES)
 
+#define CAP_BUFFER (1 << 12)
+static char BUFFER[CAP_BUFFER];
+static u32  LEN_BUFFER = 0;
+
 #endif
