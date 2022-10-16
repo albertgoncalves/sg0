@@ -29,8 +29,9 @@ static Enemy ENEMIES[CAP_ENEMIES];
 
 static void init_enemies(void) {
     LEN_ENEMIES = 4;
-    LEN_LINES = LEN_ENEMIES;
     EXIT_IF(CAP_ENEMIES < LEN_ENEMIES);
+    LEN_LINES = LEN_ENEMIES;
+    EXIT_IF(CAP_LINES < LEN_LINES);
     ENEMIES[0] = (Enemy){
         .translate = (Vec3f){30.0f, ENEMY_CUBE_TRANSLATE_Y, 0.0f},
         .polar_degrees = 0.0f,

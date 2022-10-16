@@ -21,6 +21,7 @@
 static Vec3f PLAYER_SPEED = {0};
 
 #define PLAYER_CUBE   CUBES[OFFSET_PLAYER]
+#define PLAYER_BOX    BOXES[OFFSET_PLAYER]
 #define PLAYER_SPRITE SPRITES[OFFSET_PLAYER]
 
 static void init_player(void) {
@@ -50,11 +51,11 @@ static void update_player(Vec3f move) {
         Vec3f remaining = PLAYER_SPEED;
         u8    hit = 0;
         for (u32 _ = 0; _ < 3; ++_) {
-            set_box_from_cube(&PLAYER_CUBE, &BOXES[OFFSET_PLAYER]);
+            set_box_from_cube(&PLAYER_CUBE, &PLAYER_BOX);
             Collision collision = {0};
             for (u32 i = 0; i < LEN_WORLD; ++i) {
                 const Collision candidate =
-                    get_box_collision(&BOXES[OFFSET_PLAYER],
+                    get_box_collision(&PLAYER_BOX,
                                       &BOXES[OFFSET_WORLD + i],
                                       &speed);
                 if (!candidate.hit) {
