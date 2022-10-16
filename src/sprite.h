@@ -1,34 +1,40 @@
 #ifndef __SPRITE_H__
 #define __SPRITE_H__
 
-#include "math.h"
+#include "geom.h"
 
-#define PATH_SPRITE_PLAYER "assets/sprite_player.png"
+#define PATH_SPRITE_ATLAS "assets/sprite_atlas.png"
 
 #define SPRITE_PLAYER_COLS 5
 #define SPRITE_PLAYER_ROWS 8
 
-static u64 SPRITE_TIME = 0;
+#define SPRITE_PLAYER_COLS_OFFSET 0
+#define SPRITE_PLAYER_ROWS_OFFSET 0
+
+#define SPRITE_ENEMY_COLS 4
+#define SPRITE_ENEMY_ROWS 4
+
+#define SPRITE_ENEMY_COLS_OFFSET 5
+#define SPRITE_ENEMY_ROWS_OFFSET 0
+
+#define SPRITE_ATLAS_COLS 9
+#define SPRITE_ATLAS_ROWS 8
+
+static const u8 SPRITE_DIRECTIONS_PLAYER[SPRITE_PLAYER_ROWS] =
+    {3, 4, 0, 7, 6, 5, 1, 2};
+static const u8 SPRITE_DIRECTIONS_ENEMY[SPRITE_ENEMY_ROWS] = {2, 1, 3, 0};
 
 #define SPRITE_UPDATE_STEP 250
+
+static u64 SPRITE_TIME = 0;
 
 typedef struct {
     Geom  geom;
     Vec2u col_row;
 } Sprite;
 
-static void animate_sprite_player(Vec2f speed, Vec2u* cell) {
-    if (NEAR_ZERO(speed.x) && NEAR_ZERO(speed.y)) {
-        cell->x = 4;
-        return;
-    }
-    const f32 angle = get_polar_degrees((Vec2f){
-        .x = speed.x == 0.0f ? EPSILON : speed.x,
-        .y = speed.y == 0.0f ? EPSILON : speed.y,
-    });
-    const u8  directions[SPRITE_PLAYER_ROWS] = {3, 4, 0, 7, 6, 5, 1, 2};
-    cell->y = directions[((u8)((angle + 22.5f) / 45.0f)) % SPRITE_PLAYER_ROWS];
-    cell->x = (SPRITE_TIME / 10000) % 4;
+static void update_sprites(void) {
+    SPRITE_TIME += SPRITE_UPDATE_STEP;
 }
 
 #endif
