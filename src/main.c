@@ -73,17 +73,19 @@ static void loop(GLFWwindow* window,
 
 i32 main(void) {
     printf("\n"
-           "sizeof(BUFFER)  : %zu\n"
-           "sizeof(CUBES)   : %zu\n"
-           "sizeof(BOXES)   : %zu\n"
-           "sizeof(LINES)   : %zu\n"
-           "sizeof(SPRITES) : %zu\n"
+           "sizeof(BUFFER)   : %zu\n"
+           "sizeof(CUBES)    : %zu\n"
+           "sizeof(BOXES)    : %zu\n"
+           "sizeof(LINES)    : %zu\n"
+           "sizeof(SPRITES)  : %zu\n"
+           "sizeof(Uniforms) : %zu\n"
            "\n",
            sizeof(BUFFER),
            sizeof(CUBES),
            sizeof(BOXES),
            sizeof(LINES),
-           sizeof(SPRITES));
+           sizeof(SPRITES),
+           sizeof(Uniforms));
     printf("GLFW version : %s\n", glfwGetVersionString());
     GLFWwindow* window = init_window();
     printf("GL_VENDOR    : %s\n"
