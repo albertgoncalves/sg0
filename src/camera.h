@@ -16,11 +16,11 @@
 
 static Vec3f VIEW_OFFSET = {0};
 
-#define CAMERA_INTERVAL 175.0f
+#define CAMERA_LATENCY 175.0f
 
 static void update_camera(Vec3f target) {
-    VIEW_OFFSET.x -= (VIEW_OFFSET.x - target.x) / CAMERA_INTERVAL;
-    VIEW_OFFSET.z -= (VIEW_OFFSET.z - target.z) / CAMERA_INTERVAL;
+    VIEW_OFFSET.x -= (VIEW_OFFSET.x - target.x) / CAMERA_LATENCY;
+    VIEW_OFFSET.z -= (VIEW_OFFSET.z - target.z) / CAMERA_LATENCY;
 }
 
 static Mat4 get_view(void) {
