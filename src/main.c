@@ -26,8 +26,7 @@ static Vec3f get_move(GLFWwindow* window) {
 static void update(GLFWwindow* window,
                    u64         now,
                    u64*        update_time,
-                   u64*        update_delta,
-                   Uniforms*   uniforms) {
+                   u64*        update_delta) {
     for (*update_delta += now - *update_time;
          FRAME_UPDATE_STEP < *update_delta;
          *update_delta -= FRAME_UPDATE_STEP)
@@ -39,11 +38,10 @@ static void update(GLFWwindow* window,
         update_camera(PLAYER_CUBE.translate);
     }
     *update_time = now;
-    uniforms->view = get_view();
+    update_uniforms();
 }
 
 static void loop(GLFWwindow* window,
-                 Uniforms*   uniforms,
                  u32         cube_program,
                  u32         line_program,
                  u32         sprite_program) {
@@ -67,8 +65,8 @@ static void loop(GLFWwindow* window,
                 frame_count = 0;
             }
         }
-        update(window, now, &update_time, &update_delta, uniforms);
-        draw(window, uniforms, cube_program, line_program, sprite_program);
+        update(window, now, &update_time, &update_delta);
+        draw(window, cube_program, line_program, sprite_program);
         wait(now);
     }
 }
@@ -95,7 +93,7 @@ i32 main(void) {
            glGetString(GL_RENDERER));
 
     init_graphics();
-    Uniforms  uniforms = init_uniforms();
+    init_uniforms();
     const u32 cube_program = init_cubes();
     const u32 line_program = init_lines();
     const u32 sprite_program = init_sprites();
@@ -103,7 +101,7 @@ i32 main(void) {
     init_player();
     init_enemies();
     init_world();
-    loop(window, &uniforms, cube_program, line_program, sprite_program);
+    loop(window, cube_program, line_program, sprite_program);
 
     free_graphics();
     glDeleteProgram(cube_program);

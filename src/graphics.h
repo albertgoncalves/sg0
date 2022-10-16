@@ -46,6 +46,8 @@ static u32 UBO[CAP_UBO];
 #define CAP_TEXTURES 1
 static u32 TEXTURES[CAP_TEXTURES];
 
+static Uniforms UNIFORMS;
+
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
         switch (glGetError()) {                            \
@@ -417,13 +419,11 @@ static u32 init_sprites(void) {
     return sprite_program;
 }
 
-static Uniforms init_uniforms(void) {
-    Uniforms uniforms = {
-        .projection =
-            perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR),
-    };
+static void init_uniforms(void) {
+    UNIFORMS.projection =
+        perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
     BIND_BUFFER(UBO[0],
-                &uniforms,
+                &UNIFORMS,
                 sizeof(Uniforms),
                 GL_UNIFORM_BUFFER,
                 GL_DYNAMIC_DRAW);
@@ -433,19 +433,21 @@ static Uniforms init_uniforms(void) {
                       0,
                       sizeof(Uniforms));
     EXIT_IF_GL_ERROR();
-    return uniforms;
 }
 
-static void draw(GLFWwindow*     window,
-                 const Uniforms* uniforms,
-                 u32             cube_program,
-                 u32             line_program,
-                 u32             sprite_program) {
+static void update_uniforms(void) {
+    UNIFORMS.view = get_view();
+}
+
+static void draw(GLFWwindow* window,
+                 u32         cube_program,
+                 u32         line_program,
+                 u32         sprite_program) {
     glBindBuffer(GL_UNIFORM_BUFFER, UBO[0]);
     glBufferSubData(GL_UNIFORM_BUFFER,
                     offsetof(Uniforms, view),
                     sizeof(Mat4),
-                    &uniforms->view.column_row[0][0]);
+                    &UNIFORMS.view.column_row[0][0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
