@@ -132,7 +132,7 @@ static void animate_player(void) {
         PLAYER_SPRITE.col_row.x = 4;
         return;
     }
-    const f32 angle = get_polar_degrees((Vec2f){
+    const f32 polar_degrees = get_polar_degrees((Vec2f){
         .x = speed.x == 0.0f ? EPSILON : speed.x,
         .y = speed.y == 0.0f ? EPSILON : speed.y,
     });
@@ -141,7 +141,8 @@ static void animate_player(void) {
     PLAYER_SPRITE.col_row = (Vec2u){
         .x = SPRITE_PLAYER_COLS_OFFSET + ((SPRITE_TIME / 10000) % 4),
         .y = SPRITE_PLAYER_ROWS_OFFSET +
-             SPRITE_DIRECTIONS_PLAYER[((u8)((angle + PLAYER_SPRITE_TURN_HALF) /
+             SPRITE_DIRECTIONS_PLAYER[((u8)((polar_degrees +
+                                             PLAYER_SPRITE_TURN_HALF) /
                                             PLAYER_SPRITE_TURN)) %
                                       SPRITE_PLAYER_ROWS],
     };
