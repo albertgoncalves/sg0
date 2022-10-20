@@ -61,9 +61,16 @@ static void update_player(Vec3f move) {
                 if (!candidate.hit) {
                     continue;
                 }
-                if (!collision.hit || (candidate.time < collision.time) ||
-                    ((candidate.time == collision.time) &&
-                     (collision.overlap < candidate.overlap)))
+                if (!collision.hit) {
+                    collision = candidate;
+                    continue;
+                }
+                if (candidate.time < collision.time) {
+                    collision = candidate;
+                    continue;
+                }
+                if ((candidate.time == collision.time) &&
+                    (collision.overlap < candidate.overlap))
                 {
                     collision = candidate;
                 }
