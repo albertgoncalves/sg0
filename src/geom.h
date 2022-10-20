@@ -127,23 +127,23 @@ static Box get_move_to(const Box* move_from, const Vec3f* speed, f32 time) {
     };
 }
 
-static f32 get_overlap_segment(f32 l0, f32 r0, f32 l1, f32 r1) {
+static f32 get_segment_overlap(f32 l0, f32 r0, f32 l1, f32 r1) {
     const f32 a = l0 < l1 ? l1 : l0;
     const f32 b = r0 < r1 ? r0 : r1;
     const f32 c = b - a;
     return c < 0.0f ? 0.0f : c;
 }
 
-static f32 get_overlap_box(const Box* l, const Box* r) {
-    return get_overlap_segment(l->left_bottom_back.x,
+static f32 get_box_overlap(const Box* l, const Box* r) {
+    return get_segment_overlap(l->left_bottom_back.x,
                                l->right_top_front.x,
                                r->left_bottom_back.x,
                                r->right_top_front.x) +
-           get_overlap_segment(l->left_bottom_back.y,
+           get_segment_overlap(l->left_bottom_back.y,
                                l->right_top_front.y,
                                r->left_bottom_back.y,
                                r->right_top_front.y) +
-           get_overlap_segment(l->left_bottom_back.z,
+           get_segment_overlap(l->left_bottom_back.z,
                                l->right_top_front.z,
                                r->left_bottom_back.z,
                                r->right_top_front.z);
@@ -196,7 +196,7 @@ static Collision get_box_collision(const Box*   move_from,
             (obstacle->left_bottom_back.z < move_to.right_top_front.z))
         {
             collision.time = time.x;
-            collision.overlap = get_overlap_box(&move_to, obstacle);
+            collision.overlap = get_box_overlap(&move_to, obstacle);
             collision.hit = HIT_X;
         }
     } else if ((time.x < time.y) && (time.z < time.y)) {
@@ -210,7 +210,7 @@ static Collision get_box_collision(const Box*   move_from,
             (obstacle->left_bottom_back.z < move_to.right_top_front.z))
         {
             collision.time = time.y;
-            collision.overlap = get_overlap_box(&move_to, obstacle);
+            collision.overlap = get_box_overlap(&move_to, obstacle);
             collision.hit = HIT_Y;
         }
     } else {
@@ -224,7 +224,7 @@ static Collision get_box_collision(const Box*   move_from,
             (obstacle->left_bottom_back.y < move_to.right_top_front.y))
         {
             collision.time = time.z;
-            collision.overlap = get_overlap_box(&move_to, obstacle);
+            collision.overlap = get_box_overlap(&move_to, obstacle);
             collision.hit = HIT_Z;
         }
     }
