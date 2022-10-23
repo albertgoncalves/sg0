@@ -2,6 +2,7 @@
 #define __WORLD_H__
 
 #include "memory.h"
+#include "pcg_rng.h"
 
 #define WORLD_GRAVITY 0.000675f
 #define WORLD_FLOOR   -2.5f
@@ -12,6 +13,8 @@
 #define WORLD_CUBES(i) CUBES[OFFSET_WORLD + i]
 
 static void init_world(void) {
+    (void)get_random_uniform_f32;
+    (void)get_random_bounded_u32;
     LEN_WORLD = 8;
     EXIT_IF(CAP_WORLD < LEN_WORLD);
     WORLD_CUBES(0) = (Geom){

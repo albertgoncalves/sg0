@@ -25,6 +25,7 @@ flags_main=(
     -D_DEFAULT_SOURCE
     "-fsanitize=bounds"
     "-fsanitize=float-divide-by-zero"
+    "-fsanitize-ignorelist=$WD/scripts/ignorelist.txt"
     "-fsanitize=implicit-conversion"
     "-fsanitize=integer"
     "-fsanitize=nullability"

@@ -100,9 +100,11 @@ i32 main(void) {
     const u32 line_program = init_lines();
     const u32 sprite_program = init_sprites();
 
-    init_player();
-    init_enemies();
+    set_seed(now_ns(), 1);
     init_world();
+    init_enemies();
+    init_player();
+
     loop(window, cube_program, line_program, sprite_program);
 
     free_graphics();

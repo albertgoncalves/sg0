@@ -8,6 +8,7 @@
 
 !scripts/
 !*.sh
+!ignorelist.txt
 
 !lib/
 !src/

@@ -1,0 +1,2 @@
+[unsigned-integer-overflow]
+fun:get_random_uniform_u32
