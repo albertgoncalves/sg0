@@ -8,7 +8,6 @@ flags_shared=(
     -O3
     -Werror
     -Weverything
-    -Wno-declaration-after-statement
     -Wno-padded
 )
 flags_stb=(
@@ -37,6 +36,7 @@ flags_main=(
     "-std=c99"
     -Wno-c2x-extensions
     -Wno-covered-switch-default
+    -Wno-declaration-after-statement
 )
 
 clang-format -i -verbose "$WD/src/"*
