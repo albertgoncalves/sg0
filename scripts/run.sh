@@ -37,7 +37,6 @@ flags_main=(
     "-std=c99"
     -Wno-c2x-extensions
     -Wno-covered-switch-default
-    -Wno-float-equal
 )
 
 clang-format -i -verbose "$WD/src/"*
