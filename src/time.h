@@ -1,5 +1,5 @@
-#ifndef __TIME_H__
-#define __TIME_H__
+#ifndef TIME_H
+#define TIME_H
 
 #include "prelude.h"
 

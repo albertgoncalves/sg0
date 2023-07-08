@@ -1,5 +1,5 @@
-#ifndef __SPRITE_H__
-#define __SPRITE_H__
+#ifndef SPRITE_H
+#define SPRITE_H
 
 #include "geom.h"
 

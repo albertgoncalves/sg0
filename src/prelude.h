@@ -1,5 +1,5 @@
-#ifndef __PRELUDE_H__
-#define __PRELUDE_H__
+#ifndef PRELUDE_H
+#define PRELUDE_H
 
 #include <stdint.h>
 #include <stdio.h>

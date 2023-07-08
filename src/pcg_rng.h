@@ -1,5 +1,5 @@
-#ifndef __PCG_RNG_H__
-#define __PCG_RNG_H__
+#ifndef PCG_RNG_H
+#define PCG_RNG_H
 
 #include "prelude.h"
 

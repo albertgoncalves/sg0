@@ -10,7 +10,6 @@ flags_shared=(
     -Weverything
     -Wno-declaration-after-statement
     -Wno-padded
-    -Wno-reserved-macro-identifier
 )
 flags_stb=(
     -Wno-cast-align

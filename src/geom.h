@@ -1,5 +1,5 @@
-#ifndef __GEOM_H__
-#define __GEOM_H__
+#ifndef GEOM_H
+#define GEOM_H
 
 #include "math.h"
 

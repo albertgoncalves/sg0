@@ -1,5 +1,5 @@
-#ifndef __GRAPHICS_H__
-#define __GRAPHICS_H__
+#ifndef GRAPHICS_H
+#define GRAPHICS_H
 
 #include "camera.h"
 #include "image.h"

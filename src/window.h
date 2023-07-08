@@ -1,5 +1,5 @@
-#ifndef __WINDOW_H__
-#define __WINDOW_H__
+#ifndef WINDOW_H
+#define WINDOW_H
 
 #define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768

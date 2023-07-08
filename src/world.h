@@ -1,5 +1,5 @@
-#ifndef __WORLD_H__
-#define __WORLD_H__
+#ifndef WORLD_H
+#define WORLD_H
 
 #include "memory.h"
 #include "pcg_rng.h"

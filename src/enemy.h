@@ -1,5 +1,5 @@
-#ifndef __ENEMY_H__
-#define __ENEMY_H__
+#ifndef ENEMY_H
+#define ENEMY_H
 
 #include "memory.h"
 #include "sprite.h"
