@@ -32,7 +32,7 @@ static void set_seed(u64 state, u64 increment) {
 }
 
 // NOTE: See `https://www.pcg-random.org/using-pcg-c-basic.html#generating-doubles`.
-static f32 get_random_uniform_f32() {
+static f32 get_random_uniform_f32(void) {
     const u32 r = get_random_uniform_u32();
     return ldexpf((f32)r, -32);
 }
