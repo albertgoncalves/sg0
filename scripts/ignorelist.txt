@@ -1,2 +1,2 @@
 [unsigned-integer-overflow]
-fun:get_random_uniform_u32
+fun:pcg_rng_random_uniform_u32

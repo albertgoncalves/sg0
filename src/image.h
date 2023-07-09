@@ -9,7 +9,7 @@ typedef struct {
     i32 height;
 } Image;
 
-Image image_rgba_from_path(const char*);
+Image image_open(const char*);
 void  image_free(Image);
 
 #endif

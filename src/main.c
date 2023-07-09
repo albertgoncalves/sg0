@@ -1,9 +1,52 @@
 #include "enemy.h"
 #include "graphics.h"
+#include "pcg_rng.h"
 #include "player.h"
+#include "sprite.h"
 #include "time.h"
+#include "world.h"
 
-static Vec3f get_move(GLFWwindow* window) {
+extern char BUFFER[CAP_BUFFER];
+extern u32  LEN_BUFFER;
+
+extern Geom CUBES[CAP_CUBES];
+extern u32  LEN_CUBES;
+
+extern Geom LINES[CAP_LINES];
+extern u32  LEN_LINES;
+
+extern Sprite SPRITES[CAP_SPRITES];
+extern u32    LEN_SPRITES;
+
+extern Box BOXES[CAP_CUBES];
+
+extern u32 LEN_WORLD;
+
+extern u64 SPRITE_TIME;
+
+char BUFFER[CAP_BUFFER];
+u32  LEN_BUFFER = 0;
+
+Geom CUBES[CAP_CUBES];
+u32  LEN_CUBES = CAP_PLAYER + CAP_ENEMIES;
+
+Geom LINES[CAP_LINES];
+u32  LEN_LINES = 0;
+
+Sprite SPRITES[CAP_SPRITES];
+u32    LEN_SPRITES = CAP_PLAYER;
+
+Box BOXES[CAP_CUBES];
+
+u32 LEN_WORLD = 0;
+
+u64 SPRITE_TIME = 0;
+
+#define FRAME_UPDATE_COUNT 6
+#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
+#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
+
+static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         move.z -= 1.0f;
@@ -20,7 +63,7 @@ static Vec3f get_move(GLFWwindow* window) {
     if ((move.x == 0.0f) && (move.z == 0.0f)) {
         return move;
     }
-    return normalize(move);
+    return math_normalize(move);
 }
 
 static void update(GLFWwindow* window,
@@ -32,82 +75,73 @@ static void update(GLFWwindow* window,
          *update_delta -= FRAME_UPDATE_STEP)
     {
         glfwPollEvents();
-        update_player(get_move(window));
-        update_sprites();
-        animate_player();
-        update_camera(PLAYER_CUBE.translate);
+        player_update(input(window));
+        sprite_update();
+        player_animate();
+        graphics_update_camera(PLAYER_CUBE.translate);
     }
     *update_time = now;
-    update_uniforms();
+    graphics_update_uniforms();
 }
 
 static void loop(GLFWwindow* window,
                  u32         cube_program,
                  u32         line_program,
                  u32         sprite_program) {
-    u64 update_time = now_ns();
+    u64 update_time = time_nanoseconds();
     u64 update_delta = 0;
     u64 frame_time = update_time;
     u64 frame_count = 0;
+
     printf("\n\n");
     while (!glfwWindowShouldClose(window)) {
-        const u64 now = now_ns();
-        {
-            ++frame_count;
-            // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
-            if (NANO_PER_SECOND <= (now - frame_time)) {
-                printf("\033[2A"
-                       "%7.4f ms/f\n"
-                       "%7lu f/s\n",
-                       (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
-                       frame_count);
-                frame_time += NANO_PER_SECOND;
-                frame_count = 0;
-            }
+        const u64 now = time_nanoseconds();
+
+        ++frame_count;
+        // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
+        if (NANO_PER_SECOND <= (now - frame_time)) {
+            printf("\033[2A"
+                   "%7.4f ms/f\n"
+                   "%7lu f/s\n",
+                   (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
+                   frame_count);
+            frame_time += NANO_PER_SECOND;
+            frame_count = 0;
         }
+
         update(window, now, &update_time, &update_delta);
-        draw(window, cube_program, line_program, sprite_program);
-        wait(now);
+        graphics_draw(window, cube_program, line_program, sprite_program);
+
+        const u64 elapsed = time_nanoseconds() - now;
+        if (elapsed < FRAME_DURATION) {
+            EXIT_IF(
+                usleep((u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
+        }
     }
 }
 
 i32 main(void) {
-    printf("\n"
-           "sizeof(BUFFER)   : %zu\n"
-           "sizeof(CUBES)    : %zu\n"
-           "sizeof(BOXES)    : %zu\n"
-           "sizeof(LINES)    : %zu\n"
-           "sizeof(SPRITES)  : %zu\n"
-           "sizeof(Uniforms) : %zu\n"
-           "\n",
-           sizeof(BUFFER),
-           sizeof(CUBES),
-           sizeof(BOXES),
-           sizeof(LINES),
-           sizeof(SPRITES),
-           sizeof(Uniforms));
     printf("GLFW version : %s\n", glfwGetVersionString());
-    GLFWwindow* window = init_window();
+    GLFWwindow* window = graphics_window();
     printf("GL_VENDOR    : %s\n"
            "GL_RENDERER  : %s\n"
            "\n",
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
 
-    init_graphics();
-    init_uniforms();
-    const u32 cube_program = init_cubes();
-    const u32 line_program = init_lines();
-    const u32 sprite_program = init_sprites();
+    graphics_init();
+    const u32 cube_program = graphics_cubes();
+    const u32 line_program = graphics_lines();
+    const u32 sprite_program = graphics_sprites();
 
-    set_seed(now_ns(), 1);
-    init_world();
-    init_enemies();
-    init_player();
+    pcg_rng_set_seed(time_nanoseconds(), 1);
+    world_init();
+    player_init();
+    enemy_init();
 
     loop(window, cube_program, line_program, sprite_program);
 
-    free_graphics();
+    graphics_free();
     glDeleteProgram(cube_program);
     glDeleteProgram(line_program);
     glDeleteProgram(sprite_program);

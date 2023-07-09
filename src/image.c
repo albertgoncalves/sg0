@@ -10,7 +10,7 @@
 #undef STB_IMAGE_IMPLEMENTATION
 #undef STBI_ONLY_PNG
 
-Image image_rgba_from_path(const char* path) {
+Image image_open(const char* path) {
     i32 width;
     i32 height;
     u8* pixels = stbi_load(path, &width, &height, NULL, STBI_rgb_alpha);

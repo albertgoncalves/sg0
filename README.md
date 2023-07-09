@@ -10,7 +10,7 @@ Quick start
 ---
 ```
 $ nix-shell
-[nix-shell:path/to/sg0]$ ./scripts/run.sh
+[nix-shell:path/to/sg0]$ make run
 ```
 
 Attribution

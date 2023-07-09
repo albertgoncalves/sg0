@@ -5,12 +5,17 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define STATIC_ASSERT(condition) _Static_assert(condition, "!(" #condition ")")
+
 typedef uint8_t  u8;
 typedef uint32_t u32;
 typedef uint64_t u64;
 typedef int32_t  i32;
 typedef float    f32;
 typedef double   f64;
+
+STATIC_ASSERT(sizeof(u64) == sizeof(f64));
+STATIC_ASSERT(sizeof(u64) == sizeof(void*));
 
 typedef enum {
     FALSE = 0,
@@ -22,18 +27,16 @@ typedef enum {
 #define OK    0
 #define ERROR 1
 
-#define EPSILON 0.001f
-
-#define EXIT()                                              \
-    do {                                                    \
-        printf("%s:%s:%d\n", __FILE__, __func__, __LINE__); \
-        _exit(ERROR);                                       \
+#define EXIT()                                                       \
+    do {                                                             \
+        fprintf(stderr, "%s:%s:%d\n", __FILE__, __func__, __LINE__); \
+        _exit(ERROR);                                                \
     } while (FALSE)
 
-#define EXIT_WITH(x)                                                \
-    do {                                                            \
-        printf("%s:%s:%d `%s`\n", __FILE__, __func__, __LINE__, x); \
-        _exit(ERROR);                                               \
+#define EXIT_WITH(x)                                                         \
+    do {                                                                     \
+        fprintf(stderr, "%s:%s:%d `%s`\n", __FILE__, __func__, __LINE__, x); \
+        _exit(ERROR);                                                        \
     } while (FALSE)
 
 #define EXIT_IF(condition)         \
@@ -43,6 +46,20 @@ typedef enum {
         }                          \
     } while (FALSE)
 
-#define NEAR_ZERO(x) ((-EPSILON < x) && (x < EPSILON))
+#define CAP_CUBES (1 << 6)
+#define CAP_LINES (1 << 4)
+
+#define CAP_BUFFER (1 << 12)
+
+#define CAP_PLAYER  1
+#define CAP_ENEMIES (1 << 4)
+
+#define CAP_SPRITES (1 << 4)
+
+#define OFFSET_PLAYER  0
+#define OFFSET_ENEMIES CAP_PLAYER
+#define OFFSET_WORLD   (CAP_PLAYER + CAP_ENEMIES)
+
+STATIC_ASSERT(OFFSET_WORLD < CAP_CUBES);
 
 #endif
