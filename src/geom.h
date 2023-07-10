@@ -32,7 +32,7 @@ typedef struct {
     Hit hit;
 } Collision;
 
-void      geom_cube_into_box(const Geom*, Box*);
+Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);
 Geom      geom_between(const Geom*, const Geom*);
 

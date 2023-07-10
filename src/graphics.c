@@ -30,7 +30,7 @@ typedef struct {
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 22.5f, 10.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 35.0f, 17.5f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
@@ -561,12 +561,6 @@ void graphics_draw(GLFWwindow* window,
                             NULL,
                             (i32)LEN_SPRITES);
 
-    glUseProgram(line_program);
-    glBindVertexArray(VAO[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_LINES, &LINES[0]);
-    glDrawArraysInstanced(GL_LINES, 0, 2, (i32)LEN_LINES);
-
     glUseProgram(cube_program);
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
@@ -576,6 +570,12 @@ void graphics_draw(GLFWwindow* window,
                             GL_UNSIGNED_BYTE,
                             NULL,
                             (i32)LEN_CUBES);
+
+    glUseProgram(line_program);
+    glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_LINES, &LINES[0]);
+    glDrawArraysInstanced(GL_LINES, 0, 2, (i32)LEN_LINES);
 
     glfwSwapBuffers(window);
     EXIT_IF_GL_ERROR();

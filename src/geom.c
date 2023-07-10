@@ -2,21 +2,23 @@
 
 #include <math.h>
 
-void geom_cube_into_box(const Geom* cube, Box* box) {
+Box geom_box(const Geom* cube) {
     const Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,
         .y = cube->scale.y / 2.0f,
         .z = cube->scale.z / 2.0f,
     };
-    box->left_bottom_back.x = cube->translate.x - half_scale.x;
-    box->left_bottom_back.y = cube->translate.y - half_scale.y;
-    box->left_bottom_back.z = cube->translate.z - half_scale.z;
-    box->right_top_front.x = cube->translate.x + half_scale.x;
-    box->right_top_front.y = cube->translate.y + half_scale.y;
-    box->right_top_front.z = cube->translate.z + half_scale.z;
+    return (Box){
+        .left_bottom_back.x = cube->translate.x - half_scale.x,
+        .left_bottom_back.y = cube->translate.y - half_scale.y,
+        .left_bottom_back.z = cube->translate.z - half_scale.z,
+        .right_top_front.x = cube->translate.x + half_scale.x,
+        .right_top_front.y = cube->translate.y + half_scale.y,
+        .right_top_front.z = cube->translate.z + half_scale.z,
+    };
 }
 
-static Box move_box(const Box* box, const Vec3f* speed, f32 time) {
+static Box move(const Box* box, const Vec3f* speed, f32 time) {
     const Vec3f hit_distance = (Vec3f){
         .x = speed->x * time,
         .y = speed->y * time,
@@ -60,7 +62,7 @@ static f32 overlap_box(const Box* l, const Box* r) {
                            r->right_top_front.z);
 }
 
-Collision geom_collision(const Box*   move_from,
+Collision geom_collision(const Box*   from,
                          const Box*   obstacle,
                          const Vec3f* speed) {
     Vec3f time = {
@@ -69,73 +71,67 @@ Collision geom_collision(const Box*   move_from,
         .z = -INFINITY,
     };
     if (0.0f < speed->x) {
-        time.x =
-            (obstacle->left_bottom_back.x - move_from->right_top_front.x) /
-            speed->x;
+        time.x = (obstacle->left_bottom_back.x - from->right_top_front.x) /
+                 speed->x;
     } else if (speed->x < 0.0f) {
-        time.x =
-            (obstacle->right_top_front.x - move_from->left_bottom_back.x) /
-            speed->x;
+        time.x = (obstacle->right_top_front.x - from->left_bottom_back.x) /
+                 speed->x;
     }
     if (0.0f < speed->y) {
-        time.y =
-            (obstacle->left_bottom_back.y - move_from->right_top_front.y) /
-            speed->y;
+        time.y = (obstacle->left_bottom_back.y - from->right_top_front.y) /
+                 speed->y;
     } else if (speed->y < 0.0f) {
-        time.y =
-            (obstacle->right_top_front.y - move_from->left_bottom_back.y) /
-            speed->y;
+        time.y = (obstacle->right_top_front.y - from->left_bottom_back.y) /
+                 speed->y;
     }
     if (0.0f < speed->z) {
-        time.z =
-            (obstacle->left_bottom_back.z - move_from->right_top_front.z) /
-            speed->z;
+        time.z = (obstacle->left_bottom_back.z - from->right_top_front.z) /
+                 speed->z;
     } else if (speed->z < 0.0f) {
-        time.z =
-            (obstacle->right_top_front.z - move_from->left_bottom_back.z) /
-            speed->z;
+        time.z = (obstacle->right_top_front.z - from->left_bottom_back.z) /
+                 speed->z;
     }
     Collision collision = {0};
     if ((time.y < time.x) && (time.z < time.x)) {
         if ((time.x < 0.0f) || (1.0f < time.x)) {
             return collision;
         }
-        Box move_to = move_box(move_from, speed, time.x);
-        if ((move_to.left_bottom_back.y < obstacle->right_top_front.y) &&
-            (obstacle->left_bottom_back.y < move_to.right_top_front.y) &&
-            (move_to.left_bottom_back.z < obstacle->right_top_front.z) &&
-            (obstacle->left_bottom_back.z < move_to.right_top_front.z))
+        Box to = move(from, speed, time.x);
+        if ((to.left_bottom_back.y < obstacle->right_top_front.y) &&
+            (obstacle->left_bottom_back.y < to.right_top_front.y) &&
+            (to.left_bottom_back.z < obstacle->right_top_front.z) &&
+            (obstacle->left_bottom_back.z < to.right_top_front.z))
         {
             collision.time = time.x;
-            collision.overlap = overlap_box(&move_to, obstacle);
+            collision.overlap = overlap_box(&to, obstacle);
             collision.hit = HIT_X;
         }
     } else if ((time.x < time.y) && (time.z < time.y)) {
         if ((time.y < 0.0f) || (1.0f < time.y)) {
             return collision;
         }
-        Box move_to = move_box(move_from, speed, time.y);
-        if ((move_to.left_bottom_back.x < obstacle->right_top_front.x) &&
-            (obstacle->left_bottom_back.x < move_to.right_top_front.x) &&
-            (move_to.left_bottom_back.z < obstacle->right_top_front.z) &&
-            (obstacle->left_bottom_back.z < move_to.right_top_front.z))
+        Box to = move(from, speed, time.y);
+        if ((to.left_bottom_back.x < obstacle->right_top_front.x) &&
+            (obstacle->left_bottom_back.x < to.right_top_front.x) &&
+            (to.left_bottom_back.z < obstacle->right_top_front.z) &&
+            (obstacle->left_bottom_back.z < to.right_top_front.z))
         {
             collision.time = time.y;
-            collision.overlap = overlap_box(&move_to, obstacle);
+            collision.overlap = overlap_box(&to, obstacle);
             collision.hit = HIT_Y;
         }
     } else {
         if ((time.z < 0.0f) || (1.0f < time.z)) {
             return collision;
         }
-        Box move_to = move_box(move_from, speed, time.z);
-        if ((move_to.left_bottom_back.x < obstacle->right_top_front.x) &&
-            (obstacle->left_bottom_back.x < move_to.right_top_front.x) &&
-            (move_to.left_bottom_back.y < obstacle->right_top_front.y) &&
-            (obstacle->left_bottom_back.y < move_to.right_top_front.y))
+        Box to = move(from, speed, time.z);
+        if ((to.left_bottom_back.x < obstacle->right_top_front.x) &&
+            (obstacle->left_bottom_back.x < to.right_top_front.x) &&
+            (to.left_bottom_back.y < obstacle->right_top_front.y) &&
+            (obstacle->left_bottom_back.y < to.right_top_front.y))
         {
             collision.time = time.z;
-            collision.overlap = overlap_box(&move_to, obstacle);
+            collision.overlap = overlap_box(&to, obstacle);
             collision.hit = HIT_Z;
         }
     }
