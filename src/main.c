@@ -59,6 +59,7 @@ static void update(GLFWwindow* window,
     {
         glfwPollEvents();
         player_update(input(window));
+        enemy_update();
         sprite_update();
         player_animate();
         graphics_update_camera(PLAYER_CUBE.translate);

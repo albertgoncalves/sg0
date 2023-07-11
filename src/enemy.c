@@ -18,7 +18,7 @@ typedef struct {
 #define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
-#define LINE_RADIUS      5.0f
+#define LINE_RADIUS      7.5f
 #define LINE_TRANSLATE_Y 1.75f
 #define LINE_COLOR_ALPHA 0.75f
 
@@ -41,7 +41,31 @@ static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 static Enemy ENEMIES[CAP_ENEMIES];
 static u32   LEN_ENEMIES = 0;
 
+static void rotate(const Enemy* enemy,
+                   const Geom*  cube,
+                   Sprite*      sprite,
+                   Geom*        line) {
+    sprite->col_row = (Vec2u){
+        .x = SPRITE_COLS_OFFSET,
+        .y = SPRITE_ROWS_OFFSET +
+             SPRITE_DIRECTIONS[DIRECTION(enemy->polar_degrees)],
+    };
 
+    const f32  polar_radians = math_radians(enemy->polar_degrees);
+    const Geom target = {
+        .translate =
+            (Vec3f){
+                .x = enemy->translate.x + (LINE_RADIUS * cosf(polar_radians)),
+                .y = enemy->translate.y,
+                .z = enemy->translate.z - (LINE_RADIUS * sinf(polar_radians)),
+            },
+        .scale = SCALE_SPRITE,
+        .color = COLOR_SPRITE,
+    };
+    *line = geom_between(cube, &target);
+    line->translate.y += LINE_TRANSLATE_Y;
+    line->color.w = LINE_COLOR_ALPHA;
+}
 
 void enemy_init(void) {
     LEN_ENEMIES = 4;
@@ -79,28 +103,16 @@ void enemy_init(void) {
         ENEMY_SPRITES(i).geom.translate.y += SPRITE_TRANSLATE_Y;
         ENEMY_SPRITES(i).geom.scale = SCALE_SPRITE;
         ENEMY_SPRITES(i).geom.color = COLOR_SPRITE;
+        rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
+    }
+}
 
-        ENEMY_SPRITES(i).col_row = (Vec2u){
-            .x = SPRITE_COLS_OFFSET,
-            .y = SPRITE_ROWS_OFFSET +
-                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)],
-        };
-
-        const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees);
-        const Geom target = {
-            .translate =
-                (Vec3f){
-                    .x = ENEMIES[i].translate.x +
-                         (LINE_RADIUS * cosf(polar_radians)),
-                    .y = ENEMIES[i].translate.y,
-                    .z = ENEMIES[i].translate.z -
-                         (LINE_RADIUS * sinf(polar_radians)),
-                },
-            .scale = SCALE_SPRITE,
-            .color = COLOR_SPRITE,
-        };
-        LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
-        LINES[i].translate.y += LINE_TRANSLATE_Y;
-        LINES[i].color.w = LINE_COLOR_ALPHA;
+void enemy_update(void) {
+    for (u32 i = 0; i < LEN_ENEMIES; ++i) {
+        ENEMIES[i].polar_degrees += 0.1f;
+        while (360.0f <= ENEMIES[i].polar_degrees) {
+            ENEMIES[i].polar_degrees -= 360.0f;
+        }
+        rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
     }
 }

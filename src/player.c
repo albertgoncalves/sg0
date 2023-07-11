@@ -7,8 +7,8 @@
 
 #define NEAR_ZERO(x) ((-EPSILON < x) && (x < EPSILON))
 
-#define RUN      0.00175f
-#define FRICTION 0.96f
+#define RUN      0.002125f
+#define FRICTION 0.9425f
 #define DRAG     0.999f
 
 #define TRANSLATE ((Vec3f){0.0f, 2.0f, 0.0f})
@@ -32,6 +32,8 @@
 
 #define SPRITE_TURN      (360.0f / SPRITE_ROWS)
 #define SPRITE_TURN_HALF (SPRITE_TURN / 2.0f)
+
+#define SPRITE_RATE 10000
 
 #define DIRECTION(polar_degrees) \
     (((u8)((polar_degrees + SPRITE_TURN_HALF) / SPRITE_TURN)) % SPRITE_ROWS)
@@ -158,7 +160,8 @@ void player_animate(void) {
         .y = SPEED.z == 0.0f ? EPSILON : -SPEED.z,
     });
     PLAYER_SPRITE.col_row = (Vec2u){
-        .x = SPRITE_COLS_OFFSET + ((SPRITE_TIME / 10000) % (SPRITE_COLS - 1)),
+        .x = SPRITE_COLS_OFFSET +
+             ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
         .y = SPRITE_ROWS_OFFSET + SPRITE_DIRECTIONS[DIRECTION(polar_degrees)],
     };
 }

@@ -30,7 +30,7 @@ typedef struct {
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 35.0f, 17.5f})
+#define VIEW_FROM ((Vec3f){0.0f, 35.0f, 12.5f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};
@@ -38,6 +38,8 @@ static Vec3f VIEW_OFFSET = {0};
 #define CAMERA_LATENCY 175.0f
 
 #define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
+
+#define LINE_WIDTH 3.5f
 
 #define UNIFORM_INDEX 0
 
@@ -376,6 +378,10 @@ u32 graphics_cubes(void) {
 u32 graphics_lines(void) {
     const u32 line_program = compile_program(PATH_LINE_VERT, PATH_LINE_FRAG);
     glUseProgram(line_program);
+
+    glLineWidth(LINE_WIDTH);
+    glEnable(GL_LINE_SMOOTH);
+
     glBindVertexArray(VAO[1]);
 
     BIND_BUFFER(VBO[1],
