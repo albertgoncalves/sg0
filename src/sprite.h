@@ -15,4 +15,9 @@ typedef struct {
 
 void sprite_update(void);
 
+extern Sprite SPRITES[CAP_SPRITES];
+extern u32    LEN_SPRITES;
+
+extern u64 SPRITE_TIME;
+
 #endif

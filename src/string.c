@@ -7,9 +7,6 @@
 
 typedef struct stat FileStat;
 
-extern char BUFFER[CAP_BUFFER];
-extern u32  LEN_BUFFER;
-
 MemMap string_open(const char* path) {
     EXIT_IF(!path);
     const i32 file = open(path, O_RDONLY);

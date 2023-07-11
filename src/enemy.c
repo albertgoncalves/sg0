@@ -41,13 +41,7 @@ static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 static Enemy ENEMIES[CAP_ENEMIES];
 static u32   LEN_ENEMIES = 0;
 
-extern Geom CUBES[CAP_CUBES];
 
-extern Sprite SPRITES[CAP_SPRITES];
-extern u32    LEN_SPRITES;
-
-extern Geom LINES[CAP_LINES];
-extern u32  LEN_LINES;
 
 void enemy_init(void) {
     LEN_ENEMIES = 4;

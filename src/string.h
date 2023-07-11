@@ -16,4 +16,7 @@ typedef struct {
 MemMap      string_open(const char*);
 const char* string_copy(MemMap);
 
+extern char BUFFER[CAP_BUFFER];
+extern u32  LEN_BUFFER;
+
 #endif

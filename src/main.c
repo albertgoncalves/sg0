@@ -3,26 +3,9 @@
 #include "pcg_rng.h"
 #include "player.h"
 #include "sprite.h"
+#include "string.h"
 #include "time.h"
 #include "world.h"
-
-extern char BUFFER[CAP_BUFFER];
-extern u32  LEN_BUFFER;
-
-extern Geom CUBES[CAP_CUBES];
-extern u32  LEN_CUBES;
-
-extern Geom LINES[CAP_LINES];
-extern u32  LEN_LINES;
-
-extern Sprite SPRITES[CAP_SPRITES];
-extern u32    LEN_SPRITES;
-
-extern Box BOXES[CAP_CUBES];
-
-extern u32 LEN_WORLD;
-
-extern u64 SPRITE_TIME;
 
 char BUFFER[CAP_BUFFER];
 u32  LEN_BUFFER = 0;

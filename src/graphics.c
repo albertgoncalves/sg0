@@ -120,17 +120,6 @@ static const Vec3f LINE_VERTICES[] = {
     {0.5f, 0.5f, 0.5f},
 };
 
-extern char BUFFER[CAP_BUFFER];
-extern u32  LEN_BUFFER;
-
-extern Geom   CUBES[CAP_CUBES];
-extern Geom   LINES[CAP_LINES];
-extern Sprite SPRITES[CAP_SPRITES];
-extern u32    LEN_SPRITES;
-
-extern u32 LEN_LINES;
-extern u32 LEN_CUBES;
-
 #define EXIT_IF_GL_ERROR()                                 \
     do {                                                   \
         switch (glGetError()) {                            \

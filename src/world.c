@@ -9,12 +9,6 @@
 
 #define CAP_WORLD (CAP_CUBES - (CAP_ENEMIES + CAP_PLAYER))
 
-extern Geom CUBES[CAP_CUBES];
-extern Box  BOXES[CAP_CUBES];
-
-extern u32 LEN_CUBES;
-extern u32 LEN_WORLD;
-
 #define PLATFORM(x, z, width, depth)   \
     ((Geom){                           \
         .translate = {x, -1.0f, z},    \

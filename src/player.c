@@ -40,14 +40,6 @@ static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {3, 4, 0, 7, 6, 5, 1, 2};
 
 static Vec3f SPEED = {0};
 
-extern Geom   CUBES[CAP_CUBES];
-extern Sprite SPRITES[CAP_SPRITES];
-extern Box    BOXES[CAP_CUBES];
-
-extern u32 LEN_WORLD;
-
-extern u64 SPRITE_TIME;
-
 void player_init(void) {
     PLAYER_CUBE.translate = TRANSLATE;
     PLAYER_CUBE.scale = SCALE_CUBE;

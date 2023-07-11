@@ -36,4 +36,12 @@ Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);
 Geom      geom_between(const Geom*, const Geom*);
 
+extern Geom CUBES[CAP_CUBES];
+extern u32  LEN_CUBES;
+
+extern Geom LINES[CAP_LINES];
+extern u32  LEN_LINES;
+
+extern Box BOXES[CAP_CUBES];
+
 #endif
