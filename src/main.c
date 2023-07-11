@@ -118,7 +118,7 @@ i32 main(void) {
     const u32 line_program = graphics_lines();
     const u32 sprite_program = graphics_sprites();
 
-    pcg_rng_set_seed(time_nanoseconds(), 1);
+    pcg_rng_seed(time_nanoseconds(), 1);
     world_init();
     player_init();
     enemy_init();

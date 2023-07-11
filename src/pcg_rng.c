@@ -12,7 +12,7 @@ static PcgRng RNG = {
     .increment = 15726070495360670683llu,
 };
 
-void pcg_rng_set_seed(u64 state, u64 increment) {
+void pcg_rng_seed(u64 state, u64 increment) {
     RNG.state = 0;
     RNG.increment = (increment << 1u) | 1u;
     pcg_rng_random_uniform_u32();
