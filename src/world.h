@@ -8,6 +8,8 @@
 
 extern u32 LEN_WORLD;
 
+extern u32 OFFSET_WAYPOINTS;
+
 void world_init(void);
 
 #endif
