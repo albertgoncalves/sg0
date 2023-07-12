@@ -6,8 +6,12 @@
 
 typedef struct {
     Vec3f translate;
+    Vec3f speed;
     f32   polar_degrees;
 } Enemy;
+
+#define RUN      0.001f
+#define FRICTION 0.975f
 
 #define CUBE_TRANSLATE_Y   -0.45f
 #define SPRITE_TRANSLATE_Y 0.69f
@@ -113,6 +117,20 @@ void enemy_update(void) {
         while (360.0f <= ENEMIES[i].polar_degrees) {
             ENEMIES[i].polar_degrees -= 360.0f;
         }
+        {
+            const Vec3f move = (Vec3f){.x = -0.05f};
+            ENEMIES[i].speed.x += move.x * RUN;
+            ENEMIES[i].speed.z += move.z * RUN;
+            ENEMIES[i].speed.x *= FRICTION;
+            ENEMIES[i].speed.z *= FRICTION;
+            ENEMIES[i].translate.x += ENEMIES[i].speed.x;
+            ENEMIES[i].translate.z += ENEMIES[i].speed.z;
+        }
+
         rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
+        ENEMY_CUBES(i).translate.x = ENEMIES[i].translate.x;
+        ENEMY_CUBES(i).translate.z = ENEMIES[i].translate.z;
+        ENEMY_SPRITES(i).geom.translate.x = ENEMIES[i].translate.x;
+        ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.z;
     }
 }
