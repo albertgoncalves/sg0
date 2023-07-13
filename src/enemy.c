@@ -1,14 +1,27 @@
 #include "enemy.h"
 
 #include "sprite.h"
+#include "world.h"
 
 #include <math.h>
 
+typedef struct Waypoint Waypoint;
+
 typedef struct {
-    Vec3f translate;
-    Vec3f speed;
-    f32   polar_degrees;
+    Vec3f           translate;
+    Vec3f           speed;
+    f32             polar_degrees;
+    const Waypoint* waypoint;
 } Enemy;
+
+struct Waypoint {
+    Vec3f           translate;
+    const Waypoint* next;
+};
+
+#define CAP_WAYPOINTS (1 << 5)
+
+static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define RUN      0.001f
 #define FRICTION 0.975f
@@ -75,28 +88,94 @@ void enemy_init(void) {
     LEN_ENEMIES = 4;
     EXIT_IF(CAP_ENEMIES < LEN_ENEMIES);
 
+    LEN_WAYPOINTS = 0;
+    {
+        const u8  indices[] = {0, 1, 2, 3, 4, 5, 6, 7};
+        const u32 offset = LEN_WAYPOINTS;
+#define N (sizeof(indices) / sizeof(indices[0]))
+        for (u32 i = 0; i < N; ++i) {
+            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
+            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
+                .translate = CUBES[OFFSET_WAYPOINTS + indices[i]].translate,
+                .next = &WAYPOINTS[((i + 1) % N) + offset],
+            };
+        }
+#undef N
+        ENEMIES[0].translate = (Vec3f){
+            .x = WAYPOINTS[offset].translate.x,
+            .y = CUBE_TRANSLATE_Y,
+            .z = WAYPOINTS[offset].translate.z,
+        };
+        ENEMIES[0].polar_degrees = 0.0f;
+        ENEMIES[0].waypoint = &WAYPOINTS[offset];
+    }
+    {
+        const u8  indices[] = {8, 9, 10, 9, 11, 12, 13, 14};
+        const u32 offset = LEN_WAYPOINTS;
+#define N (sizeof(indices) / sizeof(indices[0]))
+        for (u32 i = 0; i < N; ++i) {
+            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
+            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
+                .translate = CUBES[OFFSET_WAYPOINTS + indices[i]].translate,
+                .next = &WAYPOINTS[((i + 1) % N) + offset],
+            };
+        }
+#undef N
+        ENEMIES[1].translate = (Vec3f){
+            .x = WAYPOINTS[offset].translate.x,
+            .y = CUBE_TRANSLATE_Y,
+            .z = WAYPOINTS[offset].translate.z,
+        };
+        ENEMIES[1].polar_degrees = 90.0f;
+        ENEMIES[1].waypoint = &WAYPOINTS[offset];
+    }
+    {
+        const u8  indices[] = {15, 16};
+        const u32 offset = LEN_WAYPOINTS;
+#define N (sizeof(indices) / sizeof(indices[0]))
+        for (u32 i = 0; i < N; ++i) {
+            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
+            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
+                .translate = CUBES[OFFSET_WAYPOINTS + indices[i]].translate,
+                .next = &WAYPOINTS[((i + 1) % N) + offset],
+            };
+        }
+#undef N
+        ENEMIES[2].translate = (Vec3f){
+            .x = WAYPOINTS[offset].translate.x,
+            .y = CUBE_TRANSLATE_Y,
+            .z = WAYPOINTS[offset].translate.z,
+        };
+        ENEMIES[2].polar_degrees = 180.0f;
+        ENEMIES[2].waypoint = &WAYPOINTS[offset];
+    }
+    {
+        const u8  indices[] = {17, 18, 19, 18};
+        const u32 offset = LEN_WAYPOINTS;
+#define N (sizeof(indices) / sizeof(indices[0]))
+        for (u32 i = 0; i < N; ++i) {
+            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
+            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
+                .translate = CUBES[OFFSET_WAYPOINTS + indices[i]].translate,
+                .next = &WAYPOINTS[((i + 1) % N) + offset],
+            };
+        }
+#undef N
+        ENEMIES[3].translate = (Vec3f){
+            .x = WAYPOINTS[offset].translate.x,
+            .y = CUBE_TRANSLATE_Y,
+            .z = WAYPOINTS[offset].translate.z,
+        };
+        ENEMIES[3].polar_degrees = 270.0f;
+        ENEMIES[3].waypoint = &WAYPOINTS[offset];
+    }
+
     LEN_SPRITES = CAP_PLAYER + LEN_ENEMIES;
     EXIT_IF(CAP_SPRITES < LEN_SPRITES);
 
     LEN_LINES = LEN_ENEMIES;
     EXIT_IF(CAP_LINES < LEN_LINES);
 
-    ENEMIES[0] = (Enemy){
-        .translate = (Vec3f){30.0f, CUBE_TRANSLATE_Y, 0.0f},
-        .polar_degrees = 0.0f,
-    };
-    ENEMIES[1] = (Enemy){
-        .translate = (Vec3f){25.0f, CUBE_TRANSLATE_Y, -5.0f},
-        .polar_degrees = 90.0f,
-    };
-    ENEMIES[2] = (Enemy){
-        .translate = (Vec3f){20.0f, CUBE_TRANSLATE_Y, 0.0f},
-        .polar_degrees = 180.0f,
-    };
-    ENEMIES[3] = (Enemy){
-        .translate = (Vec3f){25.0f, CUBE_TRANSLATE_Y, 5.0f},
-        .polar_degrees = 270.0f,
-    };
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         ENEMY_CUBES(i) = (Geom){
             .translate = ENEMIES[i].translate,
