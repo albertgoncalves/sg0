@@ -143,6 +143,9 @@ static const Vec3f LINE_VERTICES[] = {
         case GL_NO_ERROR: {                                \
             break;                                         \
         }                                                  \
+        default: {                                         \
+            EXIT();                                        \
+        }                                                  \
         }                                                  \
     } while (FALSE)
 
