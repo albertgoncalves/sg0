@@ -71,11 +71,9 @@ void player_update(Vec3f move) {
         for (u32 _ = 0; _ < 3; ++_) {
             PLAYER_BOX = geom_box(&PLAYER_CUBE);
             Collision collision = {0};
-            for (u32 i = 0; i < OFFSET_WAYPOINTS; ++i) {
+            for (u32 i = OFFSET_WORLD; i < OFFSET_WAYPOINTS; ++i) {
                 const Collision candidate =
-                    geom_collision(&PLAYER_BOX,
-                                   &BOXES[OFFSET_WORLD + i],
-                                   &speed);
+                    geom_collision(&PLAYER_BOX, &BOXES[i], &speed);
                 if (!candidate.hit) {
                     continue;
                 }
