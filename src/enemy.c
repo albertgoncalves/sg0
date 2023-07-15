@@ -44,6 +44,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
 #define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]
 
+#define SPRITE_COLS 4
 #define SPRITE_ROWS 4
 
 #define SPRITE_COLS_OFFSET 5
@@ -52,6 +53,8 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define SPRITE_TURN      (360.0f / SPRITE_ROWS)
 #define SPRITE_TURN_HALF (SPRITE_TURN / 2.0f)
 
+#define SPRITE_RATE 22500
+
 #define DIRECTION(polar_degrees) \
     (((u8)((polar_degrees + SPRITE_TURN_HALF) / SPRITE_TURN)) % SPRITE_ROWS)
 
@@ -59,32 +62,6 @@ static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
 static Enemy ENEMIES[CAP_ENEMIES];
 static u32   LEN_ENEMIES = 0;
-
-static void rotate(const Enemy* enemy,
-                   const Geom*  cube,
-                   Sprite*      sprite,
-                   Geom*        line) {
-    sprite->col_row = (Vec2u){
-        .x = SPRITE_COLS_OFFSET,
-        .y = SPRITE_ROWS_OFFSET +
-             SPRITE_DIRECTIONS[DIRECTION(enemy->polar_degrees)],
-    };
-
-    const f32  polar_radians = math_radians(enemy->polar_degrees);
-    const Geom target = {
-        .translate =
-            {
-                .x = enemy->translate.x + (LINE_RADIUS * cosf(polar_radians)),
-                .y = CUBE_TRANSLATE_Y,
-                .z = enemy->translate.y - (LINE_RADIUS * sinf(polar_radians)),
-            },
-        .scale = SCALE_SPRITE,
-        .color = COLOR_SPRITE,
-    };
-    *line = geom_between(cube, &target);
-    line->translate.y += LINE_TRANSLATE_Y;
-    line->color.w = LINE_COLOR_ALPHA;
-}
 
 void enemy_init(void) {
     LEN_ENEMIES = 4;
@@ -240,10 +217,33 @@ void enemy_update(void) {
 
 void enemy_animate(void) {
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
-        rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
         ENEMY_CUBES(i).translate.x = ENEMIES[i].translate.x;
         ENEMY_CUBES(i).translate.z = ENEMIES[i].translate.y;
         ENEMY_SPRITES(i).geom.translate.x = ENEMIES[i].translate.x;
         ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.y;
+
+        ENEMY_SPRITES(i).col_row = (Vec2u){
+            .x = SPRITE_COLS_OFFSET +
+                 ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
+            .y = SPRITE_ROWS_OFFSET +
+                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)],
+        };
+
+        const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees);
+        const Geom target = {
+            .translate =
+                {
+                    .x = ENEMIES[i].translate.x +
+                         (LINE_RADIUS * cosf(polar_radians)),
+                    .y = CUBE_TRANSLATE_Y,
+                    .z = ENEMIES[i].translate.y -
+                         (LINE_RADIUS * sinf(polar_radians)),
+                },
+            .scale = SCALE_SPRITE,
+            .color = COLOR_SPRITE,
+        };
+        LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
+        LINES[i].translate.y += LINE_TRANSLATE_Y;
+        LINES[i].color.w = LINE_COLOR_ALPHA;
     }
 }
