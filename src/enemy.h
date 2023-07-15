@@ -7,5 +7,6 @@ extern u32 LEN_WAYPOINTS;
 
 void enemy_init(void);
 void enemy_update(void);
+void enemy_animate(void);
 
 #endif

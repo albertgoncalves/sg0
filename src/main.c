@@ -65,6 +65,7 @@ static void update(GLFWwindow* window,
         enemy_update();
         sprite_update();
         player_animate();
+        enemy_animate();
         graphics_update_camera(PLAYER_CUBE.translate);
     }
     *update_time = now;

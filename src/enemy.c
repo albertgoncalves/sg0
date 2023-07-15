@@ -23,8 +23,10 @@ struct Waypoint {
 
 static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
-#define RUN      0.001f
+#define RUN      0.0001725f
 #define FRICTION 0.975f
+
+#define WAYPOINT_THRESHOLD 0.025f
 
 #define CUBE_TRANSLATE_Y   -0.45f
 #define SPRITE_TRANSLATE_Y 0.69f
@@ -109,7 +111,6 @@ void enemy_init(void) {
             .x = WAYPOINTS[offset].translate.x,
             .y = WAYPOINTS[offset].translate.y,
         };
-        ENEMIES[0].polar_degrees = 0.0f;
         ENEMIES[0].waypoint = &WAYPOINTS[offset];
     }
     {
@@ -132,7 +133,6 @@ void enemy_init(void) {
             .x = WAYPOINTS[offset].translate.x,
             .y = WAYPOINTS[offset].translate.y,
         };
-        ENEMIES[1].polar_degrees = 90.0f;
         ENEMIES[1].waypoint = &WAYPOINTS[offset];
     }
     {
@@ -155,7 +155,6 @@ void enemy_init(void) {
             .x = WAYPOINTS[offset].translate.x,
             .y = WAYPOINTS[offset].translate.y,
         };
-        ENEMIES[2].polar_degrees = 180.0f;
         ENEMIES[2].waypoint = &WAYPOINTS[offset];
     }
     {
@@ -178,7 +177,6 @@ void enemy_init(void) {
             .x = WAYPOINTS[offset].translate.x,
             .y = WAYPOINTS[offset].translate.y,
         };
-        ENEMIES[3].polar_degrees = 270.0f;
         ENEMIES[3].waypoint = &WAYPOINTS[offset];
     }
 
@@ -190,41 +188,58 @@ void enemy_init(void) {
 
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         ENEMY_CUBES(i) = (Geom){
-            .translate =
-                {
-                    .x = ENEMIES[i].translate.x,
-                    .y = CUBE_TRANSLATE_Y,
-                    .z = ENEMIES[i].translate.y,
-                },
+            .translate = {.y = CUBE_TRANSLATE_Y},
             .scale = SCALE_CUBE,
             .color = COLOR_CUBE,
         };
-        ENEMY_SPRITES(i).geom.translate.x = ENEMIES[i].translate.x;
-        ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.y;
         ENEMY_SPRITES(i).geom.translate.y = SPRITE_TRANSLATE_Y;
         ENEMY_SPRITES(i).geom.scale = SCALE_SPRITE;
         ENEMY_SPRITES(i).geom.color = COLOR_SPRITE;
-        rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
     }
 }
 
 void enemy_update(void) {
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
+        const Waypoint* waypoint = ENEMIES[i].waypoint;
+
+        Vec3f distance = (Vec3f){
+            .x = waypoint->translate.x - ENEMIES[i].translate.x,
+            .y = 0.0f,
+            .z = waypoint->translate.y - ENEMIES[i].translate.y,
+        };
+        if (WITHIN(WAYPOINT_THRESHOLD, distance.x - ENEMIES[i].speed.x) &&
+            WITHIN(WAYPOINT_THRESHOLD, distance.z - ENEMIES[i].speed.y))
         {
-            const Vec2f move = (Vec2f){.x = -0.05f};
-            ENEMIES[i].speed.x += move.x * RUN;
-            ENEMIES[i].speed.y += move.y * RUN;
-            ENEMIES[i].speed.x *= FRICTION;
-            ENEMIES[i].speed.y *= FRICTION;
-            ENEMIES[i].translate.x += ENEMIES[i].speed.x;
-            ENEMIES[i].translate.y += ENEMIES[i].speed.y;
+            ENEMIES[i].speed.x = 0.0f;
+            ENEMIES[i].speed.y = 0.0f;
+            ENEMIES[i].translate.x = waypoint->translate.x;
+            ENEMIES[i].translate.y = waypoint->translate.y;
+
+            ENEMIES[i].waypoint = ENEMIES[i].waypoint->next;
+            waypoint = ENEMIES[i].waypoint;
+            distance = (Vec3f){
+                .x = waypoint->translate.x - ENEMIES[i].translate.x,
+                .y = 0.0f,
+                .z = waypoint->translate.y - ENEMIES[i].translate.y,
+            };
         }
 
+        const Vec3f move = math_normalize(distance);
+        ENEMIES[i].speed.x += move.x * RUN;
+        ENEMIES[i].speed.y += move.z * RUN;
+        ENEMIES[i].speed.x *= FRICTION;
+        ENEMIES[i].speed.y *= FRICTION;
+        ENEMIES[i].translate.x += ENEMIES[i].speed.x;
+        ENEMIES[i].translate.y += ENEMIES[i].speed.y;
         ENEMIES[i].polar_degrees = math_polar_degrees((Vec2f){
             .x = ENEMIES[i].speed.x == 0.0f ? EPSILON : ENEMIES[i].speed.x,
             .y = ENEMIES[i].speed.y == 0.0f ? EPSILON : -ENEMIES[i].speed.y,
         });
+    }
+}
 
+void enemy_animate(void) {
+    for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         rotate(&ENEMIES[i], &ENEMY_CUBES(i), &ENEMY_SPRITES(i), &LINES[i]);
         ENEMY_CUBES(i).translate.x = ENEMIES[i].translate.x;
         ENEMY_CUBES(i).translate.z = ENEMIES[i].translate.y;
