@@ -3,10 +3,6 @@
 #include "sprite.h"
 #include "world.h"
 
-#define EPSILON 0.001f
-
-#define NEAR_ZERO(x) ((-EPSILON < x) && (x < EPSILON))
-
 #define RUN      0.002125f
 #define FRICTION 0.9425f
 #define DRAG     0.999f
