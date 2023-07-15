@@ -26,13 +26,13 @@ static Box move(const Box* box, const Vec3f* speed, f32 time) {
     };
     return (Box){
         .left_bottom_back =
-            (Vec3f){
+            {
                 .x = box->left_bottom_back.x + hit_distance.x,
                 .y = box->left_bottom_back.y + hit_distance.y,
                 .z = box->left_bottom_back.z + hit_distance.z,
             },
         .right_top_front =
-            (Vec3f){
+            {
                 .x = box->right_top_front.x + hit_distance.x,
                 .y = box->right_top_front.y + hit_distance.y,
                 .z = box->right_top_front.z + hit_distance.z,
