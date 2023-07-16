@@ -3,9 +3,13 @@
 #include "sprite.h"
 #include "world.h"
 
+#include <math.h>
+
 #define RUN      0.002125f
 #define FRICTION 0.9425f
 #define DRAG     0.999f
+
+#define RUN_THRESHOLD 0.0001f
 
 #define TRANSLATE ((Vec3f){0.0f, 2.0f, 0.0f})
 
@@ -145,13 +149,13 @@ void player_update(Vec3f move) {
 void player_animate(void) {
     PLAYER_SPRITE.geom.translate = PLAYER_CUBE.translate;
     PLAYER_SPRITE.geom.translate.y += SPRITE_TRANSLATE_Y;
-    if (NEAR_ZERO(SPEED.x) && NEAR_ZERO(SPEED.z)) {
+    if ((fabsf(SPEED.x) < RUN_THRESHOLD) && (fabsf(SPEED.z) < RUN_THRESHOLD)) {
         PLAYER_SPRITE.col_row.x = 4;
         return;
     }
     const f32 polar_degrees = math_polar_degrees((Vec2f){
-        .x = SPEED.x == 0.0f ? EPSILON : SPEED.x,
-        .y = SPEED.z == 0.0f ? EPSILON : -SPEED.z,
+        .x = SPEED.x,
+        .y = -SPEED.z,
     });
     PLAYER_SPRITE.col_row = (Vec2u){
         .x = SPRITE_COLS_OFFSET +

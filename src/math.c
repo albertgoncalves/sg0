@@ -4,6 +4,8 @@
 
 #define PI 3.14159274f
 
+#define EPSILON 0.00001f
+
 f32 math_radians(f32 degrees) {
     return (degrees * PI) / 180.0f;
 }
@@ -13,7 +15,9 @@ f32 math_degrees(f32 radians) {
 }
 
 f32 math_polar_degrees(Vec2f point) {
-    const f32 angle = math_degrees(atanf(point.y / point.x));
+    const f32 angle =
+        math_degrees(atanf((point.y == 0.0f ? EPSILON : point.y) /
+                           (point.x == 0.0f ? EPSILON : point.x)));
     if (point.x < 0.0f) {
         return 180.0f + angle;
     }

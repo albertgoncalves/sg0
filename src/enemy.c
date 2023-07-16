@@ -1,5 +1,6 @@
 #include "enemy.h"
 
+#include "player.h"
 #include "sprite.h"
 #include "world.h"
 
@@ -10,7 +11,8 @@ typedef struct Waypoint Waypoint;
 typedef struct {
     Vec2f           translate;
     Vec2f           speed;
-    f32             polar_degrees;
+    f32             polar_degrees_move;
+    f32             polar_degrees_aim;
     const Waypoint* waypoint;
 } Enemy;
 
@@ -25,6 +27,8 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define RUN      0.0001725f
 #define FRICTION 0.975f
+
+#define FOV_DEGREES 90.0f
 
 #define WAYPOINT_THRESHOLD 0.025f
 
@@ -184,8 +188,8 @@ void enemy_update(void) {
             .y = 0.0f,
             .z = waypoint->translate.y - ENEMIES[i].translate.y,
         };
-        if (WITHIN(WAYPOINT_THRESHOLD, distance.x - ENEMIES[i].speed.x) &&
-            WITHIN(WAYPOINT_THRESHOLD, distance.z - ENEMIES[i].speed.y))
+        if ((fabsf(distance.x - ENEMIES[i].speed.x) < WAYPOINT_THRESHOLD) &&
+            (fabsf(distance.z - ENEMIES[i].speed.y) < WAYPOINT_THRESHOLD))
         {
             ENEMIES[i].speed.x = 0.0f;
             ENEMIES[i].speed.y = 0.0f;
@@ -208,10 +212,28 @@ void enemy_update(void) {
         ENEMIES[i].speed.y *= FRICTION;
         ENEMIES[i].translate.x += ENEMIES[i].speed.x;
         ENEMIES[i].translate.y += ENEMIES[i].speed.y;
-        ENEMIES[i].polar_degrees = math_polar_degrees((Vec2f){
-            .x = ENEMIES[i].speed.x == 0.0f ? EPSILON : ENEMIES[i].speed.x,
-            .y = ENEMIES[i].speed.y == 0.0f ? EPSILON : -ENEMIES[i].speed.y,
+        ENEMIES[i].polar_degrees_move = math_polar_degrees((Vec2f){
+            .x = ENEMIES[i].speed.x,
+            .y = -ENEMIES[i].speed.y,
         });
+
+        const f32 polar_degrees_player = math_polar_degrees((Vec2f){
+            .x = PLAYER_CUBE.translate.x - ENEMIES[i].translate.x,
+            .y = -(PLAYER_CUBE.translate.z - ENEMIES[i].translate.y),
+        });
+
+        f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees_move;
+        {
+            const f32 rollover = angle + 360.0f;
+            angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
+        }
+        {
+            const f32 rollover = angle - 360.0f;
+            angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
+        }
+        ENEMIES[i].polar_degrees_aim = fabsf(angle) < FOV_DEGREES
+                                           ? polar_degrees_player
+                                           : ENEMIES[i].polar_degrees_move;
     }
 }
 
@@ -226,10 +248,10 @@ void enemy_animate(void) {
             .x = SPRITE_COLS_OFFSET +
                  ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
             .y = SPRITE_ROWS_OFFSET +
-                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)],
+                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees_move)],
         };
 
-        const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees);
+        const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees_aim);
         const Geom target = {
             .translate =
                 {

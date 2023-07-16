@@ -62,10 +62,4 @@ typedef enum {
 
 STATIC_ASSERT(OFFSET_WORLD < CAP_CUBES);
 
-#define EPSILON 0.00001f
-
-#define WITHIN(k, x) ((-(k) < (x)) && ((x) < (k)))
-
-#define NEAR_ZERO(x) WITHIN(EPSILON, x)
-
 #endif
