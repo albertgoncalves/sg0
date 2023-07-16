@@ -161,3 +161,23 @@ Geom geom_between(const Geom* l, const Geom* r) {
             },
     };
 }
+
+Bool geom_intersects(Vec2f l[2], Vec2f r[2]) {
+    const f32 x0 = l[0].x;
+    const f32 x1 = l[1].x;
+    const f32 x2 = r[0].x;
+    const f32 x3 = r[1].x;
+    const f32 y0 = l[0].y;
+    const f32 y1 = l[1].y;
+    const f32 y2 = r[0].y;
+    const f32 y3 = r[1].y;
+    const f32 denominator = ((x0 - x1) * (y2 - y3)) - ((y0 - y1) * (x2 - x3));
+    if (denominator != 0.0f) {
+        const f32 t =
+            (((x0 - x2) * (y2 - y3)) - ((y0 - y2) * (x2 - x3))) / denominator;
+        const f32 u =
+            -(((x0 - x1) * (y0 - y2)) - ((y0 - y1) * (x0 - x2))) / denominator;
+        return (0.0f <= t) && (t <= 1.0f) && (0.0f <= u) && (u <= 1.0f);
+    }
+    return FALSE;
+}

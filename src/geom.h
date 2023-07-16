@@ -35,6 +35,7 @@ typedef struct {
 Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);
 Geom      geom_between(const Geom*, const Geom*);
+Bool      geom_intersects(Vec2f[2], Vec2f[2]);
 
 extern Geom CUBES[CAP_CUBES];
 extern u32  LEN_CUBES;

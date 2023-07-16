@@ -11,9 +11,9 @@ typedef struct Waypoint Waypoint;
 typedef struct {
     Vec2f           translate;
     Vec2f           speed;
-    f32             polar_degrees_move;
-    f32             polar_degrees_aim;
+    f32             polar_degrees;
     const Waypoint* waypoint;
+    Bool            player_in_view;
 } Enemy;
 
 struct Waypoint {
@@ -179,6 +179,24 @@ void enemy_init(void) {
     }
 }
 
+static Bool intersects(const Box* box, Vec2f line[2]) {
+    const f32 left = box->left_bottom_back.x;
+    const f32 back = box->left_bottom_back.z;
+    const f32 right = box->right_top_front.x;
+    const f32 front = box->right_top_front.z;
+
+    const Vec2f points[] = {
+        {left, back},
+        {right, back},
+        {right, front},
+        {left, front},
+    };
+    return geom_intersects((Vec2f[2]){points[0], points[1]}, line) ||
+           geom_intersects((Vec2f[2]){points[1], points[2]}, line) ||
+           geom_intersects((Vec2f[2]){points[2], points[3]}, line) ||
+           geom_intersects((Vec2f[2]){points[3], points[0]}, line);
+}
+
 void enemy_update(void) {
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         const Waypoint* waypoint = ENEMIES[i].waypoint;
@@ -212,7 +230,7 @@ void enemy_update(void) {
         ENEMIES[i].speed.y *= FRICTION;
         ENEMIES[i].translate.x += ENEMIES[i].speed.x;
         ENEMIES[i].translate.y += ENEMIES[i].speed.y;
-        ENEMIES[i].polar_degrees_move = math_polar_degrees((Vec2f){
+        ENEMIES[i].polar_degrees = math_polar_degrees((Vec2f){
             .x = ENEMIES[i].speed.x,
             .y = -ENEMIES[i].speed.y,
         });
@@ -222,7 +240,7 @@ void enemy_update(void) {
             .y = -(PLAYER_CUBE.translate.z - ENEMIES[i].translate.y),
         });
 
-        f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees_move;
+        f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees;
         {
             const f32 rollover = angle + 360.0f;
             angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
@@ -231,9 +249,21 @@ void enemy_update(void) {
             const f32 rollover = angle - 360.0f;
             angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
         }
-        ENEMIES[i].polar_degrees_aim = fabsf(angle) < FOV_DEGREES
-                                           ? polar_degrees_player
-                                           : ENEMIES[i].polar_degrees_move;
+        ENEMIES[i].player_in_view = FALSE;
+        if (fabsf(angle) < FOV_DEGREES) {
+            Vec2f line[2] = {
+                {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
+                ENEMIES[i].translate,
+            };
+            for (u32 j = OFFSET_PLATFORMS; j < OFFSET_WAYPOINTS; ++j) {
+                if (intersects(&BOXES[j], line)) {
+                    goto skip;
+                }
+            }
+            ENEMIES[i].player_in_view = TRUE;
+        }
+    skip:
+        (void)0;
     }
 }
 
@@ -248,23 +278,27 @@ void enemy_animate(void) {
             .x = SPRITE_COLS_OFFSET +
                  ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
             .y = SPRITE_ROWS_OFFSET +
-                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees_move)],
+                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)],
         };
 
-        const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees_aim);
-        const Geom target = {
-            .translate =
-                {
-                    .x = ENEMIES[i].translate.x +
-                         (LINE_RADIUS * cosf(polar_radians)),
-                    .y = CUBE_TRANSLATE_Y,
-                    .z = ENEMIES[i].translate.y -
-                         (LINE_RADIUS * sinf(polar_radians)),
-                },
-            .scale = SCALE_SPRITE,
-            .color = COLOR_SPRITE,
-        };
-        LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
+        if (ENEMIES[i].player_in_view) {
+            LINES[i] = geom_between(&ENEMY_CUBES(i), &PLAYER_CUBE);
+        } else {
+            const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees);
+            const Geom target = {
+                .translate =
+                    {
+                        .x = ENEMIES[i].translate.x +
+                             (LINE_RADIUS * cosf(polar_radians)),
+                        .y = CUBE_TRANSLATE_Y,
+                        .z = ENEMIES[i].translate.y -
+                             (LINE_RADIUS * sinf(polar_radians)),
+                    },
+                .scale = SCALE_SPRITE,
+                .color = COLOR_SPRITE,
+            };
+            LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
+        }
         LINES[i].translate.y += LINE_TRANSLATE_Y;
         LINES[i].color.w = LINE_COLOR_ALPHA;
     }

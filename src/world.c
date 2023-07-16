@@ -40,6 +40,8 @@ void world_init(void) {
     WORLD_CUBES(LEN_WORLD++) = PLATFORM(0.0f, -5.0f, 30.0f, 40.0f);
     WORLD_CUBES(LEN_WORLD++) = PLATFORM(16.0f, 0.0f, 20.0f, 25.0f);
 
+    OFFSET_PLATFORMS = OFFSET_WORLD + LEN_WORLD;
+
     WORLD_CUBES(LEN_WORLD++) = WALL(-7.0f, 5.5f, 10.0f, 14.0f);
     WORLD_CUBES(LEN_WORLD++) = WALL(-7.0f, -14.5f, 10.0f, 15.0f);
     WORLD_CUBES(LEN_WORLD++) = WALL(7.5f, 4.0f, 8.0f, 17.0f);
