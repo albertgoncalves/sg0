@@ -31,7 +31,7 @@ typedef struct {
 #define VIEW_FAR  100.0f
 #define VIEW_UP   ((Vec3f){0.0f, 1.0f, 0.0f})
 
-#define VIEW_FROM ((Vec3f){0.0f, 45.0f, 15.0f})
+#define VIEW_FROM ((Vec3f){0.0f, 55.0f, 30.0f})
 #define VIEW_TO   ((Vec3f){0.0f, 0.0f, 0.0f})
 
 static Vec3f VIEW_OFFSET = {0};

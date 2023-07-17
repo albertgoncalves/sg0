@@ -25,10 +25,10 @@ struct Waypoint {
 
 static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
-#define RUN      0.0001725f
+#define RUN      0.0002f
 #define FRICTION 0.975f
 
-#define FOV_DEGREES 90.0f
+#define FOV_DEGREES 60.0f
 
 #define WAYPOINT_THRESHOLD 0.025f
 
