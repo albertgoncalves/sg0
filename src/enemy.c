@@ -41,9 +41,9 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
-#define LINE_RADIUS      7.5f
+#define LINE_RADIUS      4.0f
 #define LINE_TRANSLATE_Y 1.75f
-#define LINE_COLOR_ALPHA 0.75f
+#define LINE_COLOR_ALPHA 0.325f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
 #define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]

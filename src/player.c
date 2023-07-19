@@ -11,7 +11,7 @@
 
 #define RUN_THRESHOLD 0.0001f
 
-#define TRANSLATE ((Vec3f){0.0f, 2.0f, 0.0f})
+#define TRANSLATE ((Vec3f){-3.0f, 1.0f, 13.75f})
 
 #define SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
 #define SCALE_SPRITE ((Vec3f){2.0f, 2.0f, 1.0f})
