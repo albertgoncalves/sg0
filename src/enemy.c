@@ -198,6 +198,7 @@ static Bool intersects(const Box* box, Vec2f line[2]) {
 }
 
 void enemy_update(void) {
+    PLAYER_IN_VIEW = FALSE;
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         const Waypoint* waypoint = ENEMIES[i].waypoint;
 
@@ -260,6 +261,7 @@ void enemy_update(void) {
                     goto skip;
                 }
             }
+            PLAYER_IN_VIEW = TRUE;
             ENEMIES[i].player_in_view = TRUE;
         }
     skip:

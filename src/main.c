@@ -29,6 +29,8 @@ u32 OFFSET_WAYPOINTS = 0;
 
 u64 SPRITE_TIME = 0;
 
+Bool PLAYER_IN_VIEW = FALSE;
+
 #define FRAME_UPDATE_COUNT 6
 #define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
 #define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
@@ -53,6 +55,12 @@ static Vec3f input(GLFWwindow* window) {
     return math_normalize(move);
 }
 
+static void init(void) {
+    world_init();
+    player_init();
+    enemy_init();
+}
+
 static void update(GLFWwindow* window,
                    u64         now,
                    u64*        update_time,
@@ -64,6 +72,12 @@ static void update(GLFWwindow* window,
         glfwPollEvents();
         player_update(input(window));
         enemy_update();
+#if 0
+        if (PLAYER_IN_VIEW) {
+            init();
+            continue;
+        }
+#endif
         sprite_update();
         player_animate();
         enemy_animate();
@@ -107,12 +121,6 @@ static void loop(GLFWwindow* window,
                 usleep((u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
         }
     }
-}
-
-static void init(void) {
-    world_init();
-    player_init();
-    enemy_init();
 }
 
 static void callback(GLFWwindow* window, i32 key, i32, i32 action, i32) {
