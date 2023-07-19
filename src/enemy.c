@@ -243,11 +243,12 @@ void enemy_update(void) {
 
         f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees;
         {
-            const f32 rollover = angle - 360.0f;
-            angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
+            const f32 rollover = fabsf(angle - 360.0f);
+            angle = fabsf(angle);
+            angle = rollover < angle ? rollover : angle;
         }
         ENEMIES[i].player_in_view = FALSE;
-        if (fabsf(angle) < FOV_DEGREES) {
+        if (angle < FOV_DEGREES) {
             Vec2f line[2] = {
                 {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
                 ENEMIES[i].translate,
