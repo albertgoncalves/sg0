@@ -243,10 +243,6 @@ void enemy_update(void) {
 
         f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees;
         {
-            const f32 rollover = angle + 360.0f;
-            angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
-        }
-        {
             const f32 rollover = angle - 360.0f;
             angle = fabsf(rollover) < fabsf(angle) ? rollover : angle;
         }
