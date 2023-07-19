@@ -79,11 +79,11 @@ static void update(GLFWwindow* window,
         }
 #endif
         sprite_update();
-        player_animate();
-        enemy_animate();
         graphics_update_camera(PLAYER_CUBE.translate);
     }
     *update_time = now;
+    player_animate();
+    enemy_animate();
     graphics_update_uniforms();
 }
 
