@@ -189,26 +189,14 @@ void graphics_update_camera(Vec3f target) {
     VIEW_OFFSET.z -= (VIEW_OFFSET.z - target.z) / CAMERA_LATENCY;
 }
 
-ATTRIBUTE(noreturn) static void callback_error(i32 code, const char* error) {
+ATTRIBUTE(noreturn) static void callback(i32 code, const char* error) {
     printf("%d: %s\n", code, error);
     _exit(ERROR);
 }
 
-static void callback_key(GLFWwindow* window, i32 key, i32, i32 action, i32) {
-    if (action != GLFW_PRESS) {
-        return;
-    }
-    switch (key) {
-    case GLFW_KEY_ESCAPE: {
-        glfwSetWindowShouldClose(window, TRUE);
-        break;
-    }
-    }
-}
-
 GLFWwindow* graphics_window(void) {
     EXIT_IF(!glfwInit());
-    glfwSetErrorCallback(callback_error);
+    glfwSetErrorCallback(callback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -218,7 +206,6 @@ GLFWwindow* graphics_window(void) {
         glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
     EXIT_IF(!window);
 
-    glfwSetKeyCallback(window, callback_key);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);

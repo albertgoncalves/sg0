@@ -109,9 +109,32 @@ static void loop(GLFWwindow* window,
     }
 }
 
+static void init(void) {
+    world_init();
+    player_init();
+    enemy_init();
+}
+
+static void callback(GLFWwindow* window, i32 key, i32, i32 action, i32) {
+    if (action != GLFW_PRESS) {
+        return;
+    }
+    switch (key) {
+    case GLFW_KEY_ESCAPE: {
+        glfwSetWindowShouldClose(window, TRUE);
+        break;
+    }
+    case GLFW_KEY_R: {
+        init();
+        break;
+    }
+    }
+}
+
 i32 main(void) {
     printf("GLFW version : %s\n", glfwGetVersionString());
     GLFWwindow* window = graphics_window();
+    glfwSetKeyCallback(window, callback);
     printf("GL_VENDOR    : %s\n"
            "GL_RENDERER  : %s\n"
            "\n",
@@ -124,9 +147,7 @@ i32 main(void) {
     const u32 sprite_program = graphics_sprites();
 
     pcg_rng_seed(time_nanoseconds(), 1);
-    world_init();
-    player_init();
-    enemy_init();
+    init();
 
     loop(window, cube_program, line_program, sprite_program);
 
