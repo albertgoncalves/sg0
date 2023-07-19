@@ -33,17 +33,16 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define WAYPOINT_THRESHOLD 0.025f
 
 #define CUBE_TRANSLATE_Y   -0.45f
-#define SPRITE_TRANSLATE_Y 0.69f
+#define SPRITE_TRANSLATE_Y 0.485f
 
 #define SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
-#define SCALE_SPRITE ((Vec3f){2.0f, 3.0f, 1.0f})
-
+#define SCALE_SPRITE ((Vec3f){2.0f, 2.85f, 1.0f})
 #define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
 #define LINE_RADIUS      4.0f
-#define LINE_TRANSLATE_Y 2.125f
-#define LINE_COLOR_ALPHA 0.325f
+#define LINE_TRANSLATE_Y 1.975f
+#define LINE_COLOR_ALPHA 0.25f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
 #define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]
