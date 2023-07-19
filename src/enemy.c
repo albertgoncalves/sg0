@@ -28,7 +28,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define RUN      0.0002f
 #define FRICTION 0.975f
 
-#define FOV_DEGREES 60.0f
+#define FOV_DEGREES 70.0f
 
 #define WAYPOINT_THRESHOLD 0.025f
 
@@ -42,7 +42,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
 #define LINE_RADIUS      4.0f
-#define LINE_TRANSLATE_Y 1.75f
+#define LINE_TRANSLATE_Y 2.125f
 #define LINE_COLOR_ALPHA 0.325f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
