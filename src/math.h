@@ -7,13 +7,19 @@ typedef struct {
     f32 x, y;
 } Vec2f;
 
+STATIC_ASSERT(sizeof(Vec2f) == 8);
+
 typedef struct {
     f32 x, y, z;
 } Vec3f;
 
+STATIC_ASSERT(sizeof(Vec3f) == 12);
+
 typedef struct {
     f32 x, y, z, w;
 } Vec4f;
+
+STATIC_ASSERT(sizeof(Vec4f) == 16);
 
 typedef struct {
     u8 x, y;

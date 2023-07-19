@@ -9,6 +9,8 @@ typedef struct {
     Vec4f color;
 } Geom;
 
+STATIC_ASSERT(sizeof(Geom) == 40);
+
 typedef struct {
     Vec3f position;
     Vec3f normal;
@@ -18,6 +20,8 @@ typedef struct {
     Vec3f left_bottom_back;
     Vec3f right_top_front;
 } Box;
+
+STATIC_ASSERT(sizeof(Box) == 24);
 
 typedef enum {
     HIT_NONE = 0,
@@ -31,6 +35,8 @@ typedef struct {
     f32 overlap;
     Hit hit;
 } Collision;
+
+STATIC_ASSERT(sizeof(Collision) == 12);
 
 Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);

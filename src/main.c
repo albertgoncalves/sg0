@@ -143,9 +143,11 @@ i32 main(void) {
     printf("GLFW version : %s\n", glfwGetVersionString());
     GLFWwindow* window = graphics_window();
     glfwSetKeyCallback(window, callback);
-    printf("GL_VENDOR    : %s\n"
+    printf("GL_VERSION   : %s\n"
+           "GL_VENDOR    : %s\n"
            "GL_RENDERER  : %s\n"
            "\n",
+           glGetString(GL_VERSION),
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
 
