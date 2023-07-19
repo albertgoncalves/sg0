@@ -43,6 +43,10 @@ static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {3, 4, 0, 7, 6, 5, 1, 2};
 static Vec3f SPEED = {0};
 
 void player_init(void) {
+    SPEED.x = 0;
+    SPEED.y = 0;
+    SPEED.z = 0;
+
     PLAYER_CUBE.translate = TRANSLATE;
     PLAYER_CUBE.scale = SCALE_CUBE;
     PLAYER_CUBE.color = COLOR_CUBE;
@@ -50,6 +54,9 @@ void player_init(void) {
     PLAYER_SPRITE.geom.translate = TRANSLATE;
     PLAYER_SPRITE.geom.scale = SCALE_SPRITE;
     PLAYER_SPRITE.geom.color = COLOR_SPRITE;
+
+    PLAYER_SPRITE.col_row.x = 0;
+    PLAYER_SPRITE.col_row.y = 0;
 }
 
 void player_update(Vec3f move) {

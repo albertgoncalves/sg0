@@ -168,14 +168,21 @@ void enemy_init(void) {
     EXIT_IF(CAP_LINES < LEN_LINES);
 
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
+        ENEMIES[i].speed.x = 0.0f;
+        ENEMIES[i].speed.y = 0.0f;
+
         ENEMY_CUBES(i) = (Geom){
             .translate = {.y = CUBE_TRANSLATE_Y},
             .scale = SCALE_CUBE,
             .color = COLOR_CUBE,
         };
+
         ENEMY_SPRITES(i).geom.translate.y = SPRITE_TRANSLATE_Y;
         ENEMY_SPRITES(i).geom.scale = SCALE_SPRITE;
         ENEMY_SPRITES(i).geom.color = COLOR_SPRITE;
+
+        ENEMY_SPRITES(i).col_row.x = 0;
+        ENEMY_SPRITES(i).col_row.y = 0;
     }
 }
 
