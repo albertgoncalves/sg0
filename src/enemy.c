@@ -174,6 +174,14 @@ void enemy_init(void) {
         ENEMIES[i].speed.x = 0.0f;
         ENEMIES[i].speed.y = 0.0f;
 
+        {
+            const Waypoint* waypoint = ENEMIES[i].waypoint->next;
+            ENEMIES[i].polar_degrees = math_polar_degrees((Vec2f){
+                .x = waypoint->translate.x - ENEMIES[i].translate.x,
+                .y = -(waypoint->translate.y - ENEMIES[i].translate.y),
+            });
+        }
+
         ENEMY_CUBES(i) = (Geom){
             .translate = {.y = CUBE_TRANSLATE_Y},
             .scale = SCALE_CUBE,
