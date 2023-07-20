@@ -30,7 +30,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define HALT 0.0001f
 
-#define TURN 3.5f
+#define TURN 2.25f
 
 #define FOV_DEGREES 70.0f
 

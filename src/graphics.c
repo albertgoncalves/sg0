@@ -21,8 +21,13 @@ typedef struct {
 #define PATH_SPRITE_VERT "shaders/sprite_vert.glsl"
 #define PATH_SPRITE_FRAG "shaders/sprite_frag.glsl"
 
-#define WINDOW_WIDTH  1500
-#define WINDOW_HEIGHT 860
+#if 1
+    #define WINDOW_WIDTH  1500
+    #define WINDOW_HEIGHT 860
+#else
+    #define WINDOW_WIDTH  2500
+    #define WINDOW_HEIGHT 1150
+#endif
 
 #define FOV_DEGREES  45.0f
 #define ASPECT_RATIO (((f32)WINDOW_WIDTH) / ((f32)WINDOW_HEIGHT))
