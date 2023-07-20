@@ -9,7 +9,7 @@
 #define FRICTION 0.9425f
 #define DRAG     0.999f
 
-#define RUN_THRESHOLD 0.0001f
+#define HALT 0.0001f
 
 #define TRANSLATE ((Vec3f){-3.0f, 1.0f, 13.75f})
 
@@ -156,7 +156,7 @@ void player_update(Vec3f move) {
 void player_animate(void) {
     PLAYER_SPRITE.geom.translate = PLAYER_CUBE.translate;
     PLAYER_SPRITE.geom.translate.y += SPRITE_TRANSLATE_Y;
-    if ((fabsf(SPEED.x) < RUN_THRESHOLD) && (fabsf(SPEED.z) < RUN_THRESHOLD)) {
+    if ((fabsf(SPEED.x) <= HALT) && (fabsf(SPEED.z) <= HALT)) {
         PLAYER_SPRITE.col_row.x = 4;
         return;
     }

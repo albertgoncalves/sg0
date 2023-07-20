@@ -28,6 +28,10 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define RUN      0.0002f
 #define FRICTION 0.975f
 
+#define HALT 0.0001f
+
+#define TURN 3.5f
+
 #define FOV_DEGREES 70.0f
 
 #define WAYPOINT_THRESHOLD 0.025f
@@ -230,17 +234,50 @@ void enemy_update(void) {
             };
         }
 
-        const Vec3f move = math_normalize(distance);
-        ENEMIES[i].speed.x += move.x * RUN;
-        ENEMIES[i].speed.y += move.z * RUN;
-        ENEMIES[i].speed.x *= FRICTION;
-        ENEMIES[i].speed.y *= FRICTION;
-        ENEMIES[i].translate.x += ENEMIES[i].speed.x;
-        ENEMIES[i].translate.y += ENEMIES[i].speed.y;
-        ENEMIES[i].polar_degrees = math_polar_degrees((Vec2f){
-            .x = ENEMIES[i].speed.x,
-            .y = -ENEMIES[i].speed.y,
-        });
+        {
+            const Vec3f move = math_normalize(distance);
+
+            const f32 polar_degrees_move = math_polar_degrees((Vec2f){
+                .x = move.x,
+                .y = -move.z,
+            });
+
+            f32 angle = polar_degrees_move - ENEMIES[i].polar_degrees;
+            {
+                const f32 reverse = angle + 360.0f;
+                angle = fabsf(reverse) < fabsf(angle) ? reverse : angle;
+            }
+            {
+                const f32 reverse = angle - 360.0f;
+                angle = fabsf(reverse) < fabsf(angle) ? reverse : angle;
+            }
+
+            if (fabsf(angle) < TURN) {
+                ENEMIES[i].speed.x += move.x * RUN;
+                ENEMIES[i].speed.y += move.z * RUN;
+                ENEMIES[i].speed.x *= FRICTION;
+                ENEMIES[i].speed.y *= FRICTION;
+                ENEMIES[i].translate.x += ENEMIES[i].speed.x;
+                ENEMIES[i].translate.y += ENEMIES[i].speed.y;
+
+                ENEMIES[i].polar_degrees = polar_degrees_move;
+            } else {
+                ENEMIES[i].speed.x = 0.0f;
+                ENEMIES[i].speed.y = 0.0f;
+
+                if (0.0f < angle) {
+                    ENEMIES[i].polar_degrees += TURN;
+                    if (360.0f <= ENEMIES[i].polar_degrees) {
+                        ENEMIES[i].polar_degrees -= 360.0f;
+                    }
+                } else {
+                    ENEMIES[i].polar_degrees -= TURN;
+                    if (ENEMIES[i].polar_degrees < 0.0f) {
+                        ENEMIES[i].polar_degrees += 360.0f;
+                    }
+                }
+            }
+        }
 
         const f32 polar_degrees_player = math_polar_degrees((Vec2f){
             .x = PLAYER_CUBE.translate.x - ENEMIES[i].translate.x,
@@ -249,9 +286,9 @@ void enemy_update(void) {
 
         f32 angle = polar_degrees_player - ENEMIES[i].polar_degrees;
         {
-            const f32 rollover = fabsf(angle - 360.0f);
+            const f32 reverse = fabsf(angle - 360.0f);
             angle = fabsf(angle);
-            angle = rollover < angle ? rollover : angle;
+            angle = reverse < angle ? reverse : angle;
         }
         ENEMIES[i].player_in_view = FALSE;
         if (angle < FOV_DEGREES) {
@@ -279,12 +316,16 @@ void enemy_animate(void) {
         ENEMY_SPRITES(i).geom.translate.x = ENEMIES[i].translate.x;
         ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.y;
 
-        ENEMY_SPRITES(i).col_row = (Vec2u){
-            .x = SPRITE_COLS_OFFSET +
-                 ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
-            .y = SPRITE_ROWS_OFFSET +
-                 SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)],
-        };
+        ENEMY_SPRITES(i).col_row.x = SPRITE_COLS_OFFSET;
+        if ((HALT < fabsf(ENEMIES[i].speed.x)) ||
+            (HALT < fabsf(ENEMIES[i].speed.y)))
+        {
+            ENEMY_SPRITES(i).col_row.x +=
+                ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1));
+        }
+        ENEMY_SPRITES(i).col_row.y =
+            SPRITE_ROWS_OFFSET +
+            SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)];
 
         if (ENEMIES[i].player_in_view) {
             LINES[i] = geom_between(&ENEMY_CUBES(i), &PLAYER_CUBE);
