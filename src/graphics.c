@@ -562,14 +562,19 @@ void graphics_draw(GLFWwindow* window) {
                     0,
                     sizeof(Geom) * OFFSET_WAYPOINTS,
                     &CUBES[0]);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            sizeof(CUBE_INDICES) / (sizeof(u8)),
+                            GL_UNSIGNED_BYTE,
+                            NULL,
+                            (i32)OFFSET_WAYPOINTS);
 #else
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_CUBES, &CUBES[0]);
-#endif
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(CUBE_INDICES) / (sizeof(u8)),
                             GL_UNSIGNED_BYTE,
                             NULL,
                             (i32)LEN_CUBES);
+#endif
 
     glUseProgram(LINE_PROGRAM);
     glBindVertexArray(VAO[1]);
