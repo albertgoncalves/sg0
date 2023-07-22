@@ -21,7 +21,6 @@
 
 #define SPRITE_TRANSLATE_Y 1.0f
 
-#define PLAYER_BOX    BOXES[OFFSET_PLAYER]
 #define PLAYER_SPRITE SPRITES[OFFSET_PLAYER]
 
 #define SPRITE_COLS 5
@@ -40,12 +39,10 @@
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {3, 4, 0, 7, 6, 5, 1, 2};
 
-static Vec3f SPEED = {0};
-
 void player_init(void) {
-    SPEED.x = 0;
-    SPEED.y = 0;
-    SPEED.z = 0;
+    PLAYER_SPEED.x = 0;
+    PLAYER_SPEED.y = 0;
+    PLAYER_SPEED.z = 0;
 
     PLAYER_CUBE.translate = TRANSLATE;
     PLAYER_CUBE.scale = SCALE_CUBE;
@@ -60,27 +57,27 @@ void player_init(void) {
 }
 
 void player_update(Vec3f move) {
-    EXIT_IF(0.0f < SPEED.y);
-    if (SPEED.y < 0.0f) {
-        SPEED.x *= DRAG;
-        SPEED.z *= DRAG;
+    EXIT_IF(0.0f < PLAYER_SPEED.y);
+    if (PLAYER_SPEED.y < 0.0f) {
+        PLAYER_SPEED.x *= DRAG;
+        PLAYER_SPEED.z *= DRAG;
     } else {
-        SPEED.x += move.x * RUN;
-        SPEED.z += move.z * RUN;
-        SPEED.x *= FRICTION;
-        SPEED.z *= FRICTION;
+        PLAYER_SPEED.x += move.x * RUN;
+        PLAYER_SPEED.z += move.z * RUN;
+        PLAYER_SPEED.x *= FRICTION;
+        PLAYER_SPEED.z *= FRICTION;
     }
-    SPEED.y -= WORLD_GRAVITY;
+    PLAYER_SPEED.y -= WORLD_GRAVITY;
     {
-        Vec3f speed = SPEED;
-        Vec3f remaining = SPEED;
+        Vec3f speed = PLAYER_SPEED;
+        Vec3f remaining = PLAYER_SPEED;
         u8    hit = 0;
         for (u32 _ = 0; _ < 3; ++_) {
-            PLAYER_BOX = geom_box(&PLAYER_CUBE);
+            const Box player_box = geom_box(&PLAYER_CUBE);
             Collision collision = {0};
             for (u32 i = OFFSET_WORLD; i < OFFSET_WAYPOINTS; ++i) {
                 const Collision candidate =
-                    geom_collision(&PLAYER_BOX, &BOXES[i], &speed);
+                    geom_collision(&player_box, &BOXES[i], &speed);
                 if (!candidate.hit) {
                     continue;
                 }
@@ -138,31 +135,31 @@ void player_update(Vec3f move) {
             hit |= collision.hit;
         }
         if (hit & HIT_X) {
-            SPEED.x = 0.0f;
+            PLAYER_SPEED.x = 0.0f;
         }
         if (hit & HIT_Y) {
-            SPEED.y = 0.0f;
+            PLAYER_SPEED.y = 0.0f;
         }
         if (hit & HIT_Z) {
-            SPEED.z = 0.0f;
+            PLAYER_SPEED.z = 0.0f;
         }
     }
     if (PLAYER_CUBE.translate.y < WORLD_FLOOR) {
         PLAYER_CUBE.translate = TRANSLATE;
-        SPEED = (Vec3f){0};
+        PLAYER_SPEED = (Vec3f){0};
     }
 }
 
 void player_animate(void) {
     PLAYER_SPRITE.geom.translate = PLAYER_CUBE.translate;
     PLAYER_SPRITE.geom.translate.y += SPRITE_TRANSLATE_Y;
-    if ((fabsf(SPEED.x) <= HALT) && (fabsf(SPEED.z) <= HALT)) {
+    if ((fabsf(PLAYER_SPEED.x) <= HALT) && (fabsf(PLAYER_SPEED.z) <= HALT)) {
         PLAYER_SPRITE.col_row.x = 4;
         return;
     }
     const f32 polar_degrees = math_polar_degrees((Vec2f){
-        .x = SPEED.x,
-        .y = -SPEED.z,
+        .x = PLAYER_SPEED.x,
+        .y = -PLAYER_SPEED.z,
     });
     PLAYER_SPRITE.col_row = (Vec2u){
         .x = SPRITE_COLS_OFFSET +

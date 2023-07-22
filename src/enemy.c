@@ -6,21 +6,6 @@
 
 #include <math.h>
 
-typedef struct Waypoint Waypoint;
-
-typedef struct {
-    Vec2f           translate;
-    Vec2f           speed;
-    f32             polar_degrees;
-    const Waypoint* waypoint;
-    Bool            player_in_view;
-} Enemy;
-
-struct Waypoint {
-    Vec2f           translate;
-    const Waypoint* next;
-};
-
 #define CAP_WAYPOINTS (1 << 5)
 
 static Waypoint WAYPOINTS[CAP_WAYPOINTS];
@@ -67,8 +52,18 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
-static Enemy ENEMIES[CAP_ENEMIES];
-static u32   LEN_ENEMIES = 0;
+Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
+    return (Enemy){
+        .translate = math_lerp_vec2f(l.translate, r.translate, t),
+        .speed = math_lerp_vec2f(l.speed, r.speed, t),
+        .polar_degrees = math_lerp_f32(l.polar_degrees, r.polar_degrees, t),
+        .waypoint = (const Waypoint*)math_lerp_pointer((const void*)l.waypoint,
+                                                       (const void*)r.waypoint,
+                                                       t),
+        .player_in_view =
+            math_lerp_bool(l.player_in_view, r.player_in_view, t),
+    };
+}
 
 void enemy_init(void) {
     LEN_ENEMIES = 4;

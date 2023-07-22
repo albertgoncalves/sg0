@@ -7,33 +7,51 @@
 #include "time.h"
 #include "world.h"
 
+#include <string.h>
+
 char BUFFER[CAP_BUFFER];
 u32  LEN_BUFFER = 0;
+
+Vec3f VIEW_OFFSET = {0};
 
 Geom CUBES[CAP_CUBES];
 u32  LEN_CUBES = CAP_PLAYER + CAP_ENEMIES;
 
 Geom LINES[CAP_LINES];
-u32  LEN_LINES = 0;
+u32  LEN_LINES;
 
 Sprite SPRITES[CAP_SPRITES];
 u32    LEN_SPRITES = CAP_PLAYER;
 
+// NOTE: We only need `Box` memory for the world geometry. Would be nice to
+// shrink this.
 Box BOXES[CAP_CUBES];
 
-u32 LEN_WORLD = 0;
-u32 LEN_WAYPOINTS = 0;
+u32 LEN_WORLD;
+u32 LEN_WAYPOINTS;
 
-u32 OFFSET_PLATFORMS = 0;
-u32 OFFSET_WAYPOINTS = 0;
+u32 OFFSET_PLATFORMS;
+u32 OFFSET_WAYPOINTS;
+
+Vec3f PLAYER_SPEED = {0};
+
+Enemy ENEMIES[CAP_ENEMIES];
+u32   LEN_ENEMIES;
 
 u64 SPRITE_TIME = 0;
 
 Bool PLAYER_IN_VIEW = FALSE;
 
-#define FRAME_UPDATE_COUNT 6
-#define FRAME_DURATION     (NANO_PER_SECOND / (60 + 1))
-#define FRAME_UPDATE_STEP  (FRAME_DURATION / FRAME_UPDATE_COUNT)
+static Enemy PREVIOUS_ENEMIES[CAP_ENEMIES];
+
+static Geom  PREVIOUS_PLAYER_CUBE = {0};
+static Vec3f PREVIOUS_PLAYER_SPEED = {0};
+static Vec3f PREVIOUS_VIEW_OFFSET = {0};
+static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
+
+#define STEPS_PER_FRAME 6
+#define FRAME_DURATION  (NANO_PER_SECOND / (60 + 1))
+#define STEP_DURATION   (FRAME_DURATION / STEPS_PER_FRAME)
 
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
@@ -61,65 +79,98 @@ static void init(void) {
     enemy_init();
 }
 
-static void update(GLFWwindow* window,
-                   u64         now,
-                   u64*        update_time,
-                   u64*        update_delta) {
-    for (*update_delta += now - *update_time;
-         FRAME_UPDATE_STEP < *update_delta;
-         *update_delta -= FRAME_UPDATE_STEP)
-    {
-        glfwPollEvents();
-        player_update(input(window));
-        enemy_update();
-#if 0
-        if (PLAYER_IN_VIEW) {
-            init();
-            continue;
+static void step(GLFWwindow* window) {
+    glfwPollEvents();
+    player_update(input(window));
+    enemy_update();
+    sprite_update();
+    graphics_update_camera(PLAYER_CUBE.translate);
+}
+
+// NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
+static void update(GLFWwindow* window) {
+    u64 delta = FRAME_DURATION;
+    u64 prev = time_nanoseconds();
+    for (; STEP_DURATION < delta; delta -= STEP_DURATION) {
+        step(window);
+
+        const u64 now = time_nanoseconds();
+        const u64 elapsed = now - prev;
+        if (elapsed < STEP_DURATION) {
+            const u64 remaining = STEP_DURATION - elapsed;
+            EXIT_IF(usleep((u32)(remaining / NANO_PER_MICRO)));
         }
-#endif
-        sprite_update();
-        graphics_update_camera(PLAYER_CUBE.translate);
+        prev = now;
     }
-    *update_time = now;
+
+    PREVIOUS_VIEW_OFFSET = VIEW_OFFSET;
+
+    PREVIOUS_PLAYER_CUBE = PLAYER_CUBE;
+    PREVIOUS_PLAYER_SPEED = PLAYER_SPEED;
+
+    memcpy(PREVIOUS_ENEMIES, ENEMIES, sizeof(Enemy) * LEN_ENEMIES);
+    PREVIOUS_PLAYER_IN_VIEW = PLAYER_IN_VIEW;
+
+    step(window);
+    {
+        const f32 blend = ((f32)delta) / ((f32)STEP_DURATION);
+        EXIT_IF(blend < 0.0f);
+        EXIT_IF(1.0f <= blend);
+
+        VIEW_OFFSET =
+            math_lerp_vec3f(PREVIOUS_VIEW_OFFSET, VIEW_OFFSET, blend);
+
+        PLAYER_CUBE = geom_lerp(PREVIOUS_PLAYER_CUBE, PLAYER_CUBE, blend);
+        PLAYER_SPEED =
+            math_lerp_vec3f(PREVIOUS_PLAYER_SPEED, PLAYER_SPEED, blend);
+
+        for (u32 i = 0; i < LEN_ENEMIES; ++i) {
+            ENEMIES[i] = enemy_lerp(PREVIOUS_ENEMIES[i], ENEMIES[i], blend);
+        }
+        PLAYER_IN_VIEW =
+            math_lerp_bool(PREVIOUS_PLAYER_IN_VIEW, PLAYER_IN_VIEW, blend);
+    }
+
+#if 0
+    if (PLAYER_IN_VIEW) {
+        init();
+    }
+#endif
+
     player_animate();
     enemy_animate();
     graphics_update_uniforms();
 }
 
-static void loop(GLFWwindow* window,
-                 u32         cube_program,
-                 u32         line_program,
-                 u32         sprite_program) {
-    u64 update_time = time_nanoseconds();
-    u64 update_delta = 0;
-    u64 frame_time = update_time;
+static void loop(GLFWwindow* window) {
+    u64 frame_prev = time_nanoseconds();
     u64 frame_count = 0;
 
     printf("\n\n");
     while (!glfwWindowShouldClose(window)) {
         const u64 now = time_nanoseconds();
 
-        ++frame_count;
         // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
-        if (NANO_PER_SECOND <= (now - frame_time)) {
+        if (NANO_PER_SECOND <= (now - frame_prev)) {
             printf("\033[2A"
                    "%7.4f ms/f\n"
                    "%7lu f/s\n",
                    (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
                    frame_count);
-            frame_time += NANO_PER_SECOND;
+            frame_prev += NANO_PER_SECOND;
             frame_count = 0;
         }
 
-        update(window, now, &update_time, &update_delta);
-        graphics_draw(window, cube_program, line_program, sprite_program);
+        update(window);
+        graphics_draw(window);
 
         const u64 elapsed = time_nanoseconds() - now;
         if (elapsed < FRAME_DURATION) {
-            EXIT_IF(
-                usleep((u32)((FRAME_DURATION - elapsed) / NANO_PER_MICRO)));
+            const u64 remaining = FRAME_DURATION - elapsed;
+            EXIT_IF(usleep((u32)(remaining / NANO_PER_MICRO)));
         }
+
+        ++frame_count;
     }
 }
 
@@ -150,22 +201,14 @@ i32 main(void) {
            glGetString(GL_VERSION),
            glGetString(GL_VENDOR),
            glGetString(GL_RENDERER));
-
     graphics_init();
-    const u32 cube_program = graphics_cubes();
-    const u32 line_program = graphics_lines();
-    const u32 sprite_program = graphics_sprites();
 
     pcg_rng_seed(time_nanoseconds(), 1);
     init();
 
-    loop(window, cube_program, line_program, sprite_program);
+    loop(window);
 
     graphics_free();
-    glDeleteProgram(cube_program);
-    glDeleteProgram(line_program);
-    glDeleteProgram(sprite_program);
-
     glfwTerminate();
     return OK;
 }

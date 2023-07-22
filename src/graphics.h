@@ -7,6 +7,8 @@
 
 #include <GLFW/glfw3.h>
 
+extern Vec3f VIEW_OFFSET;
+
 GLFWwindow* graphics_window(void);
 
 void graphics_init(void);
@@ -19,6 +21,6 @@ u32 graphics_sprites(void);
 void graphics_update_camera(Vec3f);
 void graphics_update_uniforms(void);
 void graphics_update_sprites(void);
-void graphics_draw(GLFWwindow*, u32, u32, u32);
+void graphics_draw(GLFWwindow*);
 
 #endif
