@@ -7,7 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
-extern Vec3f VIEW_OFFSET;
+extern Vec3f OFFSET_VIEW;
 
 GLFWwindow* graphics_window(void);
 

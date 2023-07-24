@@ -12,7 +12,7 @@
 char BUFFER[CAP_BUFFER];
 u32  LEN_BUFFER = 0;
 
-Vec3f VIEW_OFFSET = {0};
+Vec3f OFFSET_VIEW = {0};
 
 Geom CUBES[CAP_CUBES];
 u32  LEN_CUBES = CAP_PLAYER + CAP_ENEMIES;
@@ -44,7 +44,7 @@ static Enemy PREVIOUS_ENEMIES[CAP_ENEMIES];
 
 static Geom  PREVIOUS_PLAYER_CUBE = {0};
 static Vec3f PREVIOUS_PLAYER_SPEED = {0};
-static Vec3f PREVIOUS_VIEW_OFFSET = {0};
+static Vec3f PREVIOUS_OFFSET_VIEW = {0};
 static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 
 #define STEPS_PER_FRAME   6
@@ -89,11 +89,11 @@ static void step(GLFWwindow* window) {
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
 static void update(GLFWwindow* window) {
     u64 remaining = NANOS_PER_FRAME;
-    u64 prev = time_nanoseconds();
+    u64 prev = time_now();
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
         step(window);
 
-        const u64 now = time_nanoseconds();
+        const u64 now = time_now();
         const u64 elapsed = now - prev;
         if (elapsed < NANOS_PER_STEP) {
             time_sleep(NANOS_PER_STEP - elapsed);
@@ -101,7 +101,7 @@ static void update(GLFWwindow* window) {
         prev = now;
     }
 
-    PREVIOUS_VIEW_OFFSET = VIEW_OFFSET;
+    PREVIOUS_OFFSET_VIEW = OFFSET_VIEW;
 
     PREVIOUS_PLAYER_CUBE = PLAYER_CUBE;
     PREVIOUS_PLAYER_SPEED = PLAYER_SPEED;
@@ -115,8 +115,8 @@ static void update(GLFWwindow* window) {
         EXIT_IF(blend <= 0.0f);
         EXIT_IF(1.0f < blend);
 
-        VIEW_OFFSET =
-            math_lerp_vec3f(PREVIOUS_VIEW_OFFSET, VIEW_OFFSET, blend);
+        OFFSET_VIEW =
+            math_lerp_vec3f(PREVIOUS_OFFSET_VIEW, OFFSET_VIEW, blend);
 
         PLAYER_CUBE = geom_lerp(PREVIOUS_PLAYER_CUBE, PLAYER_CUBE, blend);
         PLAYER_SPEED =
@@ -141,12 +141,12 @@ static void update(GLFWwindow* window) {
 }
 
 static void loop(GLFWwindow* window) {
-    u64 prev = time_nanoseconds();
+    u64 prev = time_now();
     u64 frames = 0;
 
     printf("\n\n\n");
     while (!glfwWindowShouldClose(window)) {
-        const u64 now = time_nanoseconds();
+        const u64 now = time_now();
 
         {
             // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
@@ -172,7 +172,7 @@ static void loop(GLFWwindow* window) {
         graphics_draw(window);
 
         {
-            const u64 elapsed = time_nanoseconds() - now;
+            const u64 elapsed = time_now() - now;
             if (elapsed < NANOS_PER_FRAME) {
                 time_sleep(NANOS_PER_FRAME - elapsed);
             }
@@ -211,7 +211,7 @@ i32 main(void) {
            glGetString(GL_RENDERER));
     graphics_init();
 
-    pcg_rng_seed(time_nanoseconds(), 1);
+    pcg_rng_seed(time_now(), 1);
     init();
 
     loop(window);

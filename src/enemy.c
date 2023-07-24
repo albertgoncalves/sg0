@@ -14,25 +14,26 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define RUN      0.0002f
 #define FRICTION 0.975f
 
-#define HALT 0.0001f
-
 #define TURN 2.25f
+
+#define HALT      0.0001f
+#define THRESHOLD 0.025f
 
 #define FOV_DEGREES 70.0f
 
-#define WAYPOINT_THRESHOLD 0.025f
-
-#define CUBE_TRANSLATE_Y   -0.45f
-#define SPRITE_TRANSLATE_Y 0.485f
+#define TRANSLATE_Y_CUBE   -0.45f
+#define TRANSLATE_Y_LINE   1.975f
+#define TRANSLATE_Y_SPRITE 0.485f
 
 #define SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
 #define SCALE_SPRITE ((Vec3f){2.0f, 2.85f, 1.0f})
+
 #define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
 
-#define LINE_RADIUS      4.0f
-#define LINE_TRANSLATE_Y 1.975f
-#define LINE_COLOR_ALPHA 0.25f
+#define ALPHA_LINE 0.25f
+
+#define RADIUS_LINE 4.0f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
 #define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]
@@ -40,16 +41,16 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define SPRITE_COLS 4
 #define SPRITE_ROWS 4
 
-#define SPRITE_COLS_OFFSET 5
-#define SPRITE_ROWS_OFFSET 0
+#define OFFSET_SPRITE_COLS 5
+#define OFFSET_SPRITE_ROWS 0
 
-#define SPRITE_TURN      (360.0f / SPRITE_ROWS)
-#define SPRITE_TURN_HALF (SPRITE_TURN / 2.0f)
+#define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
 #define SPRITE_RATE 22500
 
-#define DIRECTION(polar_degrees) \
-    (((u8)((polar_degrees + SPRITE_TURN_HALF) / SPRITE_TURN)) % SPRITE_ROWS)
+#define DIRECTION(polar_degrees)                                    \
+    (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
+     SPRITE_ROWS)
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
@@ -175,12 +176,12 @@ void enemy_init(void) {
         }
 
         ENEMY_CUBES(i) = (Geom){
-            .translate = {.y = CUBE_TRANSLATE_Y},
+            .translate = {.y = TRANSLATE_Y_CUBE},
             .scale = SCALE_CUBE,
             .color = COLOR_CUBE,
         };
 
-        ENEMY_SPRITES(i).geom.translate.y = SPRITE_TRANSLATE_Y;
+        ENEMY_SPRITES(i).geom.translate.y = TRANSLATE_Y_SPRITE;
         ENEMY_SPRITES(i).geom.scale = SCALE_SPRITE;
         ENEMY_SPRITES(i).geom.color = COLOR_SPRITE;
 
@@ -217,8 +218,8 @@ void enemy_update(void) {
             .y = 0.0f,
             .z = waypoint->translate.y - ENEMIES[i].translate.y,
         };
-        if ((fabsf(distance.x - ENEMIES[i].speed.x) < WAYPOINT_THRESHOLD) &&
-            (fabsf(distance.z - ENEMIES[i].speed.y) < WAYPOINT_THRESHOLD))
+        if ((fabsf(distance.x - ENEMIES[i].speed.x) < THRESHOLD) &&
+            (fabsf(distance.z - ENEMIES[i].speed.y) < THRESHOLD))
         {
             ENEMIES[i].speed.x = 0.0f;
             ENEMIES[i].speed.y = 0.0f;
@@ -319,7 +320,7 @@ void enemy_animate(void) {
         ENEMY_SPRITES(i).geom.translate.x = ENEMIES[i].translate.x;
         ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.y;
 
-        ENEMY_SPRITES(i).col_row.x = SPRITE_COLS_OFFSET;
+        ENEMY_SPRITES(i).col_row.x = OFFSET_SPRITE_COLS;
         if ((HALT < fabsf(ENEMIES[i].speed.x)) ||
             (HALT < fabsf(ENEMIES[i].speed.y)))
         {
@@ -327,7 +328,7 @@ void enemy_animate(void) {
                 ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1));
         }
         ENEMY_SPRITES(i).col_row.y =
-            SPRITE_ROWS_OFFSET +
+            OFFSET_SPRITE_ROWS +
             SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)];
 
         if (ENEMIES[i].player_in_view) {
@@ -338,17 +339,17 @@ void enemy_animate(void) {
                 .translate =
                     {
                         .x = ENEMIES[i].translate.x +
-                             (LINE_RADIUS * cosf(polar_radians)),
-                        .y = CUBE_TRANSLATE_Y,
+                             (RADIUS_LINE * cosf(polar_radians)),
+                        .y = TRANSLATE_Y_CUBE,
                         .z = ENEMIES[i].translate.y -
-                             (LINE_RADIUS * sinf(polar_radians)),
+                             (RADIUS_LINE * sinf(polar_radians)),
                     },
                 .scale = SCALE_SPRITE,
                 .color = COLOR_SPRITE,
             };
             LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
         }
-        LINES[i].translate.y += LINE_TRANSLATE_Y;
-        LINES[i].color.w = LINE_COLOR_ALPHA;
+        LINES[i].translate.y += TRANSLATE_Y_LINE;
+        LINES[i].color.w = ALPHA_LINE;
     }
 }

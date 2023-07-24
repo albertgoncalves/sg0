@@ -13,7 +13,7 @@ typedef struct timespec Time;
 #define NANOS_PER_MILLI   (NANOS_PER_SECOND / MILLIS_PER_SECOND)
 #define NANOS_PER_MICRO   (NANOS_PER_SECOND / MICROS_PER_SECOND)
 
-u64  time_nanoseconds(void);
+u64  time_now(void);
 void time_sleep(u64);
 
 #endif

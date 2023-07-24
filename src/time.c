@@ -1,6 +1,6 @@
 #include "time.h"
 
-u64 time_nanoseconds(void) {
+u64 time_now(void) {
     Time time;
     EXIT_IF(clock_gettime(CLOCK_MONOTONIC, &time));
     return ((u64)time.tv_sec * NANOS_PER_SECOND) + (u64)time.tv_nsec;
