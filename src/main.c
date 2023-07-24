@@ -23,9 +23,7 @@ u32  LEN_LINES;
 Sprite SPRITES[CAP_SPRITES];
 u32    LEN_SPRITES = CAP_PLAYER;
 
-// NOTE: We only need `Box` memory for the world geometry. Would be nice to
-// shrink this.
-Box BOXES[CAP_CUBES];
+Box BOXES[CAP_WORLD];
 
 u32 LEN_WORLD;
 u32 LEN_WAYPOINTS;

@@ -296,7 +296,10 @@ void enemy_update(void) {
                 {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
                 ENEMIES[i].translate,
             };
-            for (u32 j = OFFSET_PLATFORMS; j < OFFSET_WAYPOINTS; ++j) {
+            for (u32 j = (OFFSET_PLATFORMS - OFFSET_WORLD);
+                 j < (OFFSET_WAYPOINTS - OFFSET_WORLD);
+                 ++j)
+            {
                 if (intersects(&BOXES[j], line)) {
                     goto skip;
                 }

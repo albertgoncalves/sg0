@@ -11,8 +11,6 @@
 
 #define WORLD_CUBES(i) CUBES[OFFSET_WORLD + (i)]
 
-#define CAP_WORLD (CAP_CUBES - (CAP_ENEMIES + CAP_PLAYER))
-
 #define PLATFORM(x, z, width, depth)   \
     ((Geom){                           \
         .translate = {x, -1.0f, z},    \
@@ -102,6 +100,6 @@ void world_init(void) {
     EXIT_IF(CAP_CUBES < LEN_CUBES);
 
     for (u32 i = 0; i < LEN_WORLD; ++i) {
-        BOXES[OFFSET_WORLD + i] = geom_box(&CUBES[OFFSET_WORLD + i]);
+        BOXES[i] = geom_box(&CUBES[OFFSET_WORLD + i]);
     }
 }

@@ -50,6 +50,6 @@ extern u32  LEN_CUBES;
 extern Geom LINES[CAP_LINES];
 extern u32  LEN_LINES;
 
-extern Box BOXES[CAP_CUBES];
+extern Box BOXES[CAP_WORLD];
 
 #endif

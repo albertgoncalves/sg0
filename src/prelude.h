@@ -53,6 +53,7 @@ typedef enum {
 
 #define CAP_PLAYER  1
 #define CAP_ENEMIES (1 << 4)
+#define CAP_WORLD   (CAP_CUBES - (CAP_PLAYER + CAP_ENEMIES))
 
 #define CAP_SPRITES (1 << 4)
 
@@ -61,5 +62,6 @@ typedef enum {
 #define OFFSET_WORLD   (CAP_PLAYER + CAP_ENEMIES)
 
 STATIC_ASSERT(OFFSET_WORLD < CAP_CUBES);
+STATIC_ASSERT(CAP_WORLD == (CAP_CUBES - OFFSET_WORLD));
 
 #endif
