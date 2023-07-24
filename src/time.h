@@ -3,12 +3,17 @@
 
 #include "prelude.h"
 
-#define MILLI_PER_SECOND 1000llu
-#define MICRO_PER_SECOND 1000000llu
-#define NANO_PER_SECOND  1000000000llu
-#define NANO_PER_MILLI   (NANO_PER_SECOND / MILLI_PER_SECOND)
-#define NANO_PER_MICRO   (NANO_PER_SECOND / MICRO_PER_SECOND)
+#include <time.h>
 
-u64 time_nanoseconds(void);
+typedef struct timespec Time;
+
+#define MILLIS_PER_SECOND 1000
+#define MICROS_PER_SECOND 1000000
+#define NANOS_PER_SECOND  1000000000
+#define NANOS_PER_MILLI   (NANOS_PER_SECOND / MILLIS_PER_SECOND)
+#define NANOS_PER_MICRO   (NANOS_PER_SECOND / MICROS_PER_SECOND)
+
+u64  time_nanoseconds(void);
+void time_sleep(u64);
 
 #endif

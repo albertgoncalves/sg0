@@ -49,9 +49,10 @@ static Vec3f PREVIOUS_PLAYER_SPEED = {0};
 static Vec3f PREVIOUS_VIEW_OFFSET = {0};
 static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 
-#define STEPS_PER_FRAME 6
-#define FRAME_DURATION  (NANO_PER_SECOND / (60 + 1))
-#define STEP_DURATION   (FRAME_DURATION / STEPS_PER_FRAME)
+#define STEPS_PER_FRAME   6
+#define FRAMES_PER_SECOND 60
+#define NANOS_PER_FRAME   ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
+#define NANOS_PER_STEP    (NANOS_PER_FRAME / STEPS_PER_FRAME)
 
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
@@ -89,16 +90,15 @@ static void step(GLFWwindow* window) {
 
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
 static void update(GLFWwindow* window) {
-    u64 delta = FRAME_DURATION;
+    u64 remaining = NANOS_PER_FRAME;
     u64 prev = time_nanoseconds();
-    for (; STEP_DURATION < delta; delta -= STEP_DURATION) {
+    for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
         step(window);
 
         const u64 now = time_nanoseconds();
         const u64 elapsed = now - prev;
-        if (elapsed < STEP_DURATION) {
-            const u64 remaining = STEP_DURATION - elapsed;
-            EXIT_IF(usleep((u32)(remaining / NANO_PER_MICRO)));
+        if (elapsed < NANOS_PER_STEP) {
+            time_sleep(NANOS_PER_STEP - elapsed);
         }
         prev = now;
     }
@@ -113,9 +113,9 @@ static void update(GLFWwindow* window) {
 
     step(window);
     {
-        const f32 blend = ((f32)delta) / ((f32)STEP_DURATION);
-        EXIT_IF(blend < 0.0f);
-        EXIT_IF(1.0f <= blend);
+        const f32 blend = ((f32)remaining) / ((f32)NANOS_PER_STEP);
+        EXIT_IF(blend <= 0.0f);
+        EXIT_IF(1.0f < blend);
 
         VIEW_OFFSET =
             math_lerp_vec3f(PREVIOUS_VIEW_OFFSET, VIEW_OFFSET, blend);
@@ -143,34 +143,44 @@ static void update(GLFWwindow* window) {
 }
 
 static void loop(GLFWwindow* window) {
-    u64 frame_prev = time_nanoseconds();
-    u64 frame_count = 0;
+    u64 prev = time_nanoseconds();
+    u64 frames = 0;
 
-    printf("\n\n");
+    printf("\n\n\n");
     while (!glfwWindowShouldClose(window)) {
         const u64 now = time_nanoseconds();
 
-        // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
-        if (NANO_PER_SECOND <= (now - frame_prev)) {
-            printf("\033[2A"
-                   "%7.4f ms/f\n"
-                   "%7lu f/s\n",
-                   (NANO_PER_SECOND / (f64)frame_count) / NANO_PER_MILLI,
-                   frame_count);
-            frame_prev += NANO_PER_SECOND;
-            frame_count = 0;
+        {
+            // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
+            const u64 elapsed = now - prev;
+            if (NANOS_PER_SECOND <= elapsed) {
+                const f64 nanoseconds_per_frame =
+                    ((f64)elapsed) / ((f64)frames);
+                const f64 ratio = nanoseconds_per_frame /
+                                  (NANOS_PER_SECOND / FRAMES_PER_SECOND);
+                printf("\033[3A"
+                       "%9.0f ns/f\n"
+                       "%9.4f ratio\n"
+                       "%9lu frames\n",
+                       nanoseconds_per_frame,
+                       ratio,
+                       frames);
+                prev = now;
+                frames = 0;
+            }
         }
 
         update(window);
         graphics_draw(window);
 
-        const u64 elapsed = time_nanoseconds() - now;
-        if (elapsed < FRAME_DURATION) {
-            const u64 remaining = FRAME_DURATION - elapsed;
-            EXIT_IF(usleep((u32)(remaining / NANO_PER_MICRO)));
+        {
+            const u64 elapsed = time_nanoseconds() - now;
+            if (elapsed < NANOS_PER_FRAME) {
+                time_sleep(NANOS_PER_FRAME - elapsed);
+            }
         }
 
-        ++frame_count;
+        ++frames;
     }
 }
 

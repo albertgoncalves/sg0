@@ -7,11 +7,11 @@
 #define EPSILON 0.00001f
 
 Bool math_lerp_bool(Bool l, Bool r, f32 t) {
-    return t < 0.5f ? l : r;
+    return t <= 0.5f ? l : r;
 }
 
 const void* math_lerp_pointer(const void* l, const void* r, f32 t) {
-    return t < 0.5f ? l : r;
+    return t <= 0.5f ? l : r;
 }
 
 f32 math_lerp_f32(f32 l, f32 r, f32 t) {

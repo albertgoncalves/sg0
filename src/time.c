@@ -1,11 +1,15 @@
 #include "time.h"
 
-#include <time.h>
-
-typedef struct timespec Time;
-
 u64 time_nanoseconds(void) {
     Time time;
     EXIT_IF(clock_gettime(CLOCK_MONOTONIC, &time));
-    return ((u64)time.tv_sec * NANO_PER_SECOND) + (u64)time.tv_nsec;
+    return ((u64)time.tv_sec * NANOS_PER_SECOND) + (u64)time.tv_nsec;
+}
+
+void time_sleep(u64 nanoseconds) {
+    const Time time = (Time){
+        .tv_sec = nanoseconds / NANOS_PER_SECOND,
+        .tv_nsec = nanoseconds % NANOS_PER_SECOND,
+    };
+    EXIT_IF(clock_nanosleep(CLOCK_MONOTONIC, 0, &time, NULL));
 }
