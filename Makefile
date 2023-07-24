@@ -57,7 +57,7 @@ clean:
 
 .PHONY: run
 run: all
-	prime-run ./bin/main
+	./bin/main
 
 .PHONY: profile
 profile: all
