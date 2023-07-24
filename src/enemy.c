@@ -1,5 +1,6 @@
 #include "enemy.h"
 
+#include "pcg_rng.h"
 #include "player.h"
 #include "sprite.h"
 #include "world.h"
@@ -85,12 +86,11 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
+        const Waypoint* waypoint =
+            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        ENEMIES[0].translate = waypoint->translate;
+        ENEMIES[0].waypoint = waypoint;
 #undef N
-        ENEMIES[0].translate = (Vec2f){
-            .x = WAYPOINTS[offset].translate.x,
-            .y = WAYPOINTS[offset].translate.y,
-        };
-        ENEMIES[0].waypoint = &WAYPOINTS[offset];
     }
     {
         const u8  indices[] = {8, 9, 10, 9, 11, 12, 13, 14};
@@ -107,12 +107,11 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
+        const Waypoint* waypoint =
+            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        ENEMIES[1].translate = waypoint->translate;
+        ENEMIES[1].waypoint = waypoint;
 #undef N
-        ENEMIES[1].translate = (Vec2f){
-            .x = WAYPOINTS[offset].translate.x,
-            .y = WAYPOINTS[offset].translate.y,
-        };
-        ENEMIES[1].waypoint = &WAYPOINTS[offset];
     }
     {
         const u8  indices[] = {15, 16};
@@ -129,12 +128,11 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
+        const Waypoint* waypoint =
+            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        ENEMIES[2].translate = waypoint->translate;
+        ENEMIES[2].waypoint = waypoint;
 #undef N
-        ENEMIES[2].translate = (Vec2f){
-            .x = WAYPOINTS[offset].translate.x,
-            .y = WAYPOINTS[offset].translate.y,
-        };
-        ENEMIES[2].waypoint = &WAYPOINTS[offset];
     }
     {
         const u8  indices[] = {17, 18, 19, 18};
@@ -151,12 +149,11 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
+        const Waypoint* waypoint =
+            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        ENEMIES[3].translate = waypoint->translate;
+        ENEMIES[3].waypoint = waypoint;
 #undef N
-        ENEMIES[3].translate = (Vec2f){
-            .x = WAYPOINTS[offset].translate.x,
-            .y = WAYPOINTS[offset].translate.y,
-        };
-        ENEMIES[3].waypoint = &WAYPOINTS[offset];
     }
 
     LEN_SPRITES = CAP_PLAYER + LEN_ENEMIES;

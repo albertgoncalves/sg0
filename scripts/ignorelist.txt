@@ -1,2 +1,6 @@
 [unsigned-integer-overflow]
 fun:pcg_rng_random_uniform_u32
+fun:pcg_rng_random_bounded_u32
+
+[unsigned-shift-base]
+fun:pcg_rng_random_uniform_u32
