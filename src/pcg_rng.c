@@ -28,19 +28,19 @@ u32 pcg_rng_random_uniform_u32(void) {
     return (xor_shift >> rotate) | (xor_shift << ((-rotate) & 31));
 }
 
+// NOTE: See `https://www.pcg-random.org/using-pcg-c-basic.html#generating-doubles`.
+f32 pcg_rng_random_uniform_f32(void) {
+    const u32 x = pcg_rng_random_uniform_u32();
+    return ldexpf((f32)x, -32);
+}
+
 // NOTE: See `https://github.com/imneme/pcg-c-basic/blob/master/pcg_basic.c#L75-L109`.
 u32 pcg_rng_random_bounded_u32(u32 bound) {
     const u32 threshold = (-bound) % bound;
     for (;;) {
-        const u32 r = pcg_rng_random_uniform_u32();
-        if (threshold <= r) {
-            return r % bound;
+        const u32 x = pcg_rng_random_uniform_u32();
+        if (threshold <= x) {
+            return x % bound;
         }
     }
-}
-
-// NOTE: See `https://www.pcg-random.org/using-pcg-c-basic.html#generating-doubles`.
-f32 pcg_rng_random_uniform_f32(void) {
-    const u32 r = pcg_rng_random_uniform_u32();
-    return ldexpf((f32)r, -32);
 }
