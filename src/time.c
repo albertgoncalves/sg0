@@ -11,5 +11,5 @@ void time_sleep(u64 nanoseconds) {
         .tv_sec = nanoseconds / NANOS_PER_SECOND,
         .tv_nsec = nanoseconds % NANOS_PER_SECOND,
     };
-    EXIT_IF(clock_nanosleep(CLOCK_MONOTONIC, 0, &time, NULL));
+    EXIT_IF(clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &time, NULL));
 }

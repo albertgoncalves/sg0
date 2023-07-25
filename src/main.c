@@ -89,16 +89,10 @@ static void step(GLFWwindow* window) {
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
 static void update(GLFWwindow* window) {
     u64 remaining = NANOS_PER_FRAME;
-    u64 prev = time_now();
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
-        step(window);
-
         const u64 now = time_now();
-        const u64 elapsed = now - prev;
-        if (elapsed < NANOS_PER_STEP) {
-            time_sleep(NANOS_PER_STEP - elapsed);
-        }
-        prev = now;
+        step(window);
+        time_sleep(now + NANOS_PER_STEP);
     }
 
     PREVIOUS_OFFSET_VIEW = OFFSET_VIEW;
@@ -170,13 +164,7 @@ static void loop(GLFWwindow* window) {
 
         update(window);
         graphics_draw(window);
-
-        {
-            const u64 elapsed = time_now() - now;
-            if (elapsed < NANOS_PER_FRAME) {
-                time_sleep(NANOS_PER_FRAME - elapsed);
-            }
-        }
+        time_sleep(now + NANOS_PER_FRAME);
 
         ++frames;
     }
