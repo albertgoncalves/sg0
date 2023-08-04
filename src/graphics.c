@@ -1,7 +1,6 @@
 #include "graphics.h"
 
 #include "image.h"
-#include "sprite.h"
 #include "string.h"
 #include "world.h"
 
@@ -20,6 +19,8 @@ typedef struct {
 
 #define PATH_SPRITE_VERT "shaders/sprite_vert.glsl"
 #define PATH_SPRITE_FRAG "shaders/sprite_frag.glsl"
+
+#define PATH_SPRITE_ATLAS "assets/sprite_atlas.png"
 
 #if 1
     #define WINDOW_WIDTH  1500
@@ -46,6 +47,9 @@ typedef struct {
 #define LINE_WIDTH 3.5f
 
 #define UNIFORM_INDEX 0
+
+#define SPRITE_ATLAS_COLS 9
+#define SPRITE_ATLAS_ROWS 8
 
 #define CAP_VAO 3
 static u32 VAO[CAP_VAO];

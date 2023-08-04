@@ -2,7 +2,6 @@
 #include "graphics.h"
 #include "pcg_rng.h"
 #include "player.h"
-#include "sprite.h"
 #include "string.h"
 #include "time.h"
 #include "world.h"
@@ -36,7 +35,6 @@ Vec3f PLAYER_SPEED = {0};
 Enemy ENEMIES[CAP_ENEMIES];
 u32   LEN_ENEMIES;
 
-u64 SPRITE_TIME = 0;
 
 Bool PLAYER_IN_VIEW = FALSE;
 
@@ -82,7 +80,6 @@ static void step(GLFWwindow* window) {
     glfwPollEvents();
     player_update(input(window));
     enemy_update();
-    sprite_update();
     graphics_update_camera(PLAYER_CUBE.translate);
 }
 

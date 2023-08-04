@@ -1,8 +1,9 @@
 #include "enemy.h"
 
+#include "graphics.h"
 #include "pcg_rng.h"
 #include "player.h"
-#include "sprite.h"
+#include "time.h"
 #include "world.h"
 
 #include <math.h>
@@ -46,7 +47,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
-#define SPRITE_RATE 22500
+#define SPRITE_RATE 225000000
 
 #define DIRECTION(polar_degrees)                                    \
     (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
@@ -325,7 +326,7 @@ void enemy_animate(void) {
             (HALT < fabsf(ENEMIES[i].speed.y)))
         {
             ENEMY_SPRITES(i).col_row.x +=
-                ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1));
+                ((time_now() / SPRITE_RATE) % (SPRITE_COLS - 1));
         }
         ENEMY_SPRITES(i).col_row.y =
             OFFSET_SPRITE_ROWS +

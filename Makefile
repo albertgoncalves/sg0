@@ -41,7 +41,6 @@ MODULES = \
 	math \
 	pcg_rng \
 	player \
-	sprite \
 	string \
 	time \
 	world

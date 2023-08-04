@@ -1,6 +1,7 @@
 #include "player.h"
 
-#include "sprite.h"
+#include "graphics.h"
+#include "time.h"
 #include "world.h"
 
 #include <math.h>
@@ -31,7 +32,7 @@
 
 #define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
-#define SPRITE_RATE 10000
+#define SPRITE_RATE 125000000
 
 #define DIRECTION(polar_degrees)                                    \
     (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
@@ -163,7 +164,7 @@ void player_animate(void) {
     });
     PLAYER_SPRITE.col_row = (Vec2u){
         .x = OFFSET_SPRITE_COLS +
-             ((SPRITE_TIME / SPRITE_RATE) % (SPRITE_COLS - 1)),
+             ((time_now() / SPRITE_RATE) % (SPRITE_COLS - 1)),
         .y = OFFSET_SPRITE_ROWS + SPRITE_DIRECTIONS[DIRECTION(polar_degrees)],
     };
 }
