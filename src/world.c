@@ -37,7 +37,7 @@ void world_init(void) {
 
     EXIT_IF(CAP_WORLD < (LEN_WORLD + 2));
     WORLD_CUBES(LEN_WORLD++) = PLATFORM(0.0f, -5.0f, 30.0f, 40.0f);
-    WORLD_CUBES(LEN_WORLD++) = PLATFORM(16.0f, 0.0f, 20.0f, 25.0f);
+    WORLD_CUBES(LEN_WORLD++) = PLATFORM(20.5f, 0.0f, 11.0f, 25.0f);
 
     OFFSET_PLATFORMS = OFFSET_WORLD + LEN_WORLD;
 
