@@ -31,8 +31,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
-
-#define ALPHA_LINE 0.25f
+#define COLOR_LINE   ((Vec4f){0.875f, 0.25f, 0.25f, 0.25f})
 
 #define RADIUS_LINE 4.0f
 
@@ -314,6 +313,23 @@ void enemy_update(void) {
     }
 }
 
+static Geom between(const Geom* l, const Geom* r) {
+    return (Geom){
+        .translate =
+            {
+                .x = (l->translate.x / 2.0f) + (r->translate.x / 2.0f),
+                .y = (l->translate.y / 2.0f) + (r->translate.y / 2.0f),
+                .z = (l->translate.z / 2.0f) + (r->translate.z / 2.0f),
+            },
+        .scale =
+            {
+                .x = l->translate.x - r->translate.x,
+                .y = l->translate.y - r->translate.y,
+                .z = l->translate.z - r->translate.z,
+            },
+    };
+}
+
 void enemy_animate(void) {
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         ENEMY_CUBES(i).translate.x = ENEMIES[i].translate.x;
@@ -333,7 +349,7 @@ void enemy_animate(void) {
             SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)];
 
         if (ENEMIES[i].player_in_view) {
-            LINES[i] = geom_between(&ENEMY_CUBES(i), &PLAYER_CUBE);
+            LINES[i] = between(&ENEMY_CUBES(i), &PLAYER_CUBE);
         } else {
             const f32  polar_radians = math_radians(ENEMIES[i].polar_degrees);
             const Geom target = {
@@ -346,11 +362,10 @@ void enemy_animate(void) {
                              (RADIUS_LINE * sinf(polar_radians)),
                     },
                 .scale = SCALE_SPRITE,
-                .color = COLOR_SPRITE,
             };
-            LINES[i] = geom_between(&ENEMY_CUBES(i), &target);
+            LINES[i] = between(&ENEMY_CUBES(i), &target);
         }
         LINES[i].translate.y += TRANSLATE_Y_LINE;
-        LINES[i].color.w = ALPHA_LINE;
+        LINES[i].color = COLOR_LINE;
     }
 }

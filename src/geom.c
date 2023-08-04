@@ -146,30 +146,6 @@ Collision geom_collision(const Box*   from,
     return collision;
 }
 
-Geom geom_between(const Geom* l, const Geom* r) {
-    return (Geom){
-        .translate =
-            {
-                .x = (l->translate.x / 2.0f) + (r->translate.x / 2.0f),
-                .y = (l->translate.y / 2.0f) + (r->translate.y / 2.0f),
-                .z = (l->translate.z / 2.0f) + (r->translate.z / 2.0f),
-            },
-        .scale =
-            {
-                .x = l->translate.x - r->translate.x,
-                .y = l->translate.y - r->translate.y,
-                .z = l->translate.z - r->translate.z,
-            },
-        .color =
-            {
-                .x = (l->color.x / 2.0f) + (r->color.x / 2.0f),
-                .y = (l->color.y / 2.0f) + (r->color.y / 2.0f),
-                .z = (l->color.z / 2.0f) + (r->color.z / 2.0f),
-                .w = (l->color.w / 2.0f) + (r->color.w / 2.0f),
-            },
-    };
-}
-
 Bool geom_intersects(const Vec2f l[2], const Vec2f r[2]) {
     const f32 x0 = l[0].x - l[1].x;
     const f32 y0 = l[0].y - l[1].y;
