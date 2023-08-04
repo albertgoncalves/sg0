@@ -68,6 +68,8 @@ Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
 }
 
 void enemy_init(void) {
+    PLAYER_IN_VIEW = FALSE;
+
     LEN_ENEMIES = 4;
     EXIT_IF(CAP_ENEMIES < LEN_ENEMIES);
 
