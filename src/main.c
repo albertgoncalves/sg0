@@ -14,21 +14,21 @@ u32  LEN_BUFFER = 0;
 Vec3f OFFSET_VIEW = {0};
 
 Geom CUBES[CAP_CUBES];
-u32  LEN_CUBES = CAP_PLAYER + CAP_ENEMIES;
+u32  LEN_CUBES;
 
 Geom LINES[CAP_LINES];
 u32  LEN_LINES;
 
 Sprite SPRITES[CAP_SPRITES];
-u32    LEN_SPRITES = CAP_PLAYER;
+u32    LEN_SPRITES;
 
 Box BOXES[CAP_WORLD];
 
+u32 LEN_PLATFORMS;
 u32 LEN_WORLD;
-u32 LEN_WAYPOINTS;
 
-u32 OFFSET_PLATFORMS;
-u32 OFFSET_WAYPOINTS;
+u32 OFFSET_PLAYER;
+u32 OFFSET_ENEMIES;
 
 Vec3f PLAYER_SPEED = {0};
 
@@ -48,6 +48,8 @@ static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 #define FRAMES_PER_SECOND 60
 #define NANOS_PER_FRAME   ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
 #define NANOS_PER_STEP    (NANOS_PER_FRAME / STEPS_PER_FRAME)
+
+#define TRANSLATE_Y_PLATFORM 0.05f
 
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
@@ -73,6 +75,15 @@ static void init(void) {
     world_init();
     player_init();
     enemy_init();
+
+    LEN_CUBES = LEN_WORLD + CAP_PLAYER + LEN_ENEMIES;
+    EXIT_IF(CAP_CUBES < LEN_CUBES);
+
+    LEN_SPRITES = CAP_PLAYER + LEN_ENEMIES;
+    EXIT_IF(CAP_SPRITES < LEN_SPRITES);
+
+    LEN_LINES = LEN_ENEMIES;
+    EXIT_IF(CAP_LINES < LEN_LINES);
 }
 
 static void step(GLFWwindow* window) {
@@ -130,6 +141,18 @@ static void update(GLFWwindow* window) {
     graphics_update_uniforms();
 }
 
+static void draw(GLFWwindow* window) {
+    // NOTE: This is a hack to avoid some z-fighting. Would be nice to
+    // implement a better solution.
+    for (u32 i = 0; i < LEN_PLATFORMS; ++i) {
+        CUBES[i].translate.y += TRANSLATE_Y_PLATFORM;
+    }
+    graphics_draw(window);
+    for (u32 i = 0; i < LEN_PLATFORMS; ++i) {
+        CUBES[i].translate.y -= TRANSLATE_Y_PLATFORM;
+    }
+}
+
 static void loop(GLFWwindow* window) {
     u64 prev = time_now();
     u64 frames = 0;
@@ -159,7 +182,7 @@ static void loop(GLFWwindow* window) {
         }
 
         update(window);
-        graphics_draw(window);
+        draw(window);
         time_sleep(now + NANOS_PER_FRAME);
 
         ++frames;

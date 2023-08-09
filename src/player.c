@@ -10,19 +10,19 @@
 #define FRICTION 0.9425f
 #define DRAG     0.999f
 
-#define HALT 0.0001f
+#define HALT 0.000375f
 
 #define TRANSLATE ((Vec3f){-3.0f, 1.0f, 13.75f})
 
 #define SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
 #define SCALE_SPRITE ((Vec3f){2.0f, 2.0f, 1.0f})
 
-#define COLOR_CUBE   ((Vec4f){0.75f, 0.75f, 0.75f, 1.0f})
+#define COLOR_CUBE   ((Vec4f){1.0f, 1.0f, 1.0f, 0.15f})
 #define COLOR_SPRITE ((Vec4f){1.0f, 1.0f, 1.0f, 1.0f})
 
-#define SPRITE_TRANSLATE_Y 1.0f
+#define TRANSLATE_Y_SPRITE 1.0f
 
-#define PLAYER_SPRITE SPRITES[OFFSET_PLAYER]
+#define PLAYER_SPRITE SPRITES[OFFSET_PLAYER - LEN_WORLD]
 
 #define SPRITE_COLS 5
 #define SPRITE_ROWS 8
@@ -76,7 +76,7 @@ void player_update(Vec3f move) {
         for (u32 _ = 0; _ < 3; ++_) {
             const Box player_box = geom_box(&PLAYER_CUBE);
             Collision collision = {0};
-            for (u32 i = 0; i < (OFFSET_WAYPOINTS - OFFSET_WORLD); ++i) {
+            for (u32 i = 0; i < LEN_WORLD; ++i) {
                 const Collision candidate =
                     geom_collision(&player_box, &BOXES[i], &speed);
                 if (!candidate.hit) {
@@ -153,7 +153,7 @@ void player_update(Vec3f move) {
 
 void player_animate(void) {
     PLAYER_SPRITE.geom.translate = PLAYER_CUBE.translate;
-    PLAYER_SPRITE.geom.translate.y += SPRITE_TRANSLATE_Y;
+    PLAYER_SPRITE.geom.translate.y += TRANSLATE_Y_SPRITE;
     if ((fabsf(PLAYER_SPEED.x) <= HALT) && (fabsf(PLAYER_SPEED.z) <= HALT)) {
         PLAYER_SPRITE.col_row.x = 4;
         return;

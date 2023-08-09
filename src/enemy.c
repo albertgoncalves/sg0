@@ -29,14 +29,14 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define SCALE_CUBE   ((Vec3f){1.0f, 0.1f, 1.0f})
 #define SCALE_SPRITE ((Vec3f){2.0f, 2.85f, 1.0f})
 
-#define COLOR_CUBE   ((Vec4f){0.65f, 0.325f, 0.325f, 1.0f})
+#define COLOR_CUBE   ((Vec4f){0.875f, 0.25f, 0.25f, 0.3f})
 #define COLOR_SPRITE ((Vec4f){0.875f, 0.25f, 0.25f, 1.0f})
-#define COLOR_LINE   ((Vec4f){0.875f, 0.25f, 0.25f, 0.25f})
+#define COLOR_LINE   ((Vec4f){0.875f, 0.25f, 0.25f, 0.185f})
 
 #define RADIUS_LINE 4.0f
 
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
-#define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]
+#define ENEMY_SPRITES(i) SPRITES[(OFFSET_ENEMIES + i) - LEN_WORLD]
 
 #define SPRITE_ROWS 4
 
@@ -57,6 +57,32 @@ static const u8 SPRITE_COL_INDICES[] = {1, 2, 3, 2};
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
+static const Vec2f POSITIONS[] = {
+    {-13.5f, 13.5f},  // 0
+    {-13.5f, -23.5f}, // 1
+    {14.0f, -23.5f},  // 2
+    {14.0f, -11.0f},  // 3
+    {24.5f, -11.0f},  // 4
+    {24.5f, 11.0f},   // 5
+    {13.5f, 11.0f},   // 6
+    {13.5f, 13.5f},   // 7
+
+    {0.6f, 13.5f},   // 8
+    {0.6f, -4.0f},   // 9
+    {-13.5f, -4.0f}, // 10
+    {0.6f, -23.5f},  // 11
+    {8.0f, -23.5f},  // 12
+    {8.0f, -6.5f},   // 13
+    {0.6f, -6.5f},   // 14
+
+    {19.0f, -11.0f}, // 15
+    {19.0f, 11.0f},  // 16
+
+    {13.5f, 10.0f}, // 17
+    {13.5f, -6.5f}, // 18
+    {4.35f, -6.5f}, // 19
+};
+
 Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
     return (Enemy){
         .translate = math_lerp_vec2f(l.translate, r.translate, t),
@@ -76,19 +102,15 @@ void enemy_init(void) {
     LEN_ENEMIES = 4;
     EXIT_IF(CAP_ENEMIES < LEN_ENEMIES);
 
-    LEN_WAYPOINTS = 0;
+    u32 len_waypoints = 0;
     {
         const u8  indices[] = {0, 1, 2, 3, 4, 5, 6, 7};
-        const u32 offset = LEN_WAYPOINTS;
+        const u32 offset = len_waypoints;
 #define N (sizeof(indices) / sizeof(indices[0]))
         for (u32 i = 0; i < N; ++i) {
-            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
-            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
-                .translate =
-                    {
-                        .x = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.x,
-                        .y = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.z,
-                    },
+            EXIT_IF(CAP_WAYPOINTS < len_waypoints);
+            WAYPOINTS[len_waypoints++] = (Waypoint){
+                .translate = POSITIONS[indices[i]],
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
@@ -100,16 +122,12 @@ void enemy_init(void) {
     }
     {
         const u8  indices[] = {8, 9, 10, 9, 11, 12, 13, 14};
-        const u32 offset = LEN_WAYPOINTS;
+        const u32 offset = len_waypoints;
 #define N (sizeof(indices) / sizeof(indices[0]))
         for (u32 i = 0; i < N; ++i) {
-            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
-            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
-                .translate =
-                    {
-                        .x = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.x,
-                        .y = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.z,
-                    },
+            EXIT_IF(CAP_WAYPOINTS < len_waypoints);
+            WAYPOINTS[len_waypoints++] = (Waypoint){
+                .translate = POSITIONS[indices[i]],
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
@@ -121,16 +139,12 @@ void enemy_init(void) {
     }
     {
         const u8  indices[] = {15, 16};
-        const u32 offset = LEN_WAYPOINTS;
+        const u32 offset = len_waypoints;
 #define N (sizeof(indices) / sizeof(indices[0]))
         for (u32 i = 0; i < N; ++i) {
-            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
-            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
-                .translate =
-                    {
-                        .x = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.x,
-                        .y = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.z,
-                    },
+            EXIT_IF(CAP_WAYPOINTS < len_waypoints);
+            WAYPOINTS[len_waypoints++] = (Waypoint){
+                .translate = POSITIONS[indices[i]],
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
@@ -142,16 +156,12 @@ void enemy_init(void) {
     }
     {
         const u8  indices[] = {17, 18, 19, 18};
-        const u32 offset = LEN_WAYPOINTS;
+        const u32 offset = len_waypoints;
 #define N (sizeof(indices) / sizeof(indices[0]))
         for (u32 i = 0; i < N; ++i) {
-            EXIT_IF(CAP_WAYPOINTS < LEN_WAYPOINTS);
-            WAYPOINTS[LEN_WAYPOINTS++] = (Waypoint){
-                .translate =
-                    {
-                        .x = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.x,
-                        .y = CUBES[OFFSET_WAYPOINTS + indices[i]].translate.z,
-                    },
+            EXIT_IF(CAP_WAYPOINTS < len_waypoints);
+            WAYPOINTS[len_waypoints++] = (Waypoint){
+                .translate = POSITIONS[indices[i]],
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
@@ -161,12 +171,6 @@ void enemy_init(void) {
         ENEMIES[3].waypoint = waypoint;
 #undef N
     }
-
-    LEN_SPRITES = CAP_PLAYER + LEN_ENEMIES;
-    EXIT_IF(CAP_SPRITES < LEN_SPRITES);
-
-    LEN_LINES = LEN_ENEMIES;
-    EXIT_IF(CAP_LINES < LEN_LINES);
 
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         ENEMIES[i].speed.x = 0.0f;
@@ -302,10 +306,7 @@ void enemy_update(void) {
                 {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
                 ENEMIES[i].translate,
             };
-            for (u32 j = (OFFSET_PLATFORMS - OFFSET_WORLD);
-                 j < (OFFSET_WAYPOINTS - OFFSET_WORLD);
-                 ++j)
-            {
+            for (u32 j = LEN_PLATFORMS; j < LEN_WORLD; ++j) {
                 if (intersects(&BOXES[j], line)) {
                     goto skip;
                 }
