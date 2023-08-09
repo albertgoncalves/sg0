@@ -38,7 +38,6 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define ENEMY_CUBES(i)   CUBES[OFFSET_ENEMIES + i]
 #define ENEMY_SPRITES(i) SPRITES[OFFSET_ENEMIES + i]
 
-#define SPRITE_COLS 4
 #define SPRITE_ROWS 4
 
 #define OFFSET_SPRITE_COLS 5
@@ -46,11 +45,15 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
-#define SPRITE_RATE 225000000
+#define SPRITE_RATE 250000000
 
 #define DIRECTION(polar_degrees)                                    \
     (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
      SPRITE_ROWS)
+
+static const u8 SPRITE_COL_INDICES[] = {1, 2, 3, 2};
+#define SPRITE_COLS \
+    (sizeof(SPRITE_COL_INDICES) / sizeof(SPRITE_COL_INDICES[0]))
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
@@ -344,7 +347,7 @@ void enemy_animate(void) {
             (HALT < fabsf(ENEMIES[i].speed.y)))
         {
             ENEMY_SPRITES(i).col_row.x +=
-                ((time_now() / SPRITE_RATE) % (SPRITE_COLS - 1));
+                SPRITE_COL_INDICES[(time_now() / SPRITE_RATE) % SPRITE_COLS];
         }
         ENEMY_SPRITES(i).col_row.y =
             OFFSET_SPRITE_ROWS +
