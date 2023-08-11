@@ -15,7 +15,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 #define RUN      0.0002f
 #define FRICTION 0.975f
 
-#define TURN 2.25f
+#define TURN 1.5f
 
 #define HALT      0.0001f
 #define THRESHOLD 0.025f
