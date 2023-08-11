@@ -111,8 +111,10 @@ static const Vec3u CUBE_INDICES[] = {
     {10, 11, 8},
     {12, 13, 14},
     {14, 15, 12},
-    {16, 17, 18},
-    {18, 19, 16},
+    // NOTE: We can avoid `z-fighting` if we simply don't draw the bottom face
+    // of the cube.
+    // {16, 17, 18},
+    // {18, 19, 16},
     {20, 21, 22},
     {22, 23, 20},
 };

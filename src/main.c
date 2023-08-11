@@ -49,8 +49,6 @@ static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 #define NANOS_PER_FRAME   ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
 #define NANOS_PER_STEP    (NANOS_PER_FRAME / STEPS_PER_FRAME)
 
-#define TRANSLATE_Y_PLATFORM 0.05f
-
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -141,18 +139,6 @@ static void update(GLFWwindow* window) {
     graphics_update_uniforms();
 }
 
-static void draw(GLFWwindow* window) {
-    // NOTE: This is a hack to avoid some z-fighting. Would be nice to
-    // implement a better solution.
-    for (u32 i = 0; i < LEN_PLATFORMS; ++i) {
-        CUBES[i].translate.y += TRANSLATE_Y_PLATFORM;
-    }
-    graphics_draw(window);
-    for (u32 i = 0; i < LEN_PLATFORMS; ++i) {
-        CUBES[i].translate.y -= TRANSLATE_Y_PLATFORM;
-    }
-}
-
 static void loop(GLFWwindow* window) {
     u64 prev = time_now();
     u64 frames = 0;
@@ -182,7 +168,7 @@ static void loop(GLFWwindow* window) {
         }
 
         update(window);
-        draw(window);
+        graphics_draw(window);
         time_sleep(now + NANOS_PER_FRAME);
 
         ++frames;
