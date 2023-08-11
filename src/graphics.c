@@ -552,6 +552,8 @@ void graphics_draw(GLFWwindow* window) {
     glUseProgram(PROGRAM_CUBE);
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
+    // NOTE: We don't need to sync the stationary geometry every frame. This
+    // could be more efficient.
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_CUBES, &CUBES[0]);
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(CUBE_INDICES) / (sizeof(u8)),
