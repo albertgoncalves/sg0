@@ -57,7 +57,7 @@ static u32 VAO[CAP_VAO];
 #define CAP_VBO 3
 static u32 VBO[CAP_VBO];
 
-#define CAP_EBO 2
+#define CAP_EBO 1
 static u32 EBO[CAP_EBO];
 
 #define CAP_INSTANCE_VBO 3
@@ -122,13 +122,8 @@ static const Vec3u CUBE_INDICES[] = {
 static const Vec3f QUAD_VERTICES[] = {
     {0.5f, 0.5f, 0.0f},
     {0.5f, -0.5f, 0.0f},
-    {-0.5f, -0.5f, 0.0f},
     {-0.5f, 0.5f, 0.0f},
-};
-
-static Vec3u QUAD_INDICES[] = {
-    {0, 1, 3},
-    {1, 2, 3},
+    {-0.5f, -0.5f, 0.0f},
 };
 
 static const Vec3f LINE_VERTICES[] = {
@@ -431,11 +426,6 @@ static void sprites_init(void) {
                       sizeof(Vec3f) / sizeof(f32),
                       sizeof(QUAD_VERTICES[0]),
                       offsetof(Vec3f, x));
-    BIND_BUFFER(EBO[1],
-                QUAD_INDICES,
-                sizeof(QUAD_INDICES),
-                GL_ELEMENT_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
     BIND_BUFFER(INSTANCE_VBO[2],
                 SPRITES,
                 sizeof(SPRITES),
@@ -554,11 +544,10 @@ void graphics_draw(GLFWwindow* window) {
                     0,
                     sizeof(Sprite) * LEN_SPRITES,
                     &SPRITES[0]);
-    glDrawElementsInstanced(GL_TRIANGLES,
-                            sizeof(QUAD_INDICES) / (sizeof(u8)),
-                            GL_UNSIGNED_BYTE,
-                            NULL,
-                            (i32)LEN_SPRITES);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP,
+                          0,
+                          sizeof(QUAD_VERTICES) / sizeof(QUAD_VERTICES[0]),
+                          (i32)LEN_SPRITES);
 
     glUseProgram(PROGRAM_CUBE);
     glBindVertexArray(VAO[0]);
@@ -574,7 +563,10 @@ void graphics_draw(GLFWwindow* window) {
     glBindVertexArray(VAO[1]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[1]);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_LINES, &LINES[0]);
-    glDrawArraysInstanced(GL_LINES, 0, 2, (i32)LEN_LINES);
+    glDrawArraysInstanced(GL_LINES,
+                          0,
+                          sizeof(LINE_VERTICES) / sizeof(LINE_VERTICES[0]),
+                          (i32)LEN_LINES);
 
     glfwSwapBuffers(window);
     EXIT_IF_GL_ERROR();
