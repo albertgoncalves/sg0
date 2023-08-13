@@ -42,7 +42,7 @@ typedef struct {
 
 #define CAMERA_LATENCY 175.0f
 
-#define BACKGROUND_COLOR 0.1f, 0.1f, 0.1f, 1.0f
+#define BACKGROUND_COLOR ((Vec4f){0.1f, 0.1f, 0.1f, 1.0f})
 
 #define LINE_WIDTH 3.5f
 
@@ -199,7 +199,7 @@ void graphics_update_camera(Vec3f target) {
 
 ATTRIBUTE(noreturn) static void callback(i32 code, const char* error) {
     printf("%d: %s\n", code, error);
-    _exit(ERROR);
+    EXIT();
 }
 
 GLFWwindow* graphics_window(void) {
@@ -217,7 +217,10 @@ GLFWwindow* graphics_window(void) {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glClearColor(BACKGROUND_COLOR);
+    glClearColor(BACKGROUND_COLOR.x,
+                 BACKGROUND_COLOR.y,
+                 BACKGROUND_COLOR.z,
+                 BACKGROUND_COLOR.w);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

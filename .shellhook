@@ -4,12 +4,6 @@ export WD=$PWD
 
 set -euo pipefail
 
-for x in bin build; do
-    if [ ! -d "$WD/$x" ]; then
-        mkdir "$WD/$x"
-    fi
-done
-
 if [ ! -d "$WD/nixGL" ]; then
     git clone https://github.com/albertgoncalves/nixGL.git
     (
