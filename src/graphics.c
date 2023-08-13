@@ -75,7 +75,7 @@ static u32 PROGRAM_CUBE;
 static u32 PROGRAM_LINE;
 static u32 PROGRAM_SPRITE;
 
-static const CubeVertex CUBE_VERTICES[] = {
+static const CubeVertex VERTICES_CUBE[] = {
     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
@@ -102,7 +102,7 @@ static const CubeVertex CUBE_VERTICES[] = {
     {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 };
 
-static const Vec3u CUBE_INDICES[] = {
+static const Vec3u INDICES_CUBE[] = {
     {0, 1, 2},
     {2, 3, 0},
     {4, 5, 6},
@@ -119,14 +119,14 @@ static const Vec3u CUBE_INDICES[] = {
     {22, 23, 20},
 };
 
-static const Vec3f QUAD_VERTICES[] = {
+static const Vec3f VERTICES_QUAD[] = {
     {0.5f, 0.5f, 0.0f},
     {0.5f, -0.5f, 0.0f},
     {-0.5f, 0.5f, 0.0f},
     {-0.5f, -0.5f, 0.0f},
 };
 
-static const Vec3f LINE_VERTICES[] = {
+static const Vec3f VERTICES_LINE[] = {
     {-0.5f, -0.5f, -0.5f},
     {0.5f, 0.5f, 0.5f},
 };
@@ -281,13 +281,13 @@ static void cubes_init(void) {
     glBindVertexArray(VAO[0]);
 
     BIND_BUFFER(VBO[0],
-                CUBE_VERTICES,
-                sizeof(CUBE_VERTICES),
+                VERTICES_CUBE,
+                sizeof(VERTICES_CUBE),
                 GL_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
-#define STRIDE sizeof(CUBE_VERTICES[0])
+#define STRIDE sizeof(VERTICES_CUBE[0])
     SET_VERTEX_ATTRIB(PROGRAM_CUBE,
                       "VERT_IN_POSITION",
                       SIZE,
@@ -302,8 +302,8 @@ static void cubes_init(void) {
 #undef STRIDE
 
     BIND_BUFFER(EBO[0],
-                CUBE_INDICES,
-                sizeof(CUBE_INDICES),
+                INDICES_CUBE,
+                sizeof(INDICES_CUBE),
                 GL_ELEMENT_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
     BIND_BUFFER(INSTANCE_VBO[0],
@@ -352,8 +352,8 @@ static void lines_init(void) {
     glBindVertexArray(VAO[1]);
 
     BIND_BUFFER(VBO[1],
-                LINE_VERTICES,
-                sizeof(LINE_VERTICES),
+                VERTICES_LINE,
+                sizeof(VERTICES_LINE),
                 GL_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
     SET_VERTEX_ATTRIB(PROGRAM_LINE,
@@ -420,14 +420,14 @@ static void sprites_init(void) {
     glBindVertexArray(VAO[2]);
 
     BIND_BUFFER(VBO[2],
-                QUAD_VERTICES,
-                sizeof(QUAD_VERTICES),
+                VERTICES_QUAD,
+                sizeof(VERTICES_QUAD),
                 GL_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
     SET_VERTEX_ATTRIB(PROGRAM_SPRITE,
                       "VERT_IN_POSITION",
                       sizeof(Vec3f) / sizeof(f32),
-                      sizeof(QUAD_VERTICES[0]),
+                      sizeof(VERTICES_QUAD[0]),
                       offsetof(Vec3f, x));
     BIND_BUFFER(INSTANCE_VBO[2],
                 SPRITES,
@@ -549,7 +549,7 @@ void graphics_draw(GLFWwindow* window) {
                     &SPRITES[0]);
     glDrawArraysInstanced(GL_TRIANGLE_STRIP,
                           0,
-                          sizeof(QUAD_VERTICES) / sizeof(QUAD_VERTICES[0]),
+                          sizeof(VERTICES_QUAD) / sizeof(VERTICES_QUAD[0]),
                           (i32)LEN_SPRITES);
 
     glUseProgram(PROGRAM_CUBE);
@@ -559,7 +559,7 @@ void graphics_draw(GLFWwindow* window) {
     // could be more efficient.
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_CUBES, &CUBES[0]);
     glDrawElementsInstanced(GL_TRIANGLES,
-                            sizeof(CUBE_INDICES) / (sizeof(u8)),
+                            sizeof(INDICES_CUBE) / (sizeof(u8)),
                             GL_UNSIGNED_BYTE,
                             NULL,
                             (i32)LEN_CUBES);
@@ -570,7 +570,7 @@ void graphics_draw(GLFWwindow* window) {
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Geom) * LEN_LINES, &LINES[0]);
     glDrawArraysInstanced(GL_LINES,
                           0,
-                          sizeof(LINE_VERTICES) / sizeof(LINE_VERTICES[0]),
+                          sizeof(VERTICES_LINE) / sizeof(VERTICES_LINE[0]),
                           (i32)LEN_LINES);
 
     glfwSwapBuffers(window);
