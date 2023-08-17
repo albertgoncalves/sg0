@@ -28,7 +28,7 @@ const char* string_copy(MemMap map) {
         .buffer = (const char*)map.address,
         .len = map.len,
     };
-    EXIT_IF(CAP_BUFFER <= (LEN_BUFFER + string.len + 1));
+    EXIT_IF(CAP_BUFFER < (LEN_BUFFER + string.len + 1));
     char* copy = &BUFFER[LEN_BUFFER];
     memcpy(copy, string.buffer, string.len);
     LEN_BUFFER += string.len;
