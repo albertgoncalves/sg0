@@ -210,6 +210,7 @@ GLFWwindow* graphics_window(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, FALSE);
+    glfwWindowHint(GLFW_SAMPLES, 16);
     GLFWwindow* window =
         glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
     EXIT_IF(!window);
@@ -540,6 +541,7 @@ void graphics_draw(GLFWwindow* window) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glDisable(GL_MULTISAMPLE);
     glUseProgram(PROGRAM_SPRITE);
     glBindVertexArray(VAO[2]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
@@ -552,6 +554,7 @@ void graphics_draw(GLFWwindow* window) {
                           sizeof(VERTICES_QUAD) / sizeof(VERTICES_QUAD[0]),
                           (i32)LEN_SPRITES);
 
+    glEnable(GL_MULTISAMPLE);
     glUseProgram(PROGRAM_CUBE);
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[0]);
