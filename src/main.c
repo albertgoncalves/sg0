@@ -46,8 +46,12 @@ static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 
 #define STEPS_PER_FRAME   6
 #define FRAMES_PER_SECOND 60
-#define NANOS_PER_FRAME   ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
-#define NANOS_PER_STEP    (NANOS_PER_FRAME / STEPS_PER_FRAME)
+#ifdef VSYNC
+    #define NANOS_PER_FRAME (NANOS_PER_SECOND / FRAMES_PER_SECOND)
+#else
+    #define NANOS_PER_FRAME ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
+#endif
+#define NANOS_PER_STEP (NANOS_PER_FRAME / STEPS_PER_FRAME)
 
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
@@ -95,9 +99,13 @@ static void step(GLFWwindow* window) {
 static void update(GLFWwindow* window) {
     u64 remaining = NANOS_PER_FRAME;
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
+#ifndef VSYNC
         const u64 now = time_now();
+#endif
         step(window);
+#ifndef VSYNC
         time_sleep(now + NANOS_PER_STEP);
+#endif
     }
 
     PREVIOUS_OFFSET_VIEW = OFFSET_VIEW;
@@ -169,7 +177,9 @@ static void loop(GLFWwindow* window) {
 
         update(window);
         graphics_draw(window);
+#ifndef VSYNC
         time_sleep(now + NANOS_PER_FRAME);
+#endif
 
         ++frames;
     }
