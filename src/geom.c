@@ -157,10 +157,10 @@ Bool geom_intersects(const Vec2f l[2], const Vec2f r[2]) {
     const f32 y2 = r[0].y - r[1].y;
 
     const f32 denominator = (x0 * y2) - (y0 * x2);
-    if (denominator != 0.0f) {
-        const f32 t = ((x1 * y2) - (y1 * x2)) / denominator;
-        const f32 u = -((x0 * y1) - (y0 * x1)) / denominator;
-        return (0.0f <= t) && (t <= 1.0f) && (0.0f <= u) && (u <= 1.0f);
+    if (denominator == 0.0f) {
+        return FALSE;
     }
-    return FALSE;
+    const f32 t = ((x1 * y2) - (y1 * x2)) / denominator;
+    const f32 u = -((x0 * y1) - (y0 * x1)) / denominator;
+    return (0.0f <= t) && (t <= 1.0f) && (0.0f <= u) && (u <= 1.0f);
 }
