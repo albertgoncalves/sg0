@@ -96,8 +96,10 @@ static void step(GLFWwindow* window) {
 }
 
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
-static void update(GLFWwindow* window) {
-    u64 remaining = NANOS_PER_FRAME;
+static void update(GLFWwindow* window, u64 remaining) {
+#ifndef VSYNC
+    remaining = NANOS_PER_FRAME;
+#endif
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
 #ifndef VSYNC
         const u64 now = time_now();
@@ -149,38 +151,36 @@ static void update(GLFWwindow* window) {
 
 static void loop(GLFWwindow* window) {
     u64 prev = time_now();
+    u64 elapsed = 0;
     u64 frames = 0;
 
     printf("\n\n\n");
     while (!glfwWindowShouldClose(window)) {
         const u64 now = time_now();
+        elapsed += now - prev;
 
-        {
-            // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
-            const u64 elapsed = now - prev;
-            if (NANOS_PER_SECOND <= elapsed) {
-                const f64 nanoseconds_per_frame =
-                    ((f64)elapsed) / ((f64)frames);
-                const f64 ratio = nanoseconds_per_frame /
-                                  (NANOS_PER_SECOND / FRAMES_PER_SECOND);
-                printf("\033[3A"
-                       "%9.0f ns/f\n"
-                       "%9.4f ratio\n"
-                       "%9lu frames\n",
-                       nanoseconds_per_frame,
-                       ratio,
-                       frames);
-                prev = now;
-                frames = 0;
-            }
+        // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
+        if (NANOS_PER_SECOND <= elapsed) {
+            const f64 nanoseconds_per_frame = ((f64)elapsed) / ((f64)frames);
+            printf("\033[3A"
+                   "%9.0f ns/f\n"
+                   "%9.4f ratio\n"
+                   "%9lu frames\n",
+                   nanoseconds_per_frame,
+                   nanoseconds_per_frame /
+                       (NANOS_PER_SECOND / FRAMES_PER_SECOND),
+                   frames);
+            elapsed -= NANOS_PER_SECOND;
+            frames = 0;
         }
 
-        update(window);
+        update(window, now - prev);
         graphics_draw(window);
 #ifndef VSYNC
         time_sleep(now + NANOS_PER_FRAME);
 #endif
 
+        prev = now;
         ++frames;
     }
 }
