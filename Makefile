@@ -6,7 +6,8 @@ FLAGS_ALL = \
 	-O3 \
 	-Werror \
 	-Weverything \
-	-Wno-padded
+	-Wno-padded \
+	-Wno-unsafe-buffer-usage
 FLAGS_STB = \
 	-Wno-cast-align \
 	-Wno-cast-qual \

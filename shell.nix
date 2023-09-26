@@ -1,5 +1,5 @@
 with import <nixpkgs> {};
-mkShell.override { stdenv = llvmPackages_15.stdenv; } {
+mkShell.override { stdenv = llvmPackages_16.stdenv; } {
     buildInputs = [
         feh
         gimp
