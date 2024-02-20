@@ -46,7 +46,7 @@ static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
 
 #define STEPS_PER_FRAME   6
 #define FRAMES_PER_SECOND 60
-#ifdef VSYNC
+#if VSYNC
     #define NANOS_PER_FRAME (NANOS_PER_SECOND / FRAMES_PER_SECOND)
 #else
     #define NANOS_PER_FRAME ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
@@ -97,15 +97,15 @@ static void step(GLFWwindow* window) {
 
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
 static void update(GLFWwindow* window, u64 remaining) {
-#ifndef VSYNC
+#if !VSYNC
     remaining = NANOS_PER_FRAME;
 #endif
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
-#ifndef VSYNC
+#if !VSYNC
         const u64 now = time_now();
 #endif
         step(window);
-#ifndef VSYNC
+#if !VSYNC
         time_sleep(now + NANOS_PER_STEP);
 #endif
     }
@@ -176,7 +176,7 @@ static void loop(GLFWwindow* window) {
 
         update(window, now - prev);
         graphics_draw(window);
-#ifndef VSYNC
+#if !VSYNC
         time_sleep(now + NANOS_PER_FRAME);
 #endif
 
@@ -202,7 +202,10 @@ static void callback(GLFWwindow* window, i32 key, i32, i32 action, i32) {
 }
 
 i32 main(void) {
-    printf("GLFW version : %s\n", glfwGetVersionString());
+    printf("VSYNC        : %u\n"
+           "GLFW version : %s\n",
+           VSYNC,
+           glfwGetVersionString());
     GLFWwindow* window = graphics_window();
     glfwSetKeyCallback(window, callback);
     printf("GL_VERSION   : %s\n"

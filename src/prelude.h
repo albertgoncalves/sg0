@@ -27,6 +27,8 @@ typedef enum {
 #define OK    0
 #define ERROR 1
 
+#define VSYNC 1
+
 #define EXIT()                                                       \
     do {                                                             \
         fprintf(stderr, "%s:%s:%d\n", __FILE__, __func__, __LINE__); \

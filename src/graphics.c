@@ -22,8 +22,6 @@ typedef struct {
 
 #define PATH_SPRITE_ATLAS "assets/sprite_atlas.png"
 
-#define VSYNC
-
 #if 1
     #define WINDOW_WIDTH  1500
     #define WINDOW_HEIGHT 860
@@ -218,11 +216,7 @@ GLFWwindow* graphics_window(void) {
     EXIT_IF(!window);
 
     glfwMakeContextCurrent(window);
-#ifdef VSYNC
-    glfwSwapInterval(1);
-#else
-    glfwSwapInterval(0);
-#endif
+    glfwSwapInterval(VSYNC);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glClearColor(COLOR_BACKGROUND.x,
                  COLOR_BACKGROUND.y,
