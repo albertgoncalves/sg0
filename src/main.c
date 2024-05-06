@@ -223,6 +223,8 @@ i32 main(void) {
     loop(window);
 
     graphics_free();
+    glfwDestroyWindow(window);
     glfwTerminate();
+
     return OK;
 }
