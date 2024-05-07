@@ -131,38 +131,10 @@ static const Vec3f VERTICES_LINE[] = {
     {0.5f, 0.5f, 0.5f},
 };
 
-#define EXIT_IF_GL_ERROR()                                 \
-    do {                                                   \
-        switch (glGetError()) {                            \
-        case GL_INVALID_ENUM: {                            \
-            EXIT_WITH("GL_INVALID_ENUM");                  \
-        }                                                  \
-        case GL_INVALID_VALUE: {                           \
-            EXIT_WITH("GL_INVALID_VALUE");                 \
-        }                                                  \
-        case GL_INVALID_OPERATION: {                       \
-            EXIT_WITH("GL_INVALID_OPERATION");             \
-        }                                                  \
-        case GL_INVALID_FRAMEBUFFER_OPERATION: {           \
-            EXIT_WITH("GL_INVALID_FRAMEBUFFER_OPERATION"); \
-        }                                                  \
-        case GL_OUT_OF_MEMORY: {                           \
-            EXIT_WITH("GL_OUT_OF_MEMORY");                 \
-        }                                                  \
-        case GL_NO_ERROR: {                                \
-            break;                                         \
-        }                                                  \
-        default: {                                         \
-            EXIT();                                        \
-        }                                                  \
-        }                                                  \
-    } while (FALSE)
-
 #define BIND_BUFFER(object, data, size, target, usage) \
     do {                                               \
         glBindBuffer(target, object);                  \
         glBufferData(target, size, data, usage);       \
-        EXIT_IF_GL_ERROR();                            \
     } while (FALSE)
 
 #define SET_VERTEX_ATTRIB(program, label, size, stride, offset)     \
@@ -175,7 +147,6 @@ static const Vec3f VERTICES_LINE[] = {
                               FALSE,                                \
                               stride,                               \
                               (void*)(offset));                     \
-        EXIT_IF_GL_ERROR();                                         \
     } while (FALSE)
 
 #define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset) \
@@ -189,7 +160,6 @@ static const Vec3f VERTICES_LINE[] = {
                               stride,                               \
                               (void*)(offset));                     \
         glVertexAttribDivisor(index, 1);                            \
-        EXIT_IF_GL_ERROR();                                         \
     } while (FALSE)
 
 void graphics_update_camera(Vec3f target) {
@@ -197,15 +167,41 @@ void graphics_update_camera(Vec3f target) {
     OFFSET_VIEW.z -= (OFFSET_VIEW.z - target.z) / CAMERA_LATENCY;
 }
 
-ATTRIBUTE(noreturn) static void callback(i32 code, const char* error) {
-    printf("%d: %s\n", code, error);
+ATTRIBUTE(noreturn)
+static void callback_glfw_error(i32 code, const char* error) {
+    fflush(stdout);
+    fflush(stderr);
+    fprintf(stderr, "%d", code);
+    if (error) {
+        fprintf(stderr, ": %s", error);
+    }
+    fputc('\n', stderr);
+    EXIT();
+}
+
+ATTRIBUTE(noreturn)
+static void callback_gl_debug(u32,
+                              u32,
+                              u32,
+                              u32,
+                              i32         length,
+                              const char* message,
+                              const void*) {
+    fflush(stdout);
+    fflush(stderr);
+    if (0 < length) {
+        fprintf(stderr, "%.*s", length, message);
+    } else {
+        fprintf(stderr, "%s", message);
+    }
     EXIT();
 }
 
 GLFWwindow* graphics_window(void) {
     EXIT_IF(!glfwInit());
-    glfwSetErrorCallback(callback);
+    glfwSetErrorCallback(callback_glfw_error);
 
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -217,6 +213,11 @@ GLFWwindow* graphics_window(void) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(VSYNC);
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(callback_gl_debug, NULL);
+
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glClearColor(COLOR_BACKGROUND.x,
                  COLOR_BACKGROUND.y,
@@ -225,7 +226,6 @@ GLFWwindow* graphics_window(void) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    EXIT_IF_GL_ERROR();
     return window;
 }
 
@@ -272,7 +272,6 @@ static u32 compile_program(const char* source_vert, const char* source_frag) {
     }
     glDeleteShader(shader_vert);
     glDeleteShader(shader_frag);
-    EXIT_IF_GL_ERROR();
     return program;
 }
 
@@ -340,7 +339,6 @@ static void cubes_init(void) {
     glUniformBlockBinding(PROGRAM_CUBE,
                           glGetUniformBlockIndex(PROGRAM_CUBE, "MATRICES"),
                           UNIFORM_INDEX);
-    EXIT_IF_GL_ERROR();
 }
 
 static void lines_init(void) {
@@ -391,7 +389,6 @@ static void lines_init(void) {
     glUniformBlockBinding(PROGRAM_LINE,
                           glGetUniformBlockIndex(PROGRAM_LINE, "MATRICES"),
                           UNIFORM_INDEX);
-    EXIT_IF_GL_ERROR();
 }
 
 static void sprites_init(void) {
@@ -413,7 +410,6 @@ static void sprites_init(void) {
                      GL_UNSIGNED_BYTE,
                      sprite_player.pixels);
         image_free(sprite_player);
-        EXIT_IF_GL_ERROR();
     }
 
     PROGRAM_SPRITE = compile_program(PATH_SPRITE_VERT, PATH_SPRITE_FRAG);
@@ -464,7 +460,6 @@ static void sprites_init(void) {
                                STRIDE,
                                (void*)offsetof(Sprite, col_row));
         glVertexAttribDivisor(index, 1);
-        EXIT_IF_GL_ERROR();
     }
 #undef STRIDE
 
@@ -474,7 +469,6 @@ static void sprites_init(void) {
     glUniformBlockBinding(PROGRAM_SPRITE,
                           glGetUniformBlockIndex(PROGRAM_SPRITE, "MATRICES"),
                           UNIFORM_INDEX);
-    EXIT_IF_GL_ERROR();
 }
 
 void graphics_init(void) {
@@ -484,7 +478,6 @@ void graphics_init(void) {
     glGenBuffers(CAP_INSTANCE_VBO, &INSTANCE_VBO[0]);
     glGenBuffers(CAP_UBO, &UBO[0]);
     glGenTextures(CAP_TEXTURES, &TEXTURES[0]);
-    EXIT_IF_GL_ERROR();
 
     UNIFORMS.projection =
         math_perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
@@ -498,7 +491,6 @@ void graphics_init(void) {
                       UBO[0],
                       0,
                       sizeof(Uniforms));
-    EXIT_IF_GL_ERROR();
 
     cubes_init();
     lines_init();
@@ -577,5 +569,4 @@ void graphics_draw(GLFWwindow* window) {
                           (i32)LEN_LINES);
 
     glfwSwapBuffers(window);
-    EXIT_IF_GL_ERROR();
 }
