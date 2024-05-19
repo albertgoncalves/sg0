@@ -198,8 +198,9 @@ static void callback_gl_debug(u32,
 }
 
 GLFWwindow* graphics_window(void) {
-    EXIT_IF(!glfwInit());
     glfwSetErrorCallback(callback_glfw_error);
+
+    EXIT_IF(!glfwInit());
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
