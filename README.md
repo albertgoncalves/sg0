@@ -2,7 +2,7 @@
 
 Work-in-progress sneaking game.
 
-![](https://github.com/albertgoncalves/sg0/raw/master/clip.mp4)
+https://github.com/albertgoncalves/sg0/assets/39544913/c1a1cd4f-0e44-4e9b-882a-0c4534be8c38
 
 Needed things
 ---
