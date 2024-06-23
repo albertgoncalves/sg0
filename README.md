@@ -2,6 +2,8 @@
 
 Work-in-progress sneaking game.
 
+![](https://github.com/albertgoncalves/sg0/raw/master/clip.mp4)
+
 Needed things
 ---
 *   [Nix](https://nixos.org/download.html)
