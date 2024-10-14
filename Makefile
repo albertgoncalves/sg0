@@ -15,7 +15,8 @@ FLAGS_STB = \
 	-Wno-double-promotion \
 	-Wno-implicit-int-conversion \
 	-Wno-missing-prototypes \
-	-Wno-sign-conversion
+	-Wno-sign-conversion \
+	-Wno-switch-default
 FLAGS_OBJECTS = \
 	-D_DEFAULT_SOURCE \
 	-fsanitize=bounds \
@@ -28,7 +29,7 @@ FLAGS_OBJECTS = \
 	-fshort-enums \
 	-g \
 	-std=c99 \
-	-Wno-c2x-extensions \
+	-Wno-c23-extensions \
 	-Wno-covered-switch-default \
 	-Wno-declaration-after-statement
 FLAGS_MAIN = \

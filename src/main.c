@@ -198,6 +198,8 @@ static void callback(GLFWwindow* window, i32 key, i32, i32 action, i32) {
         init();
         break;
     }
+    default: {
+    }
     }
 }
 

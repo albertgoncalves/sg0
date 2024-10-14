@@ -1,5 +1,5 @@
 with import <nixpkgs> {};
-mkShell.override { stdenv = llvmPackages_17.stdenv; } {
+mkShell.override { stdenv = llvmPackages_18.stdenv; } {
     buildInputs = [
         feh
         gimp
@@ -7,12 +7,11 @@ mkShell.override { stdenv = llvmPackages_17.stdenv; } {
         libGL
         linuxPackages.perf
         mold
-        mypaint
         renderdoc
         shellcheck
     ];
     APPEND_LIBRARY_PATH = lib.makeLibraryPath [
-        glfw
+        glfw3
         libGL
     ];
     shellHook = ''
