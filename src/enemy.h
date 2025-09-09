@@ -25,10 +25,8 @@ extern u32 LEN_WAYPOINTS;
 
 extern Bool PLAYER_IN_VIEW;
 
-Enemy enemy_lerp(Enemy, Enemy, f32);
-
 void enemy_init(void);
-void enemy_update(void);
+void enemy_update(f32);
 void enemy_animate(void);
 
 #endif

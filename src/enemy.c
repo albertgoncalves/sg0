@@ -83,7 +83,7 @@ static const Vec2f POSITIONS[] = {
     {4.35f, -6.5f}, // 19
 };
 
-Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
+static Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
     return (Enemy){
         .translate = math_lerp_vec2f(l.translate, r.translate, t),
         .speed = math_lerp_vec2f(l.speed, r.speed, t),
@@ -217,7 +217,7 @@ static Bool intersects(const Box* box, Vec2f line[2]) {
            geom_intersects((Vec2f[2]){points[3], points[0]}, line);
 }
 
-void enemy_update(void) {
+void enemy_update(f32 t) {
     PLAYER_IN_VIEW = FALSE;
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
         const Waypoint* waypoint = ENEMIES[i].waypoint;
@@ -262,6 +262,8 @@ void enemy_update(void) {
                 angle = fabsf(reverse) < fabsf(angle) ? reverse : angle;
             }
 
+            const Enemy prev = ENEMIES[i];
+
             if (fabsf(angle) < TURN) {
                 ENEMIES[i].speed.x += move.x * RUN;
                 ENEMIES[i].speed.y += move.z * RUN;
@@ -287,6 +289,8 @@ void enemy_update(void) {
                     }
                 }
             }
+
+            ENEMIES[i] = enemy_lerp(prev, ENEMIES[i], t);
         }
 
         const f32 polar_degrees_player = math_polar_degrees((Vec2f){

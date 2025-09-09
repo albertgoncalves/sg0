@@ -162,9 +162,11 @@ static const Vec3f VERTICES_LINE[] = {
         glVertexAttribDivisor(index, 1);                            \
     } while (FALSE)
 
-void graphics_update_camera(Vec3f target) {
+void graphics_update_camera(Vec3f target, f32 t) {
+    const Vec3f prev = OFFSET_VIEW;
     OFFSET_VIEW.x -= (OFFSET_VIEW.x - target.x) / CAMERA_LATENCY;
     OFFSET_VIEW.z -= (OFFSET_VIEW.z - target.z) / CAMERA_LATENCY;
+    OFFSET_VIEW = math_lerp_vec3f(prev, OFFSET_VIEW, t);
 }
 
 ATTRIBUTE(noreturn)
@@ -213,7 +215,7 @@ GLFWwindow* graphics_window(void) {
     EXIT_IF(!window);
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(VSYNC);
+    glfwSwapInterval(1);
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

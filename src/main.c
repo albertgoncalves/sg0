@@ -37,21 +37,10 @@ u32   LEN_ENEMIES;
 
 Bool PLAYER_IN_VIEW;
 
-static Enemy PREVIOUS_ENEMIES[CAP_ENEMIES];
-
-static Geom  PREVIOUS_PLAYER_CUBE = {0};
-static Vec3f PREVIOUS_PLAYER_SPEED = {0};
-static Vec3f PREVIOUS_OFFSET_VIEW = {0};
-static Bool  PREVIOUS_PLAYER_IN_VIEW = FALSE;
-
 #define STEPS_PER_FRAME   6
 #define FRAMES_PER_SECOND 60
-#if VSYNC
-    #define NANOS_PER_FRAME (NANOS_PER_SECOND / FRAMES_PER_SECOND)
-#else
-    #define NANOS_PER_FRAME ((NANOS_PER_SECOND / FRAMES_PER_SECOND) - 175000)
-#endif
-#define NANOS_PER_STEP (NANOS_PER_FRAME / STEPS_PER_FRAME)
+#define NANOS_PER_FRAME   (NANOS_PER_SECOND / FRAMES_PER_SECOND)
+#define NANOS_PER_STEP    (NANOS_PER_FRAME / STEPS_PER_FRAME)
 
 static Vec3f input(GLFWwindow* window) {
     Vec3f move = {0};
@@ -88,55 +77,22 @@ static void init(void) {
     EXIT_IF(CAP_LINES < LEN_LINES);
 }
 
-static void step(GLFWwindow* window) {
-    glfwPollEvents();
-    player_update(input(window));
-    enemy_update();
-    graphics_update_camera(PLAYER_CUBE.translate);
+static void step(GLFWwindow* window, f32 t) {
+    EXIT_IF(1.0f < t);
+
+    player_update(input(window), t);
+    enemy_update(t);
+    graphics_update_camera(PLAYER_CUBE.translate, t);
 }
 
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
 static void update(GLFWwindow* window, u64 remaining) {
-#if !VSYNC
-    remaining = NANOS_PER_FRAME;
-#endif
+    glfwPollEvents();
+
     for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
-#if !VSYNC
-        const u64 now = time_now();
-#endif
-        step(window);
-#if !VSYNC
-        time_sleep(now + NANOS_PER_STEP);
-#endif
+        step(window, 1.0f);
     }
-
-    PREVIOUS_OFFSET_VIEW = OFFSET_VIEW;
-
-    PREVIOUS_PLAYER_CUBE = PLAYER_CUBE;
-    PREVIOUS_PLAYER_SPEED = PLAYER_SPEED;
-
-    memcpy(PREVIOUS_ENEMIES, ENEMIES, sizeof(Enemy) * LEN_ENEMIES);
-    PREVIOUS_PLAYER_IN_VIEW = PLAYER_IN_VIEW;
-
-    step(window);
-    {
-        const f32 blend = ((f32)remaining) / ((f32)NANOS_PER_STEP);
-        EXIT_IF(blend <= 0.0f);
-        EXIT_IF(1.0f < blend);
-
-        OFFSET_VIEW =
-            math_lerp_vec3f(PREVIOUS_OFFSET_VIEW, OFFSET_VIEW, blend);
-
-        PLAYER_CUBE = geom_lerp(PREVIOUS_PLAYER_CUBE, PLAYER_CUBE, blend);
-        PLAYER_SPEED =
-            math_lerp_vec3f(PREVIOUS_PLAYER_SPEED, PLAYER_SPEED, blend);
-
-        for (u32 i = 0; i < LEN_ENEMIES; ++i) {
-            ENEMIES[i] = enemy_lerp(PREVIOUS_ENEMIES[i], ENEMIES[i], blend);
-        }
-        PLAYER_IN_VIEW =
-            math_lerp_bool(PREVIOUS_PLAYER_IN_VIEW, PLAYER_IN_VIEW, blend);
-    }
+    step(window, ((f32)remaining) / NANOS_PER_STEP);
 
 #if 0
     if (PLAYER_IN_VIEW) {
@@ -170,15 +126,12 @@ static void loop(GLFWwindow* window) {
                    nanoseconds_per_frame /
                        (NANOS_PER_SECOND / FRAMES_PER_SECOND),
                    frames);
-            elapsed -= NANOS_PER_SECOND;
+            elapsed = 0;
             frames = 0;
         }
 
         update(window, now - prev);
         graphics_draw(window);
-#if !VSYNC
-        time_sleep(now + NANOS_PER_FRAME);
-#endif
 
         prev = now;
         ++frames;
@@ -204,10 +157,7 @@ static void callback(GLFWwindow* window, i32 key, i32, i32 action, i32) {
 }
 
 i32 main(void) {
-    printf("VSYNC        : %u\n"
-           "GLFW version : %s\n",
-           VSYNC,
-           glfwGetVersionString());
+    printf("GLFW version : %s\n", glfwGetVersionString());
     GLFWwindow* window = graphics_window();
     glfwSetKeyCallback(window, callback);
     printf("GL_VERSION   : %s\n"

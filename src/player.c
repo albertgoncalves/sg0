@@ -57,8 +57,11 @@ void player_init(void) {
     PLAYER_SPRITE.col_row.y = 0;
 }
 
-void player_update(Vec3f move) {
+void player_update(Vec3f move, f32 t) {
     EXIT_IF(0.0f < PLAYER_SPEED.y);
+
+    const Vec3f prev = PLAYER_SPEED;
+
     if (PLAYER_SPEED.y < 0.0f) {
         PLAYER_SPEED.x *= DRAG;
         PLAYER_SPEED.z *= DRAG;
@@ -69,6 +72,9 @@ void player_update(Vec3f move) {
         PLAYER_SPEED.z *= FRICTION;
     }
     PLAYER_SPEED.y -= WORLD_GRAVITY;
+
+    PLAYER_SPEED = math_lerp_vec3f(prev, PLAYER_SPEED, t);
+
     {
         Vec3f speed = PLAYER_SPEED;
         Vec3f remaining = PLAYER_SPEED;

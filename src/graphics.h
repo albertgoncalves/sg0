@@ -22,7 +22,7 @@ GLFWwindow* graphics_window(void);
 void graphics_init(void);
 void graphics_free(void);
 
-void graphics_update_camera(Vec3f);
+void graphics_update_camera(Vec3f, f32);
 void graphics_update_uniforms(void);
 void graphics_update_sprites(void);
 void graphics_draw(GLFWwindow*);
