@@ -7,6 +7,7 @@ FLAGS_ALL = \
 	-Werror \
 	-Weverything \
 	-Wno-padded \
+	-Wno-pre-c11-compat \
 	-Wno-unsafe-buffer-usage
 FLAGS_STB = \
 	-Wno-cast-align \
@@ -28,7 +29,6 @@ FLAGS_OBJECTS = \
 	-fsanitize=undefined \
 	-fshort-enums \
 	-g \
-	-std=c99 \
 	-Wno-c23-extensions \
 	-Wno-covered-switch-default \
 	-Wno-declaration-after-statement
