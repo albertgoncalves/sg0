@@ -2,14 +2,6 @@
 
 #include <math.h>
 
-Geom geom_lerp(Geom l, Geom r, f32 t) {
-    return (Geom){
-        .translate = math_lerp_vec3f(l.translate, r.translate, t),
-        .scale = math_lerp_vec3f(l.scale, r.scale, t),
-        .color = math_lerp_vec4f(l.color, r.color, t),
-    };
-}
-
 Box geom_box(const Geom* cube) {
     const Vec3f half_scale = (Vec3f){
         .x = cube->scale.x / 2.0f,

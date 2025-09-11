@@ -6,14 +6,6 @@
 
 #define EPSILON 0.00001f
 
-Bool math_lerp_bool(Bool l, Bool r, f32 t) {
-    return t <= 0.5f ? l : r;
-}
-
-const void* math_lerp_pointer(const void* l, const void* r, f32 t) {
-    return t <= 0.5f ? l : r;
-}
-
 f32 math_lerp_f32(f32 l, f32 r, f32 t) {
     return l + (t * (r - l));
 }
@@ -30,15 +22,6 @@ Vec3f math_lerp_vec3f(Vec3f l, Vec3f r, f32 t) {
         .x = math_lerp_f32(l.x, r.x, t),
         .y = math_lerp_f32(l.y, r.y, t),
         .z = math_lerp_f32(l.z, r.z, t),
-    };
-}
-
-Vec4f math_lerp_vec4f(Vec4f l, Vec4f r, f32 t) {
-    return (Vec4f){
-        .x = math_lerp_f32(l.x, r.x, t),
-        .y = math_lerp_f32(l.y, r.y, t),
-        .z = math_lerp_f32(l.z, r.z, t),
-        .w = math_lerp_f32(l.w, r.w, t),
     };
 }
 

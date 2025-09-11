@@ -38,7 +38,6 @@ typedef struct {
 
 STATIC_ASSERT(sizeof(Collision) == 12);
 
-Geom      geom_lerp(Geom, Geom, f32);
 Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);
 Bool      geom_intersects(const Vec2f[2], const Vec2f[2]);

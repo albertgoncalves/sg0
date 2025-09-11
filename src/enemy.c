@@ -83,19 +83,6 @@ static const Vec2f POSITIONS[] = {
     {4.35f, -6.5f}, // 19
 };
 
-static Enemy enemy_lerp(Enemy l, Enemy r, f32 t) {
-    return (Enemy){
-        .translate = math_lerp_vec2f(l.translate, r.translate, t),
-        .speed = math_lerp_vec2f(l.speed, r.speed, t),
-        .polar_degrees = math_lerp_f32(l.polar_degrees, r.polar_degrees, t),
-        .waypoint = (const Waypoint*)math_lerp_pointer((const void*)l.waypoint,
-                                                       (const void*)r.waypoint,
-                                                       t),
-        .player_in_view =
-            math_lerp_bool(l.player_in_view, r.player_in_view, t),
-    };
-}
-
 void enemy_init(void) {
     PLAYER_IN_VIEW = FALSE;
 
@@ -262,7 +249,9 @@ void enemy_update(f32 t) {
                 angle = fabsf(reverse) < fabsf(angle) ? reverse : angle;
             }
 
-            const Enemy prev = ENEMIES[i];
+            const Vec2f prev_translate = ENEMIES[i].translate;
+            const Vec2f prev_speed = ENEMIES[i].speed;
+            const f32   prev_polar_degrees = ENEMIES[i].polar_degrees;
 
             if (fabsf(angle) < TURN) {
                 ENEMIES[i].speed.x += move.x * RUN;
@@ -290,7 +279,12 @@ void enemy_update(f32 t) {
                 }
             }
 
-            ENEMIES[i] = enemy_lerp(prev, ENEMIES[i], t);
+            ENEMIES[i].translate =
+                math_lerp_vec2f(prev_translate, ENEMIES[i].translate, t);
+            ENEMIES[i].speed =
+                math_lerp_vec2f(prev_speed, ENEMIES[i].speed, t);
+            ENEMIES[i].polar_degrees =
+                math_lerp_f32(prev_polar_degrees, ENEMIES[i].polar_degrees, t);
         }
 
         const f32 polar_degrees_player = math_polar_degrees((Vec2f){
