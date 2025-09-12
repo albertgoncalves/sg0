@@ -83,6 +83,19 @@ void player_update(Vec3f move, f32 t) {
             const Box player_box = geom_box(&PLAYER_CUBE);
             Collision collision = {0};
             for (u32 i = 0; i < LEN_WORLD; ++i) {
+                // NOTE: This *should* work because `BOXES` is sorted by `x`.
+                if (BOXES[i].right_top_front.x <
+                    (player_box.left_bottom_back.x + PLAYER_SPEED.x))
+                {
+                    continue;
+                }
+                // NOTE: See `https://leanrada.com/notes/sweep-and-prune/`.
+                if ((player_box.right_top_front.x + PLAYER_SPEED.x) <
+                    BOXES[i].left_bottom_back.x)
+                {
+                    break;
+                }
+
                 const Collision candidate =
                     geom_collision(&player_box, &BOXES[i], &speed);
                 if (!candidate.hit) {

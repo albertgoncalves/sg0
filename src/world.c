@@ -62,6 +62,22 @@ void world_init(void) {
         BOXES[LEN_PLATFORMS + i] = geom_box(&CUBES[LEN_PLATFORMS + i]);
     }
 
+    for (u32 i = 0; i < LEN_WORLD; ++i) {
+        const Geom cube = CUBES[i];
+        const Box  box = BOXES[i];
+
+        u32 j = i;
+        for (; (0 < j) &&
+               (box.left_bottom_back.x < BOXES[j - 1].left_bottom_back.x);
+             --j)
+        {
+            CUBES[j] = CUBES[j - 1];
+            BOXES[j] = BOXES[j - 1];
+        }
+        CUBES[j] = cube;
+        BOXES[j] = box;
+    }
+
     OFFSET_PLAYER = LEN_WORLD;
     OFFSET_ENEMIES = LEN_WORLD + CAP_PLAYER;
 }
