@@ -89,10 +89,11 @@ static void step(GLFWwindow* window, f32 t) {
 static void update(GLFWwindow* window, u64 remaining) {
     glfwPollEvents();
 
-    for (; NANOS_PER_STEP < remaining; remaining -= NANOS_PER_STEP) {
+    f64 delta = (f64)remaining;
+    for (; NANOS_PER_STEP < delta; delta -= NANOS_PER_STEP) {
         step(window, 1.0f);
     }
-    step(window, ((f32)remaining) / NANOS_PER_STEP);
+    step(window, (f32)(delta / NANOS_PER_STEP));
 
 #if 0
     if (PLAYER_IN_VIEW) {
@@ -119,9 +120,9 @@ static void loop(GLFWwindow* window) {
         if (NANOS_PER_SECOND <= elapsed) {
             const f64 nanoseconds_per_frame = ((f64)elapsed) / ((f64)frames);
             printf("\033[3A"
-                   "%9.0f ns/f\n"
-                   "%9.4f ratio\n"
-                   "%9lu frames\n",
+                   "%15.4f ns/f\n"
+                   "%15.4f ratio\n"
+                   "%15lu frames\n",
                    nanoseconds_per_frame,
                    nanoseconds_per_frame /
                        (NANOS_PER_SECOND / FRAMES_PER_SECOND),
