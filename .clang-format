@@ -14,7 +14,7 @@ BinPackParameters: false
 BraceWrapping:
     AfterControlStatement: MultiLine
 BreakBeforeBraces: Custom
-ColumnLimit: 79
+ColumnLimit: 100
 IndentCaseLabels: false
 IndentPPDirectives: BeforeHash
 IndentWidth: 4

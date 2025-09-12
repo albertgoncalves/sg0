@@ -12,8 +12,7 @@ uniform uvec2     COLS_ROWS;
 #define EPSILON 0.1f
 
 void main() {
-    vec4 pixel =
-        texture(TEXTURE, (VERT_OUT_COL_ROW + VERT_OUT_POSITION) / COLS_ROWS);
+    vec4 pixel = texture(TEXTURE, (VERT_OUT_COL_ROW + VERT_OUT_POSITION) / COLS_ROWS);
     if (pixel.a < EPSILON) {
         discard;
     }

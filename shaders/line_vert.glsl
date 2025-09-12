@@ -14,7 +14,6 @@ flat out vec4 VERT_OUT_COLOR;
 
 void main() {
     gl_Position =
-        PROJECTION * VIEW *
-        vec4((VERT_IN_SCALE * VERT_IN_POSITION) + VERT_IN_TRANSLATE, 1.0f);
+        PROJECTION * VIEW * vec4((VERT_IN_SCALE * VERT_IN_POSITION) + VERT_IN_TRANSLATE, 1.0f);
     VERT_OUT_COLOR = VERT_IN_COLOR;
 }

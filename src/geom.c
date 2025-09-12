@@ -62,34 +62,26 @@ static f32 overlap_box(const Box* l, const Box* r) {
                            r->right_top_front.z);
 }
 
-Collision geom_collision(const Box*   from,
-                         const Box*   obstacle,
-                         const Vec3f* speed) {
+Collision geom_collision(const Box* from, const Box* obstacle, const Vec3f* speed) {
     Vec3f time = {
         .x = -INFINITY,
         .y = -INFINITY,
         .z = -INFINITY,
     };
     if (0.0f < speed->x) {
-        time.x = (obstacle->left_bottom_back.x - from->right_top_front.x) /
-                 speed->x;
+        time.x = (obstacle->left_bottom_back.x - from->right_top_front.x) / speed->x;
     } else if (speed->x < 0.0f) {
-        time.x = (obstacle->right_top_front.x - from->left_bottom_back.x) /
-                 speed->x;
+        time.x = (obstacle->right_top_front.x - from->left_bottom_back.x) / speed->x;
     }
     if (0.0f < speed->y) {
-        time.y = (obstacle->left_bottom_back.y - from->right_top_front.y) /
-                 speed->y;
+        time.y = (obstacle->left_bottom_back.y - from->right_top_front.y) / speed->y;
     } else if (speed->y < 0.0f) {
-        time.y = (obstacle->right_top_front.y - from->left_bottom_back.y) /
-                 speed->y;
+        time.y = (obstacle->right_top_front.y - from->left_bottom_back.y) / speed->y;
     }
     if (0.0f < speed->z) {
-        time.z = (obstacle->left_bottom_back.z - from->right_top_front.z) /
-                 speed->z;
+        time.z = (obstacle->left_bottom_back.z - from->right_top_front.z) / speed->z;
     } else if (speed->z < 0.0f) {
-        time.z = (obstacle->right_top_front.z - from->left_bottom_back.z) /
-                 speed->z;
+        time.z = (obstacle->right_top_front.z - from->left_bottom_back.z) / speed->z;
     }
     Collision collision = {0};
     if ((time.y < time.x) && (time.z < time.x)) {

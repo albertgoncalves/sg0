@@ -127,8 +127,7 @@ static void loop(GLFWwindow* window) {
                    "%15lu steps\n"
                    "%15.4f steps/frame\n",
                    nanoseconds_per_frame,
-                   nanoseconds_per_frame /
-                       (NANOS_PER_SECOND / FRAMES_PER_SECOND),
+                   nanoseconds_per_frame / (NANOS_PER_SECOND / FRAMES_PER_SECOND),
                    frames,
                    steps,
                    ((f64)steps) / ((f64)frames));

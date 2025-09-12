@@ -34,9 +34,8 @@ f32 math_degrees(f32 radians) {
 }
 
 f32 math_polar_degrees(Vec2f point) {
-    const f32 angle =
-        math_degrees(atanf((point.y == 0.0f ? EPSILON : point.y) /
-                           (point.x == 0.0f ? EPSILON : point.x)));
+    const f32 angle = math_degrees(
+        atanf((point.y == 0.0f ? EPSILON : point.y) / (point.x == 0.0f ? EPSILON : point.x)));
     if (point.x < 0.0f) {
         return 180.0f + angle;
     }
@@ -99,10 +98,7 @@ Mat4 math_look_at(Vec3f view_from, Vec3f view_to, Vec3f up) {
     };
 }
 
-Mat4 math_perspective(f32 fov_degrees,
-                      f32 aspect_ratio,
-                      f32 view_near,
-                      f32 view_far) {
+Mat4 math_perspective(f32 fov_degrees, f32 aspect_ratio, f32 view_near, f32 view_far) {
     const f32 cotangent = 1.0f / tanf(math_radians(fov_degrees) / 2.0f);
     const f32 d = view_near - view_far;
     return (Mat4){

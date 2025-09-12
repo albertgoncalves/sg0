@@ -76,30 +76,18 @@ static u32 PROGRAM_LINE;
 static u32 PROGRAM_SPRITE;
 
 static const CubeVertex VERTICES_CUBE[] = {
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}}, {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
+    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},   {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}},
+    {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},   {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},     {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},   {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}}, {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},     {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},   {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}}, {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},   {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}},
+    {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},   {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},     {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 };
 
 static const Vec3u INDICES_CUBE[] = {
@@ -137,29 +125,19 @@ static const Vec3f VERTICES_LINE[] = {
         glBufferData(target, size, data, usage);       \
     } while (FALSE)
 
-#define SET_VERTEX_ATTRIB(program, label, size, stride, offset)     \
-    do {                                                            \
-        const u32 index = (u32)glGetAttribLocation(program, label); \
-        glEnableVertexAttribArray(index);                           \
-        glVertexAttribPointer(index,                                \
-                              size,                                 \
-                              GL_FLOAT,                             \
-                              FALSE,                                \
-                              stride,                               \
-                              (void*)(offset));                     \
+#define SET_VERTEX_ATTRIB(program, label, size, stride, offset)                       \
+    do {                                                                              \
+        const u32 index = (u32)glGetAttribLocation(program, label);                   \
+        glEnableVertexAttribArray(index);                                             \
+        glVertexAttribPointer(index, size, GL_FLOAT, FALSE, stride, (void*)(offset)); \
     } while (FALSE)
 
-#define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset) \
-    do {                                                            \
-        const u32 index = (u32)glGetAttribLocation(program, label); \
-        glEnableVertexAttribArray(index);                           \
-        glVertexAttribPointer(index,                                \
-                              size,                                 \
-                              GL_FLOAT,                             \
-                              FALSE,                                \
-                              stride,                               \
-                              (void*)(offset));                     \
-        glVertexAttribDivisor(index, 1);                            \
+#define SET_VERTEX_ATTRIB_DIV(program, label, size, stride, offset)                   \
+    do {                                                                              \
+        const u32 index = (u32)glGetAttribLocation(program, label);                   \
+        glEnableVertexAttribArray(index);                                             \
+        glVertexAttribPointer(index, size, GL_FLOAT, FALSE, stride, (void*)(offset)); \
+        glVertexAttribDivisor(index, 1);                                              \
     } while (FALSE)
 
 void graphics_update_camera(Vec3f target, f32 t) {
@@ -182,13 +160,7 @@ static void callback_glfw_error(i32 code, const char* error) {
 }
 
 ATTRIBUTE(noreturn)
-static void callback_gl_debug(u32,
-                              u32,
-                              u32,
-                              u32,
-                              i32         length,
-                              const char* message,
-                              const void*) {
+static void callback_gl_debug(u32, u32, u32, u32, i32 length, const char* message, const void*) {
     fflush(stdout);
     fflush(stderr);
     if (0 < length) {
@@ -210,8 +182,7 @@ GLFWwindow* graphics_window(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, FALSE);
     glfwWindowHint(GLFW_SAMPLES, 16);
-    GLFWwindow* window =
-        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, __FILE__, NULL, NULL);
     EXIT_IF(!window);
 
     glfwMakeContextCurrent(window);
@@ -222,10 +193,7 @@ GLFWwindow* graphics_window(void) {
     glDebugMessageCallback(callback_gl_debug, NULL);
 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glClearColor(COLOR_BACKGROUND.x,
-                 COLOR_BACKGROUND.y,
-                 COLOR_BACKGROUND.z,
-                 COLOR_BACKGROUND.w);
+    glClearColor(COLOR_BACKGROUND.x, COLOR_BACKGROUND.y, COLOR_BACKGROUND.z, COLOR_BACKGROUND.w);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -241,10 +209,7 @@ static void compile_shader(const char* path, u32 shader) {
         i32 status = 0;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
         if (!status) {
-            glGetShaderInfoLog(shader,
-                               (i32)(CAP_BUFFER - LEN_BUFFER),
-                               NULL,
-                               &BUFFER[LEN_BUFFER]);
+            glGetShaderInfoLog(shader, (i32)(CAP_BUFFER - LEN_BUFFER), NULL, &BUFFER[LEN_BUFFER]);
             printf("%s", &BUFFER[LEN_BUFFER]);
             EXIT();
         }
@@ -265,10 +230,7 @@ static u32 compile_program(const char* source_vert, const char* source_frag) {
         i32 status = 0;
         glGetProgramiv(program, GL_LINK_STATUS, &status);
         if (!status) {
-            glGetProgramInfoLog(program,
-                                (i32)(CAP_BUFFER - LEN_BUFFER),
-                                NULL,
-                                &BUFFER[LEN_BUFFER]);
+            glGetProgramInfoLog(program, (i32)(CAP_BUFFER - LEN_BUFFER), NULL, &BUFFER[LEN_BUFFER]);
             printf("%s", &BUFFER[LEN_BUFFER]);
             EXIT();
         }
@@ -283,11 +245,7 @@ static void cubes_init(void) {
     glUseProgram(PROGRAM_CUBE);
     glBindVertexArray(VAO[0]);
 
-    BIND_BUFFER(VBO[0],
-                VERTICES_CUBE,
-                sizeof(VERTICES_CUBE),
-                GL_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[0], VERTICES_CUBE, sizeof(VERTICES_CUBE), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(VERTICES_CUBE[0])
@@ -296,11 +254,7 @@ static void cubes_init(void) {
                       SIZE,
                       STRIDE,
                       offsetof(CubeVertex, position));
-    SET_VERTEX_ATTRIB(PROGRAM_CUBE,
-                      "VERT_IN_NORMAL",
-                      SIZE,
-                      STRIDE,
-                      offsetof(CubeVertex, normal));
+    SET_VERTEX_ATTRIB(PROGRAM_CUBE, "VERT_IN_NORMAL", SIZE, STRIDE, offsetof(CubeVertex, normal));
 #undef SIZE
 #undef STRIDE
 
@@ -309,11 +263,7 @@ static void cubes_init(void) {
                 sizeof(INDICES_CUBE),
                 GL_ELEMENT_ARRAY_BUFFER,
                 GL_STATIC_DRAW);
-    BIND_BUFFER(INSTANCE_VBO[0],
-                CUBES,
-                sizeof(CUBES),
-                GL_ARRAY_BUFFER,
-                GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[0], CUBES, sizeof(CUBES), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(CUBES[0])
@@ -322,11 +272,7 @@ static void cubes_init(void) {
                           SIZE,
                           STRIDE,
                           offsetof(Geom, translate));
-    SET_VERTEX_ATTRIB_DIV(PROGRAM_CUBE,
-                          "VERT_IN_SCALE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Geom, scale));
+    SET_VERTEX_ATTRIB_DIV(PROGRAM_CUBE, "VERT_IN_SCALE", SIZE, STRIDE, offsetof(Geom, scale));
 #undef SIZE
     SET_VERTEX_ATTRIB_DIV(PROGRAM_CUBE,
                           "VERT_IN_COLOR",
@@ -353,21 +299,13 @@ static void lines_init(void) {
 
     glBindVertexArray(VAO[1]);
 
-    BIND_BUFFER(VBO[1],
-                VERTICES_LINE,
-                sizeof(VERTICES_LINE),
-                GL_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[1], VERTICES_LINE, sizeof(VERTICES_LINE), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     SET_VERTEX_ATTRIB(PROGRAM_LINE,
                       "VERT_IN_POSITION",
                       sizeof(Vec3f) / sizeof(f32),
                       sizeof(Vec3f),
                       offsetof(Vec3f, x));
-    BIND_BUFFER(INSTANCE_VBO[1],
-                LINES,
-                sizeof(LINES),
-                GL_ARRAY_BUFFER,
-                GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[1], LINES, sizeof(LINES), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(LINES[0])
@@ -376,11 +314,7 @@ static void lines_init(void) {
                           SIZE,
                           STRIDE,
                           offsetof(Geom, translate));
-    SET_VERTEX_ATTRIB_DIV(PROGRAM_LINE,
-                          "VERT_IN_SCALE",
-                          SIZE,
-                          STRIDE,
-                          offsetof(Geom, scale));
+    SET_VERTEX_ATTRIB_DIV(PROGRAM_LINE, "VERT_IN_SCALE", SIZE, STRIDE, offsetof(Geom, scale));
 #undef SIZE
     SET_VERTEX_ATTRIB_DIV(PROGRAM_LINE,
                           "VERT_IN_COLOR",
@@ -419,21 +353,13 @@ static void sprites_init(void) {
     glUseProgram(PROGRAM_SPRITE);
     glBindVertexArray(VAO[2]);
 
-    BIND_BUFFER(VBO[2],
-                VERTICES_QUAD,
-                sizeof(VERTICES_QUAD),
-                GL_ARRAY_BUFFER,
-                GL_STATIC_DRAW);
+    BIND_BUFFER(VBO[2], VERTICES_QUAD, sizeof(VERTICES_QUAD), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     SET_VERTEX_ATTRIB(PROGRAM_SPRITE,
                       "VERT_IN_POSITION",
                       sizeof(Vec3f) / sizeof(f32),
                       sizeof(VERTICES_QUAD[0]),
                       offsetof(Vec3f, x));
-    BIND_BUFFER(INSTANCE_VBO[2],
-                SPRITES,
-                sizeof(SPRITES),
-                GL_ARRAY_BUFFER,
-                GL_DYNAMIC_DRAW);
+    BIND_BUFFER(INSTANCE_VBO[2], SPRITES, sizeof(SPRITES), GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 
 #define SIZE   (sizeof(Vec3f) / sizeof(f32))
 #define STRIDE sizeof(SPRITES[0])
@@ -454,8 +380,7 @@ static void sprites_init(void) {
                           STRIDE,
                           offsetof(Sprite, geom) + offsetof(Geom, color));
     {
-        const u32 index =
-            (u32)glGetAttribLocation(PROGRAM_SPRITE, "VERT_IN_COL_ROW");
+        const u32 index = (u32)glGetAttribLocation(PROGRAM_SPRITE, "VERT_IN_COL_ROW");
         glEnableVertexAttribArray(index);
         glVertexAttribIPointer(index,
                                sizeof(Vec2u) / sizeof(u8),
@@ -482,18 +407,9 @@ void graphics_init(void) {
     glGenBuffers(CAP_UBO, &UBO[0]);
     glGenTextures(CAP_TEXTURES, &TEXTURES[0]);
 
-    UNIFORMS.projection =
-        math_perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
-    BIND_BUFFER(UBO[0],
-                &UNIFORMS,
-                sizeof(Uniforms),
-                GL_UNIFORM_BUFFER,
-                GL_DYNAMIC_DRAW);
-    glBindBufferRange(GL_UNIFORM_BUFFER,
-                      UNIFORM_INDEX,
-                      UBO[0],
-                      0,
-                      sizeof(Uniforms));
+    UNIFORMS.projection = math_perspective(FOV_DEGREES, ASPECT_RATIO, VIEW_NEAR, VIEW_FAR);
+    BIND_BUFFER(UBO[0], &UNIFORMS, sizeof(Uniforms), GL_UNIFORM_BUFFER, GL_DYNAMIC_DRAW);
+    glBindBufferRange(GL_UNIFORM_BUFFER, UNIFORM_INDEX, UBO[0], 0, sizeof(Uniforms));
 
     cubes_init();
     lines_init();
@@ -540,10 +456,7 @@ void graphics_draw(GLFWwindow* window) {
     glUseProgram(PROGRAM_SPRITE);
     glBindVertexArray(VAO[2]);
     glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO[2]);
-    glBufferSubData(GL_ARRAY_BUFFER,
-                    0,
-                    sizeof(Sprite) * LEN_SPRITES,
-                    &SPRITES[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Sprite) * LEN_SPRITES, &SPRITES[0]);
     glDrawArraysInstanced(GL_TRIANGLE_STRIP,
                           0,
                           sizeof(VERTICES_QUAD) / sizeof(VERTICES_QUAD[0]),

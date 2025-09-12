@@ -17,8 +17,7 @@ flat out uvec2 VERT_OUT_COL_ROW;
 
 void main() {
     gl_Position =
-        PROJECTION * VIEW *
-        vec4((VERT_IN_SCALE * VERT_IN_POSITION) + VERT_IN_TRANSLATE, 1.0f);
+        PROJECTION * VIEW * vec4((VERT_IN_SCALE * VERT_IN_POSITION) + VERT_IN_TRANSLATE, 1.0f);
     VERT_OUT_POSITION = (VERT_IN_POSITION.xy * vec2(1.0f, -1.0f)) + 0.5f;
     VERT_OUT_COLOR = VERT_IN_COLOR;
     VERT_OUT_COL_ROW = VERT_IN_COL_ROW;

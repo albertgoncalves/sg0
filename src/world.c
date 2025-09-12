@@ -42,23 +42,19 @@ static const Vec4f WALLS[] = {
     {16.0f, 8.0f, 2.0f, 2.0f},
     {22.0f, 8.0f, 2.0f, 2.0f},
 };
-#define LEN_WALLS     (sizeof(WALLS) / sizeof(WALLS[0]))
+#define LEN_WALLS (sizeof(WALLS) / sizeof(WALLS[0]))
 
 void world_init(void) {
     LEN_WORLD = LEN_PLATFORMS + LEN_WALLS;
     EXIT_IF(CAP_WORLD < LEN_WORLD);
 
     for (u32 i = 0; i < LEN_PLATFORMS; ++i) {
-        CUBES[i] = PLATFORM(PLATFORMS[i].x,
-                            PLATFORMS[i].y,
-                            PLATFORMS[i].z,
-                            PLATFORMS[i].w);
+        CUBES[i] = PLATFORM(PLATFORMS[i].x, PLATFORMS[i].y, PLATFORMS[i].z, PLATFORMS[i].w);
         BOXES[i] = geom_box(&CUBES[i]);
     }
 
     for (u32 i = 0; i < LEN_WALLS; ++i) {
-        CUBES[LEN_PLATFORMS + i] =
-            WALL(WALLS[i].x, WALLS[i].y, WALLS[i].z, WALLS[i].w);
+        CUBES[LEN_PLATFORMS + i] = WALL(WALLS[i].x, WALLS[i].y, WALLS[i].z, WALLS[i].w);
         BOXES[LEN_PLATFORMS + i] = geom_box(&CUBES[LEN_PLATFORMS + i]);
     }
 
@@ -67,10 +63,7 @@ void world_init(void) {
         const Box  box = BOXES[i];
 
         u32 j = i;
-        for (; (0 < j) &&
-               (box.left_bottom_back.x < BOXES[j - 1].left_bottom_back.x);
-             --j)
-        {
+        for (; (0 < j) && (box.left_bottom_back.x < BOXES[j - 1].left_bottom_back.x); --j) {
             CUBES[j] = CUBES[j - 1];
             BOXES[j] = BOXES[j - 1];
         }

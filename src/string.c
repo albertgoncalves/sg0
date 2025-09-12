@@ -14,8 +14,7 @@ MemMap string_open(const char* path) {
     FileStat stat;
     EXIT_IF(fstat(file, &stat) < 0);
     const MemMap map = {
-        .address =
-            mmap(NULL, (u32)stat.st_size, PROT_READ, MAP_SHARED, file, 0),
+        .address = mmap(NULL, (u32)stat.st_size, PROT_READ, MAP_SHARED, file, 0),
         .len = (u32)stat.st_size,
     };
     EXIT_IF(map.address == MAP_FAILED);

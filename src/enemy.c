@@ -47,13 +47,11 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define SPRITE_RATE (0.25 * NANOS_PER_SECOND)
 
-#define DIRECTION(polar_degrees)                                    \
-    (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
-     SPRITE_ROWS)
+#define DIRECTION(polar_degrees) \
+    (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % SPRITE_ROWS)
 
 static const u8 SPRITE_COL_INDICES[] = {1, 2, 3, 2};
-#define SPRITE_COLS \
-    (sizeof(SPRITE_COL_INDICES) / sizeof(SPRITE_COL_INDICES[0]))
+#define SPRITE_COLS (sizeof(SPRITE_COL_INDICES) / sizeof(SPRITE_COL_INDICES[0]))
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {2, 1, 3, 0};
 
@@ -101,8 +99,7 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
-        const Waypoint* waypoint =
-            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        const Waypoint* waypoint = &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
         ENEMIES[0].translate = waypoint->translate;
         ENEMIES[0].waypoint = waypoint;
 #undef N
@@ -118,8 +115,7 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
-        const Waypoint* waypoint =
-            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        const Waypoint* waypoint = &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
         ENEMIES[1].translate = waypoint->translate;
         ENEMIES[1].waypoint = waypoint;
 #undef N
@@ -135,8 +131,7 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
-        const Waypoint* waypoint =
-            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        const Waypoint* waypoint = &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
         ENEMIES[2].translate = waypoint->translate;
         ENEMIES[2].waypoint = waypoint;
 #undef N
@@ -152,8 +147,7 @@ void enemy_init(void) {
                 .next = &WAYPOINTS[((i + 1) % N) + offset],
             };
         }
-        const Waypoint* waypoint =
-            &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
+        const Waypoint* waypoint = &WAYPOINTS[pcg_rng_random_bounded_u32(N) + offset];
         ENEMIES[3].translate = waypoint->translate;
         ENEMIES[3].waypoint = waypoint;
 #undef N
@@ -279,10 +273,8 @@ void enemy_update(f32 t) {
                 }
             }
 
-            ENEMIES[i].translate =
-                math_lerp_vec2f(prev_translate, ENEMIES[i].translate, t);
-            ENEMIES[i].speed =
-                math_lerp_vec2f(prev_speed, ENEMIES[i].speed, t);
+            ENEMIES[i].translate = math_lerp_vec2f(prev_translate, ENEMIES[i].translate, t);
+            ENEMIES[i].speed = math_lerp_vec2f(prev_speed, ENEMIES[i].speed, t);
             ENEMIES[i].polar_degrees =
                 math_lerp_f32(prev_polar_degrees, ENEMIES[i].polar_degrees, t);
         }
@@ -342,16 +334,12 @@ void enemy_animate(void) {
         ENEMY_SPRITES(i).geom.translate.z = ENEMIES[i].translate.y;
 
         ENEMY_SPRITES(i).col_row.x = OFFSET_SPRITE_COLS;
-        if ((HALT < fabsf(ENEMIES[i].speed.x)) ||
-            (HALT < fabsf(ENEMIES[i].speed.y)))
-        {
+        if ((HALT < fabsf(ENEMIES[i].speed.x)) || (HALT < fabsf(ENEMIES[i].speed.y))) {
             ENEMY_SPRITES(i).col_row.x +=
-                SPRITE_COL_INDICES[(time_now() / ((u64)SPRITE_RATE)) %
-                                   SPRITE_COLS];
+                SPRITE_COL_INDICES[(time_now() / ((u64)SPRITE_RATE)) % SPRITE_COLS];
         }
         ENEMY_SPRITES(i).col_row.y =
-            OFFSET_SPRITE_ROWS +
-            SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)];
+            OFFSET_SPRITE_ROWS + SPRITE_DIRECTIONS[DIRECTION(ENEMIES[i].polar_degrees)];
 
         if (ENEMIES[i].player_in_view) {
             LINES[i] = between(&ENEMY_CUBES(i), &PLAYER_CUBE);
@@ -360,11 +348,9 @@ void enemy_animate(void) {
             const Geom target = {
                 .translate =
                     {
-                        .x = ENEMIES[i].translate.x +
-                             (RADIUS_LINE * cosf(polar_radians)),
+                        .x = ENEMIES[i].translate.x + (RADIUS_LINE * cosf(polar_radians)),
                         .y = TRANSLATE_Y_CUBE,
-                        .z = ENEMIES[i].translate.y -
-                             (RADIUS_LINE * sinf(polar_radians)),
+                        .z = ENEMIES[i].translate.y - (RADIUS_LINE * sinf(polar_radians)),
                     },
                 .scale = SCALE_SPRITE,
             };

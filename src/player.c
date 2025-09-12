@@ -34,9 +34,8 @@
 
 #define SPRITE_RATE (0.125 * NANOS_PER_SECOND)
 
-#define DIRECTION(polar_degrees)                                    \
-    (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
-     SPRITE_ROWS)
+#define DIRECTION(polar_degrees) \
+    (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % SPRITE_ROWS)
 
 static const u8 SPRITE_DIRECTIONS[SPRITE_ROWS] = {3, 4, 0, 7, 6, 5, 1, 2};
 
@@ -84,20 +83,15 @@ void player_update(Vec3f move, f32 t) {
             Collision collision = {0};
             for (u32 i = 0; i < LEN_WORLD; ++i) {
                 // NOTE: This *should* work because `BOXES` is sorted by `x`.
-                if (BOXES[i].right_top_front.x <
-                    (player_box.left_bottom_back.x + PLAYER_SPEED.x))
-                {
+                if (BOXES[i].right_top_front.x < (player_box.left_bottom_back.x + PLAYER_SPEED.x)) {
                     continue;
                 }
                 // NOTE: See `https://leanrada.com/notes/sweep-and-prune/`.
-                if ((player_box.right_top_front.x + PLAYER_SPEED.x) <
-                    BOXES[i].left_bottom_back.x)
-                {
+                if ((player_box.right_top_front.x + PLAYER_SPEED.x) < BOXES[i].left_bottom_back.x) {
                     break;
                 }
 
-                const Collision candidate =
-                    geom_collision(&player_box, &BOXES[i], &speed);
+                const Collision candidate = geom_collision(&player_box, &BOXES[i], &speed);
                 if (!candidate.hit) {
                     continue;
                 }
@@ -109,8 +103,7 @@ void player_update(Vec3f move, f32 t) {
                     collision = candidate;
                     continue;
                 }
-                if (((*(const u32*)&candidate.time) ==
-                     (*(const u32*)&collision.time)) &&
+                if (((*(const u32*)&candidate.time) == (*(const u32*)&collision.time)) &&
                     (collision.overlap < candidate.overlap))
                 {
                     collision = candidate;
@@ -182,8 +175,7 @@ void player_animate(void) {
         .y = -PLAYER_SPEED.z,
     });
     PLAYER_SPRITE.col_row = (Vec2u){
-        .x = OFFSET_SPRITE_COLS +
-             ((time_now() / ((u64)SPRITE_RATE)) % (SPRITE_COLS - 1)),
+        .x = OFFSET_SPRITE_COLS + ((time_now() / ((u64)SPRITE_RATE)) % (SPRITE_COLS - 1)),
         .y = OFFSET_SPRITE_ROWS + SPRITE_DIRECTIONS[DIRECTION(polar_degrees)],
     };
 }
