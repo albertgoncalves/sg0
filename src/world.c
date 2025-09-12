@@ -23,6 +23,7 @@ static const Vec4f PLATFORMS[] = {
     {0.0f, -5.0f, 30.0f, 40.0f},
     {20.5f, 0.0f, 11.0f, 25.0f},
 };
+#define LEN_PLATFORMS (sizeof(PLATFORMS) / sizeof(PLATFORMS[0]))
 
 static const Vec4f WALLS[] = {
     {-7.0f, 5.5f, 10.0f, 14.0f},
@@ -41,10 +42,9 @@ static const Vec4f WALLS[] = {
     {16.0f, 8.0f, 2.0f, 2.0f},
     {22.0f, 8.0f, 2.0f, 2.0f},
 };
-#define LEN_WALLS (sizeof(WALLS) / sizeof(WALLS[0]))
+#define LEN_WALLS     (sizeof(WALLS) / sizeof(WALLS[0]))
 
 void world_init(void) {
-    LEN_PLATFORMS = sizeof(PLATFORMS) / sizeof(PLATFORMS[0]);
     LEN_WORLD = LEN_PLATFORMS + LEN_WALLS;
     EXIT_IF(CAP_WORLD < LEN_WORLD);
 

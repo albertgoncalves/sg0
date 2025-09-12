@@ -304,7 +304,7 @@ void enemy_update(f32 t) {
                 {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
                 ENEMIES[i].translate,
             };
-            for (u32 j = LEN_PLATFORMS; j < LEN_WORLD; ++j) {
+            for (u32 j = 0; j < LEN_WORLD; ++j) {
                 if (intersects(&BOXES[j], line)) {
                     goto skip;
                 }
