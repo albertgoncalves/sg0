@@ -32,7 +32,7 @@
 
 #define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
-#define SPRITE_RATE 125000000
+#define SPRITE_RATE (0.125 * NANOS_PER_SECOND)
 
 #define DIRECTION(polar_degrees)                                    \
     (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
@@ -183,7 +183,7 @@ void player_animate(void) {
     });
     PLAYER_SPRITE.col_row = (Vec2u){
         .x = OFFSET_SPRITE_COLS +
-             ((time_now() / SPRITE_RATE) % (SPRITE_COLS - 1)),
+             ((time_now() / ((u64)SPRITE_RATE)) % (SPRITE_COLS - 1)),
         .y = OFFSET_SPRITE_ROWS + SPRITE_DIRECTIONS[DIRECTION(polar_degrees)],
     };
 }

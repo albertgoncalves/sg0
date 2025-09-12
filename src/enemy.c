@@ -45,7 +45,7 @@ static Waypoint WAYPOINTS[CAP_WAYPOINTS];
 
 #define SPRITE_TURN (360.0f / SPRITE_ROWS)
 
-#define SPRITE_RATE 250000000
+#define SPRITE_RATE (0.25 * NANOS_PER_SECOND)
 
 #define DIRECTION(polar_degrees)                                    \
     (((u8)((polar_degrees + (SPRITE_TURN / 2.0f)) / SPRITE_TURN)) % \
@@ -346,7 +346,8 @@ void enemy_animate(void) {
             (HALT < fabsf(ENEMIES[i].speed.y)))
         {
             ENEMY_SPRITES(i).col_row.x +=
-                SPRITE_COL_INDICES[(time_now() / SPRITE_RATE) % SPRITE_COLS];
+                SPRITE_COL_INDICES[(time_now() / ((u64)SPRITE_RATE)) %
+                                   SPRITE_COLS];
         }
         ENEMY_SPRITES(i).col_row.y =
             OFFSET_SPRITE_ROWS +
