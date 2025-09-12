@@ -86,12 +86,13 @@ static void step(GLFWwindow* window, f32 t) {
 }
 
 // NOTE: See `https://gafferongames.com/post/fix_your_timestep/`.
-static void update(GLFWwindow* window, u64 remaining) {
+static void update(GLFWwindow* window, u64 remaining, u64* steps) {
     glfwPollEvents();
 
     f64 delta = (f64)remaining;
     for (; NANOS_PER_STEP < delta; delta -= NANOS_PER_STEP) {
         step(window, 1.0f);
+        ++(*steps);
     }
     step(window, (f32)(delta / NANOS_PER_STEP));
 
@@ -110,8 +111,9 @@ static void loop(GLFWwindow* window) {
     u64 prev = time_now();
     u64 elapsed = 0;
     u64 frames = 0;
+    u64 steps = 0;
 
-    printf("\n\n\n");
+    printf("\n\n\n\n\n");
     while (!glfwWindowShouldClose(window)) {
         const u64 now = time_now();
         elapsed += now - prev;
@@ -119,19 +121,24 @@ static void loop(GLFWwindow* window) {
         // NOTE: See `http://www.opengl-tutorial.org/miscellaneous/an-fps-counter/`.
         if (NANOS_PER_SECOND <= elapsed) {
             const f64 nanoseconds_per_frame = ((f64)elapsed) / ((f64)frames);
-            printf("\033[3A"
+            printf("\033[5A"
                    "%15.4f ns/f\n"
                    "%15.4f ratio\n"
-                   "%15lu frames\n",
+                   "%15lu frames\n"
+                   "%15lu steps\n"
+                   "%15.4f steps/frame\n",
                    nanoseconds_per_frame,
                    nanoseconds_per_frame /
                        (NANOS_PER_SECOND / FRAMES_PER_SECOND),
-                   frames);
+                   frames,
+                   steps,
+                   ((f64)steps) / ((f64)frames));
             elapsed = 0;
             frames = 0;
+            steps = 0;
         }
 
-        update(window, now - prev);
+        update(window, now - prev, &steps);
         graphics_draw(window);
 
         prev = now;
