@@ -130,7 +130,7 @@ Collision geom_collision(const Box* from, const Box* obstacle, const Vec3f* spee
     return collision;
 }
 
-Bool geom_intersects(const Vec2f l[2], const Vec2f r[2]) {
+Bool geom_intersects(const Vec2f l[2], const Vec2f r[2], f32* at) {
     const f32 x0 = l[0].x - l[1].x;
     const f32 y0 = l[0].y - l[1].y;
 
@@ -146,5 +146,10 @@ Bool geom_intersects(const Vec2f l[2], const Vec2f r[2]) {
     }
     const f32 t = ((x1 * y2) - (y1 * x2)) / denominator;
     const f32 u = -((x0 * y1) - (y0 * x1)) / denominator;
-    return (0.0f <= t) && (t <= 1.0f) && (0.0f <= u) && (u <= 1.0f);
+
+    const Bool intersects = (0.0f <= t) && (t <= 1.0f) && (0.0f <= u) && (u <= 1.0f);
+    if (intersects && (at != NULL)) {
+        *at = t;
+    }
+    return intersects;
 }

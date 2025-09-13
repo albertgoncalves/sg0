@@ -15,7 +15,7 @@
 #define WALL(x, z, width, depth)       \
     ((Geom){                           \
         .translate = {x, 0.5f, z},     \
-        .scale = {width, 2.5f, depth}, \
+        .scale = {width, 4.0f, depth}, \
         .color = COLOR_WALL,           \
     })
 

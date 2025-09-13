@@ -180,10 +180,13 @@ void enemy_init(void) {
     }
 }
 
-static Bool intersects(const Box* box, Vec2f line[2]) {
+// TODO: Can this be simplified?
+static Bool intersects(const Box* box, const Vec3f line[2]) {
     const f32 left = box->left_bottom_back.x;
+    const f32 bottom = box->left_bottom_back.y;
     const f32 back = box->left_bottom_back.z;
     const f32 right = box->right_top_front.x;
+    const f32 top = box->right_top_front.y;
     const f32 front = box->right_top_front.z;
 
     const Vec2f points[] = {
@@ -192,10 +195,22 @@ static Bool intersects(const Box* box, Vec2f line[2]) {
         {right, front},
         {left, front},
     };
-    return geom_intersects((Vec2f[2]){points[0], points[1]}, line) ||
-           geom_intersects((Vec2f[2]){points[1], points[2]}, line) ||
-           geom_intersects((Vec2f[2]){points[2], points[3]}, line) ||
-           geom_intersects((Vec2f[2]){points[3], points[0]}, line);
+
+    const Vec2f xz[2] = {
+        {.x = line[0].x, .y = line[0].z},
+        {.x = line[1].x, .y = line[1].z},
+    };
+
+    for (u32 i = 0; i < 4; ++i) {
+        f32 at;
+        if (geom_intersects(xz, (Vec2f[2]){points[i], points[(i + 1) % 4]}, &at)) {
+            f32 y = math_lerp_f32(line[0].y, line[1].y, at);
+            if ((bottom <= y) && (y <= top)) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
 }
 
 void enemy_update(f32 t) {
@@ -292,11 +307,25 @@ void enemy_update(f32 t) {
         }
         ENEMIES[i].player_in_view = FALSE;
         if (angle < FOV_DEGREES) {
-            Vec2f line[2] = {
-                {PLAYER_CUBE.translate.x, PLAYER_CUBE.translate.z},
-                ENEMIES[i].translate,
+            const Vec3f line[2] = {
+                {
+                    .x = PLAYER_CUBE.translate.x,
+                    // TODO: Is this right?
+                    .y = PLAYER_CUBE.translate.y + TRANSLATE_Y_LINE,
+                    .z = PLAYER_CUBE.translate.z,
+                },
+                {
+                    .x = ENEMY_CUBES(i).translate.x,
+                    // TODO: Is this right?
+                    .y = ENEMY_CUBES(i).translate.y + TRANSLATE_Y_LINE,
+                    .z = ENEMY_CUBES(i).translate.z,
+                },
             };
+            const f32 x = line[0].x < line[1].x ? line[1].x : line[0].x;
             for (u32 j = 0; j < LEN_WORLD; ++j) {
+                if (x < BOXES[j].left_bottom_back.x) {
+                    break;
+                }
                 if (intersects(&BOXES[j], line)) {
                     goto skip;
                 }
