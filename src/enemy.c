@@ -180,39 +180,6 @@ void enemy_init(void) {
     }
 }
 
-// TODO: Can this be simplified?
-static Bool intersects(const Box* box, const Vec3f line[2]) {
-    const f32 left = box->left_bottom_back.x;
-    const f32 bottom = box->left_bottom_back.y;
-    const f32 back = box->left_bottom_back.z;
-    const f32 right = box->right_top_front.x;
-    const f32 top = box->right_top_front.y;
-    const f32 front = box->right_top_front.z;
-
-    const Vec2f points[] = {
-        {left, back},
-        {right, back},
-        {right, front},
-        {left, front},
-    };
-
-    const Vec2f xz[2] = {
-        {.x = line[0].x, .y = line[0].z},
-        {.x = line[1].x, .y = line[1].z},
-    };
-
-    for (u32 i = 0; i < 4; ++i) {
-        f32 at;
-        if (geom_intersects(xz, (Vec2f[2]){points[i], points[(i + 1) % 4]}, &at)) {
-            f32 y = math_lerp_f32(line[0].y, line[1].y, at);
-            if ((bottom <= y) && (y <= top)) {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
 void enemy_update(f32 t) {
     PLAYER_IN_VIEW = FALSE;
     for (u32 i = 0; i < LEN_ENEMIES; ++i) {
@@ -326,7 +293,7 @@ void enemy_update(f32 t) {
                 if (x < BOXES[j].left_bottom_back.x) {
                     break;
                 }
-                if (intersects(&BOXES[j], line)) {
+                if (geom_intersects(line, &BOXES[j])) {
                     goto skip;
                 }
             }

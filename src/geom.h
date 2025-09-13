@@ -40,7 +40,7 @@ STATIC_ASSERT(sizeof(Collision) == 12);
 
 Box       geom_box(const Geom*);
 Collision geom_collision(const Box*, const Box*, const Vec3f*);
-Bool      geom_intersects(const Vec2f[2], const Vec2f[2], f32*);
+Bool      geom_intersects(const Vec3f[2], const Box*);
 
 extern Geom CUBES[CAP_CUBES];
 extern u32  LEN_CUBES;
