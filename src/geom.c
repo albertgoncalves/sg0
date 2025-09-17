@@ -132,46 +132,45 @@ Collision geom_collision(const Box* from, const Box* obstacle, const Vec3f* spee
 }
 
 Bool geom_intersects(const Vec3f line[2], const Box* box) {
-    const f32 kx = (line[1].x - line[0].x) + FLT_EPSILON;
-    const f32 ky = (line[1].y - line[0].y) + FLT_EPSILON;
-    const f32 kz = (line[1].z - line[0].z) + FLT_EPSILON;
+    const Vec3f k = (Vec3f){
+        .x = (line[1].x - line[0].x) + FLT_EPSILON,
+        .y = (line[1].y - line[0].y) + FLT_EPSILON,
+        .z = (line[1].z - line[0].z) + FLT_EPSILON,
+    };
 
-    const f32 lx = box->left_bottom_back.x;
-    const f32 ly = box->left_bottom_back.y;
-    const f32 lz = box->left_bottom_back.z;
-    const f32 rx = box->right_top_front.x;
-    const f32 ry = box->right_top_front.y;
-    const f32 rz = box->right_top_front.z;
+    const Vec3f l = box->left_bottom_back;
+    const Vec3f r = box->right_top_front;
 
-    const f32 t0 = (lx - line[0].x) / kx;
-    const f32 t1 = (rx - line[0].x) / kx;
-    const f32 t2 = (ly - line[0].y) / ky;
-    const f32 t3 = (ry - line[0].y) / ky;
-    const f32 t4 = (lz - line[0].z) / kz;
-    const f32 t5 = (rz - line[0].z) / kz;
+    const f32 t0 = (l.x - line[0].x) / k.x;
+    const f32 t2 = (l.y - line[0].y) / k.y;
+    const f32 t4 = (l.z - line[0].z) / k.z;
 
-    const f32 y0 = line[0].y + (t0 * ky);
-    const f32 z0 = line[0].z + (t0 * kz);
+    const f32 t1 = (r.x - line[0].x) / k.x;
+    const f32 t3 = (r.y - line[0].y) / k.y;
+    const f32 t5 = (r.z - line[0].z) / k.z;
 
-    const f32 y1 = line[0].y + (t1 * ky);
-    const f32 z1 = line[0].z + (t1 * kz);
+    const f32 y0 = line[0].y + (t0 * k.y);
+    const f32 z0 = line[0].z + (t0 * k.z);
 
-    const f32 x2 = line[0].x + (t2 * kx);
-    const f32 z2 = line[0].z + (t2 * kz);
+    const f32 y1 = line[0].y + (t1 * k.y);
+    const f32 z1 = line[0].z + (t1 * k.z);
 
-    const f32 x3 = line[0].x + (t3 * kx);
-    const f32 z3 = line[0].z + (t3 * kz);
+    const f32 x2 = line[0].x + (t2 * k.x);
+    const f32 z2 = line[0].z + (t2 * k.z);
 
-    const f32 x4 = line[0].x + (t4 * kx);
-    const f32 y4 = line[0].y + (t4 * ky);
+    const f32 x3 = line[0].x + (t3 * k.x);
+    const f32 z3 = line[0].z + (t3 * k.z);
 
-    const f32 x5 = line[0].x + (t5 * kx);
-    const f32 y5 = line[0].y + (t5 * ky);
+    const f32 x4 = line[0].x + (t4 * k.x);
+    const f32 y4 = line[0].y + (t4 * k.y);
 
-    return ((0.0f <= t0) & (t0 <= 1.0f) & (ly <= y0) & (y0 <= ry) & (lz <= z0) & (z0 <= rz)) |
-           ((0.0f <= t1) & (t1 <= 1.0f) & (ly <= y1) & (y1 <= ry) & (lz <= z1) & (z1 <= rz)) |
-           ((0.0f <= t2) & (t2 <= 1.0f) & (lx <= x2) & (x2 <= rx) & (lz <= z2) & (z2 <= rz)) |
-           ((0.0f <= t3) & (t3 <= 1.0f) & (lx <= x3) & (x3 <= rx) & (lz <= z3) & (z3 <= rz)) |
-           ((0.0f <= t4) & (t4 <= 1.0f) & (lx <= x4) & (x4 <= rx) & (ly <= y4) & (y4 <= ry)) |
-           ((0.0f <= t5) & (t5 <= 1.0f) & (lx <= x5) & (x5 <= rx) & (ly <= y5) & (y5 <= ry));
+    const f32 x5 = line[0].x + (t5 * k.x);
+    const f32 y5 = line[0].y + (t5 * k.y);
+
+    return ((0.0f <= t0) & (t0 <= 1.0f) & (l.y <= y0) & (y0 <= r.y) & (l.z <= z0) & (z0 <= r.z)) |
+           ((0.0f <= t1) & (t1 <= 1.0f) & (l.y <= y1) & (y1 <= r.y) & (l.z <= z1) & (z1 <= r.z)) |
+           ((0.0f <= t2) & (t2 <= 1.0f) & (l.x <= x2) & (x2 <= r.x) & (l.z <= z2) & (z2 <= r.z)) |
+           ((0.0f <= t3) & (t3 <= 1.0f) & (l.x <= x3) & (x3 <= r.x) & (l.z <= z3) & (z3 <= r.z)) |
+           ((0.0f <= t4) & (t4 <= 1.0f) & (l.x <= x4) & (x4 <= r.x) & (l.y <= y4) & (y4 <= r.y)) |
+           ((0.0f <= t5) & (t5 <= 1.0f) & (l.x <= x5) & (x5 <= r.x) & (l.y <= y5) & (y5 <= r.y));
 }
